@@ -305,6 +305,16 @@
         }
       }
     },
+    "Delete" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除"
+          }
+        }
+      }
+    },
     "Delete All" : {
       "localizations" : {
         "ja" : {
@@ -321,6 +331,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "すべての履歴を削除"
+          }
+        }
+      }
+    },
+    "Detail" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "詳細"
           }
         }
       }
@@ -515,6 +535,26 @@
         }
       }
     },
+    "Paste" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "貼り付け"
+          }
+        }
+      }
+    },
+    "Paste as Plain Text" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プレーンテキストで貼り付け"
+          }
+        }
+      }
+    },
     "Pause Monitoring" : {
       "localizations" : {
         "ja" : {
@@ -575,12 +615,22 @@
         }
       }
     },
-    "Press Enter to paste" : {
+    "↩ Paste" : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enter で貼り付け"
+            "value" : "↩ 貼り付け"
+          }
+        }
+      }
+    },
+    "⇧↩ Plain Text" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⇧↩ プレーンテキスト"
           }
         }
       }

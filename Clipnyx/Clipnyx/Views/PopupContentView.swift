@@ -143,7 +143,10 @@ struct PopupContentView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Spacer()
-                Text("Press Enter to paste")
+                Text("↩ Paste")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text("⇧↩ Plain Text")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -189,7 +192,7 @@ struct PopupContentView: View {
             return .handled
         case .return:
             if let item = filteredItems[safe: selectedIndex] {
-                selectAndPaste(item: item)
+                selectAndPaste(item: item, asPlainText: press.modifiers.contains(.shift))
             }
             return .handled
         case .escape:
@@ -232,8 +235,8 @@ struct PopupContentView: View {
         return .ignored
     }
 
-    private func selectAndPaste(item: ClipboardItem) {
-        clipboardManager.restoreToClipboard(item)
+    private func selectAndPaste(item: ClipboardItem, asPlainText: Bool = false) {
+        clipboardManager.restoreToClipboard(item, asPlainText: asPlainText)
         onPaste()
     }
 }

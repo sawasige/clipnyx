@@ -115,17 +115,25 @@ final class ClipboardManager: @unchecked Sendable {
         store.deleteAll()
     }
 
-    func restoreToClipboard(_ item: ClipboardItem) {
+    func restoreToClipboard(_ item: ClipboardItem, asPlainText: Bool = false) {
         isRestoringItem = true
 
         // Load representations from disk and restore to pasteboard
         if let reps = store.loadRepresentations(for: item.id) {
             let pasteboard = NSPasteboard.general
             pasteboard.clearContents()
-            let types = reps.map(\.pasteboardType)
-            pasteboard.declareTypes(types, owner: nil)
-            for rep in reps {
-                pasteboard.setData(rep.data, forType: rep.pasteboardType)
+            if asPlainText {
+                // Only restore plain text representation
+                if let stringRep = reps.first(where: { $0.pasteboardType == .string }) {
+                    pasteboard.declareTypes([.string], owner: nil)
+                    pasteboard.setData(stringRep.data, forType: .string)
+                }
+            } else {
+                let types = reps.map(\.pasteboardType)
+                pasteboard.declareTypes(types, owner: nil)
+                for rep in reps {
+                    pasteboard.setData(rep.data, forType: rep.pasteboardType)
+                }
             }
         }
         lastChangeCount = NSPasteboard.general.changeCount

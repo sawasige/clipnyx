@@ -107,6 +107,9 @@ struct MenuBarView: View {
                                 onSelect: {
                                     clipboardManager.restoreToClipboard(item)
                                 },
+                                onPastePlainText: {
+                                    clipboardManager.restoreToClipboard(item, asPlainText: true)
+                                },
                                 onShowDetail: {
                                     detailItem = item
                                 },
@@ -205,6 +208,7 @@ private struct MenuItemRow: View {
     let item: ClipboardItem
     let isHovered: Bool
     let onSelect: () -> Void
+    let onPastePlainText: () -> Void
     let onShowDetail: () -> Void
     let onDelete: () -> Void
 
@@ -268,6 +272,29 @@ private struct MenuItemRow: View {
         .contentShape(Rectangle())
         .onTapGesture {
             onSelect()
+        }
+        .contextMenu {
+            Button {
+                onSelect()
+            } label: {
+                Text("Paste")
+            }
+            Button {
+                onPastePlainText()
+            } label: {
+                Label("Paste as Plain Text", systemImage: "doc.plaintext")
+            }
+            Divider()
+            Button {
+                onShowDetail()
+            } label: {
+                Label("Detail", systemImage: "info.circle")
+            }
+            Button(role: .destructive) {
+                onDelete()
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
         }
     }
 }
