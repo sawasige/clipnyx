@@ -103,26 +103,25 @@ final class PopupPanelController {
         close()
 
         guard let targetApp else { return }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(50))
             targetApp.activate()
-            self.performPaste(targetPID: targetApp.processIdentifier, attempt: 0)
+            await performPaste(targetPID: targetApp.processIdentifier, attempt: 0)
         }
     }
 
-    private func performPaste(targetPID: pid_t, attempt: Int) {
+    private func performPaste(targetPID: pid_t, attempt: Int) async {
         let maxAttempts = 10
-        let delay = 0.05
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-            let frontPID = NSWorkspace.shared.frontmostApplication?.processIdentifier
+        try? await Task.sleep(for: .milliseconds(50))
+        let frontPID = NSWorkspace.shared.frontmostApplication?.processIdentifier
 
-            if frontPID != targetPID, attempt < maxAttempts {
-                self.performPaste(targetPID: targetPID, attempt: attempt + 1)
-                return
-            }
-
-            Self.tryPaste(targetPID: targetPID)
+        if frontPID != targetPID, attempt < maxAttempts {
+            await performPaste(targetPID: targetPID, attempt: attempt + 1)
+            return
         }
+
+        Self.tryPaste(targetPID: targetPID)
     }
 
     private static func tryPaste(targetPID: pid_t) {
@@ -137,7 +136,8 @@ final class PopupPanelController {
         keyDown.flags = .maskCommand
         keyUp.flags = .maskCommand
         keyDown.post(tap: .cghidEventTap)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+        Task {
+            try? await Task.sleep(for: .milliseconds(50))
             keyUp.post(tap: .cghidEventTap)
         }
     }

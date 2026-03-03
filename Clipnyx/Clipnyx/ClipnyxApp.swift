@@ -1,5 +1,5 @@
 import SwiftUI
-@preconcurrency import ApplicationServices
+import ApplicationServices
 
 @main
 struct ClipnyxApp: App {

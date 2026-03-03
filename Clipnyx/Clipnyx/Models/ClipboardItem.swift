@@ -197,7 +197,7 @@ struct ClipboardItem: Identifiable, Sendable {
                 return String(text.prefix(500))
             }
             if let rtfData = pasteboard.data(forType: .rtf),
-               let attrStr = NSAttributedString(rtf: rtfData, documentAttributes: nil) {
+               let attrStr = try? NSAttributedString(data: rtfData, options: [.documentType: NSAttributedString.DocumentType.rtf], documentAttributes: nil) {
                 return String(attrStr.string.prefix(500))
             }
             return String(localized: "(Rich Text)")
