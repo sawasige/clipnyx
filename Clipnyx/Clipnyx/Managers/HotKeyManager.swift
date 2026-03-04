@@ -119,9 +119,11 @@ final class HotKeyManager: @unchecked Sendable {
         }
     }
 
+    #if ENABLE_AUTOPASTE
     // MARK: - Accessibility Check
 
     static func checkAccessibility() -> Bool {
         AXIsProcessTrusted()
     }
+    #endif
 }

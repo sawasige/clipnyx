@@ -113,6 +113,26 @@
         }
       }
     },
+    "↩ Paste" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "↩ 貼り付け"
+          }
+        }
+      }
+    },
+    "⇧↩ Plain Text" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⇧↩ プレーンテキスト"
+          }
+        }
+      }
+    },
     "About" : {
       "localizations" : {
         "ja" : {
@@ -611,26 +631,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "キーを入力..."
-          }
-        }
-      }
-    },
-    "↩ Paste" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "↩ 貼り付け"
-          }
-        }
-      }
-    },
-    "⇧↩ Plain Text" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "⇧↩ プレーンテキスト"
           }
         }
       }

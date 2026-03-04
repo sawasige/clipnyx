@@ -1,5 +1,7 @@
 import SwiftUI
+#if ENABLE_AUTOPASTE
 import ApplicationServices
+#endif
 
 @main
 struct ClipnyxApp: App {
@@ -23,10 +25,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var settingsWindow: NSWindow?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        #if ENABLE_AUTOPASTE
         // アクセシビリティ権限の確認
         if !AXIsProcessTrusted() {
             showAccessibilityAlert()
         }
+        #endif
 
         // Register hotkey
         HotKeyManager.shared.onHotKey = { [weak self] in
@@ -80,6 +84,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
+#if ENABLE_AUTOPASTE
 // MARK: - Accessibility Alert
 
 extension AppDelegate {
@@ -119,6 +124,7 @@ extension AppDelegate {
         }
     }
 }
+#endif
 
 extension AppDelegate: NSWindowDelegate {
     func windowWillClose(_ notification: Notification) {

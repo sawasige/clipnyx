@@ -40,9 +40,11 @@ private struct GeneralTab: View {
                 HotKeyRecorderRow()
             }
 
+            #if ENABLE_AUTOPASTE
             Section("Accessibility") {
                 AccessibilityStatusView()
             }
+            #endif
 
             Section("About") {
                 LabeledContent("Version") {
@@ -119,6 +121,7 @@ private struct LaunchAtLoginToggle: View {
     }
 }
 
+#if ENABLE_AUTOPASTE
 // MARK: - Accessibility Status
 
 private struct AccessibilityStatusView: View {
@@ -155,6 +158,7 @@ private struct AccessibilityStatusView: View {
         }
     }
 }
+#endif
 
 // MARK: - Hot Key Recorder
 

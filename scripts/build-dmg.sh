@@ -2,7 +2,7 @@
 set -euo pipefail
 
 APP_NAME="Clipnyx"
-SCHEME="Clipnyx"
+SCHEME="Clipnyx-Full"
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 PROJECT_PATH="${PROJECT_DIR}/Clipnyx/Clipnyx.xcodeproj"
 BUILD_DIR="${PROJECT_DIR}/build"
@@ -18,7 +18,7 @@ echo "==> Archiving ${APP_NAME}..."
 xcodebuild archive \
     -project "$PROJECT_PATH" \
     -scheme "$SCHEME" \
-    -configuration Release \
+    -configuration Release-Full \
     -archivePath "$ARCHIVE_PATH" \
     -quiet
 
