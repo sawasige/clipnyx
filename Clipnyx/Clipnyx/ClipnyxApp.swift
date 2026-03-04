@@ -1,7 +1,4 @@
 import SwiftUI
-#if ENABLE_AUTOPASTE
-import ApplicationServices
-#endif
 
 @main
 struct ClipnyxApp: App {
@@ -26,10 +23,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         #if ENABLE_AUTOPASTE
-        // アクセシビリティ権限の確認
-        if !AXIsProcessTrusted() {
-            showAccessibilityAlert()
-        }
+        // アクセシビリティ権限の確認（未許可ならシステムダイアログを表示）
+        AXIsProcessTrustedWithOptions(
+            ["AXTrustedCheckOptionPrompt": true] as CFDictionary
+        )
         #endif
 
         // Register hotkey
@@ -99,47 +96,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
-#if ENABLE_AUTOPASTE
-// MARK: - Accessibility Alert
-
-extension AppDelegate {
-    func showAccessibilityAlert() {
-        let alert = NSAlert()
-        alert.messageText = String(localized: "Accessibility Permission Required")
-        let message = String(localized: "Clipnyx needs accessibility permission to paste clipboard items. Please add Clipnyx in System Settings → Privacy & Security → Accessibility.")
-        alert.informativeText = "\(message)\n\n\(Bundle.main.bundlePath)"
-        alert.alertStyle = .warning
-        alert.addButton(withTitle: String(localized: "Open System Settings"))
-        alert.addButton(withTitle: String(localized: "Later"))
-
-        let copyButton = NSButton(title: String(localized: "Copy App Path"), image: NSImage(systemSymbolName: "doc.on.doc", accessibilityDescription: nil)!, target: self, action: #selector(copyAppPath(_:)))
-        copyButton.imagePosition = .imageLeading
-        copyButton.bezelStyle = .accessoryBarAction
-        alert.accessoryView = copyButton
-
-        NSApp.activate(ignoringOtherApps: true)
-        let response = alert.runModal()
-        if response == .alertFirstButtonReturn {
-            NSWorkspace.shared.open(
-                URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!
-            )
-        }
-    }
-
-    @objc private func copyAppPath(_ sender: NSButton) {
-        NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(Bundle.main.bundlePath, forType: .string)
-
-        let originalImage = sender.image
-        sender.image = NSImage(systemSymbolName: "checkmark", accessibilityDescription: "Copied")
-        sender.contentTintColor = .systemGreen
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            sender.image = originalImage
-            sender.contentTintColor = nil
-        }
-    }
-}
-#endif
 
 extension AppDelegate: NSWindowDelegate {
     func windowWillClose(_ notification: Notification) {
