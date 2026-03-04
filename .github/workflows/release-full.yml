@@ -1,0 +1,150 @@
+name: Release Full (Homebrew)
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  build-and-release:
+    runs-on: macos-15
+    permissions:
+      contents: write
+
+    env:
+      APP_NAME: Clipnyx
+      SCHEME: Clipnyx-Full
+      CONFIGURATION: Release-Full
+      PROJECT_PATH: Clipnyx/Clipnyx.xcodeproj
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── 証明書インポート ──
+      - name: Import Developer ID certificate
+        env:
+          DEVELOPER_ID_P12: ${{ secrets.DEVELOPER_ID_P12 }}
+          DEVELOPER_ID_P12_PASSWORD: ${{ secrets.DEVELOPER_ID_P12_PASSWORD }}
+        run: |
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          KEYCHAIN_PASSWORD=$(openssl rand -base64 24)
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          echo "$DEVELOPER_ID_P12" | base64 --decode > $RUNNER_TEMP/certificate.p12
+          security import $RUNNER_TEMP/certificate.p12 \
+            -P "$DEVELOPER_ID_P12_PASSWORD" \
+            -A -t cert -f pkcs12 \
+            -k "$KEYCHAIN_PATH"
+
+          security list-keychain -d user -s "$KEYCHAIN_PATH" login.keychain-db
+          security set-key-partition-list -S apple-tool:,apple:,codesign: \
+            -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+      # ── バージョン設定 ──
+      - name: Set version from tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          sed -i '' "s/MARKETING_VERSION = .*;/MARKETING_VERSION = ${VERSION};/g" \
+            "$PROJECT_PATH/project.pbxproj"
+
+      # ── Archive ──
+      - name: Archive
+        run: |
+          xcodebuild archive \
+            -project "$PROJECT_PATH" \
+            -scheme "$SCHEME" \
+            -configuration "$CONFIGURATION" \
+            -archivePath build/$APP_NAME.xcarchive \
+            -quiet \
+            CODE_SIGN_STYLE=Manual \
+            "CODE_SIGN_IDENTITY=Developer ID Application"
+
+      # ── Export ──
+      - name: Export archive
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath build/$APP_NAME.xcarchive \
+            -exportOptionsPlist scripts/ExportOptions.plist \
+            -exportPath build/export \
+            -quiet
+
+      # ── 公証（App） ──
+      - name: Store notary credentials
+        env:
+          NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
+          NOTARY_ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
+          NOTARY_KEY_P8: ${{ secrets.NOTARY_KEY_P8 }}
+        run: |
+          mkdir -p ~/private_keys
+          echo "$NOTARY_KEY_P8" > ~/private_keys/AuthKey_${NOTARY_KEY_ID}.p8
+          xcrun notarytool store-credentials "notary-profile" \
+            --key ~/private_keys/AuthKey_${NOTARY_KEY_ID}.p8 \
+            --key-id "$NOTARY_KEY_ID" \
+            --issuer "$NOTARY_ISSUER_ID"
+
+      - name: Notarize app
+        run: |
+          ditto -c -k --keepParent \
+            "build/export/$APP_NAME.app" \
+            "build/$APP_NAME.zip"
+          xcrun notarytool submit "build/$APP_NAME.zip" \
+            --keychain-profile "notary-profile" \
+            --wait
+
+      - name: Staple app
+        run: xcrun stapler staple "build/export/$APP_NAME.app"
+
+      # ── DMG 作成 ──
+      - name: Create DMG
+        run: |
+          mkdir -p build/dmg-staging
+          cp -R "build/export/$APP_NAME.app" build/dmg-staging/
+          ln -s /Applications build/dmg-staging/Applications
+          hdiutil create \
+            -volname "$APP_NAME" \
+            -srcfolder build/dmg-staging \
+            -ov -format UDZO \
+            "build/$APP_NAME.dmg"
+          rm -rf build/dmg-staging
+
+      # ── 公証（DMG） ──
+      - name: Notarize DMG
+        run: |
+          xcrun notarytool submit "build/$APP_NAME.dmg" \
+            --keychain-profile "notary-profile" \
+            --wait
+
+      - name: Staple DMG
+        run: xcrun stapler staple "build/$APP_NAME.dmg"
+
+      # ── GitHub Release ──
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            "build/$APP_NAME.dmg" \
+            --title "$APP_NAME $VERSION" \
+            --generate-notes
+
+      # ── Homebrew Cask 更新 ──
+      - name: Update Homebrew Cask formula
+        run: |
+          SHA256=$(shasum -a 256 "build/$APP_NAME.dmg" | awk '{print $1}')
+          sed -i '' "s/__VERSION__/${VERSION}/g" Casks/clipnyx.rb
+          sed -i '' "s/__SHA256__/${SHA256}/g" Casks/clipnyx.rb
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout main
+          git add Casks/clipnyx.rb
+          git commit -m "Homebrew Cask を v${VERSION} に更新"
+          git push origin main
+
+      # ── クリーンアップ ──
+      - name: Clean up keychain
+        if: always()
+        run: security delete-keychain $RUNNER_TEMP/app-signing.keychain-db || true
