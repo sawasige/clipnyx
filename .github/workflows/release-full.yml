@@ -136,8 +136,8 @@ jobs:
       - name: Update Homebrew Cask formula
         run: |
           SHA256=$(shasum -a 256 "build/$APP_NAME.dmg" | awk '{print $1}')
-          sed -i '' "s/__VERSION__/${VERSION}/g" Casks/clipnyx.rb
-          sed -i '' "s/__SHA256__/${SHA256}/g" Casks/clipnyx.rb
+          sed -i '' -E "s/^(  version ).*/\1\"${VERSION}\"/" Casks/clipnyx.rb
+          sed -i '' -E "s/^(  sha256 ).*/\1\"${SHA256}\"/" Casks/clipnyx.rb
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
