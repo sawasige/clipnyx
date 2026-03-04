@@ -25,6 +25,13 @@ struct GeneralTab: View {
                 LabeledContent("Version") {
                     Text(verbatim: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "–")
                 }
+                LabeledContent("Edition") {
+                    #if ENABLE_AUTOPASTE
+                    Text("Full")
+                    #else
+                    Text("App Store")
+                    #endif
+                }
             }
         }
     }
