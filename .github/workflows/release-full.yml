@@ -129,13 +129,7 @@ jobs:
         env:
           SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
         run: |
-          SPARKLE_BIN=$(find ~/Library/Developer/Xcode/DerivedData -path "*/Sparkle.framework/Versions/B/Resources/sign_update" -print -quit 2>/dev/null || true)
-          if [ -z "$SPARKLE_BIN" ]; then
-            SPARKLE_BIN=$(find "$(xcodebuild -project "$PROJECT_PATH" -showBuildSettings 2>/dev/null | grep -m1 BUILD_DIR | awk '{print $3}')/../SourcePackages/artifacts" -name "sign_update" -print -quit 2>/dev/null || true)
-          fi
-          if [ -z "$SPARKLE_BIN" ]; then
-            SPARKLE_BIN=$(find build/$APP_NAME.xcarchive -name "sign_update" -print -quit 2>/dev/null || true)
-          fi
+          SPARKLE_BIN=$(find ~/Library/Developer/Xcode/DerivedData -path "*/sparkle/Sparkle/bin/sign_update" -print -quit 2>/dev/null || true)
           if [ -z "$SPARKLE_BIN" ]; then
             echo "::error::sign_update not found"
             exit 1
