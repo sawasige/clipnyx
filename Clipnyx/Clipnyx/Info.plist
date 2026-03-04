@@ -26,5 +26,9 @@
     <string>public.app-category.utilities</string>
     <key>ITSAppUsesNonExemptEncryption</key>
     <false/>
+    <key>SUPublicEDKey</key>
+    <string>GVgO4TFMFaBMefInaxcQmaQXx2y+UKD6D8Gecwk1l9M=</string>
+    <key>SUFeedURL</key>
+    <string>https://sawasige.github.io/clipboard-mac/appcast.xml</string>
 </dict>
 </plist>

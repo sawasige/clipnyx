@@ -5,6 +5,10 @@ import ServiceManagement
 // MARK: - General Tab
 
 struct GeneralTab: View {
+    #if ENABLE_AUTOPASTE
+    let updateManager: UpdateManager
+    #endif
+
     var body: some View {
         Form {
             Section("Startup") {
@@ -18,6 +22,10 @@ struct GeneralTab: View {
             #if ENABLE_AUTOPASTE
             Section("Accessibility") {
                 AccessibilityStatusView()
+            }
+
+            Section("Software Update") {
+                SoftwareUpdateView(updateManager: updateManager)
             }
             #endif
 
@@ -104,6 +112,30 @@ private struct LaunchAtLoginToggle: View {
 }
 
 #if ENABLE_AUTOPASTE
+// MARK: - Software Update
+
+private struct SoftwareUpdateView: View {
+    let updateManager: UpdateManager
+    @State private var automaticallyChecks: Bool
+
+    init(updateManager: UpdateManager) {
+        self.updateManager = updateManager
+        self._automaticallyChecks = State(initialValue: updateManager.automaticallyChecksForUpdates)
+    }
+
+    var body: some View {
+        Toggle("Automatically Check for Updates", isOn: $automaticallyChecks)
+            .onChange(of: automaticallyChecks) { _, newValue in
+                updateManager.automaticallyChecksForUpdates = newValue
+            }
+
+        Button("Check for Updates...") {
+            updateManager.checkForUpdates()
+        }
+        .disabled(!updateManager.canCheckForUpdates)
+    }
+}
+
 // MARK: - Accessibility Status
 
 private struct AccessibilityStatusView: View {

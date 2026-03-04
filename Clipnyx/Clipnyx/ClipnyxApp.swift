@@ -20,6 +20,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let clipboardManager = ClipboardManager()
     private var popupController = PopupPanelController()
     private var settingsWindow: NSWindow?
+    #if ENABLE_AUTOPASTE
+    let updateManager = UpdateManager()
+    #endif
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         #if ENABLE_AUTOPASTE
@@ -62,9 +65,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         tabVC.tabStyle = .toolbar
         tabVC.title = String(localized: "Settings")
 
+        #if ENABLE_AUTOPASTE
+        let generalItem = NSTabViewItem(viewController: NSHostingController(
+            rootView: GeneralTab(updateManager: updateManager).formStyle(.grouped)
+        ))
+        #else
         let generalItem = NSTabViewItem(viewController: NSHostingController(
             rootView: GeneralTab().formStyle(.grouped)
         ))
+        #endif
         generalItem.label = String(localized: "General")
         generalItem.image = NSImage(systemSymbolName: "gear", accessibilityDescription: nil)
         tabVC.addTabViewItem(generalItem)

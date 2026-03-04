@@ -51,6 +51,8 @@ jobs:
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           sed -i '' "s/MARKETING_VERSION = .*;/MARKETING_VERSION = ${VERSION};/g" \
             "$PROJECT_PATH/project.pbxproj"
+          sed -i '' "s/CURRENT_PROJECT_VERSION = .*;/CURRENT_PROJECT_VERSION = ${GITHUB_RUN_NUMBER};/g" \
+            "$PROJECT_PATH/project.pbxproj"
 
       # ── Archive ──
       - name: Archive
@@ -122,6 +124,29 @@ jobs:
       - name: Staple DMG
         run: xcrun stapler staple "build/$APP_NAME.dmg"
 
+      # ── Sparkle 署名 ──
+      - name: Sign DMG with Sparkle EdDSA key
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        run: |
+          SPARKLE_BIN=$(find ~/Library/Developer/Xcode/DerivedData -path "*/Sparkle.framework/Versions/B/Resources/sign_update" -print -quit 2>/dev/null || true)
+          if [ -z "$SPARKLE_BIN" ]; then
+            SPARKLE_BIN=$(find "$(xcodebuild -project "$PROJECT_PATH" -showBuildSettings 2>/dev/null | grep -m1 BUILD_DIR | awk '{print $3}')/../SourcePackages/artifacts" -name "sign_update" -print -quit 2>/dev/null || true)
+          fi
+          if [ -z "$SPARKLE_BIN" ]; then
+            SPARKLE_BIN=$(find build/$APP_NAME.xcarchive -name "sign_update" -print -quit 2>/dev/null || true)
+          fi
+          if [ -z "$SPARKLE_BIN" ]; then
+            echo "::error::sign_update not found"
+            exit 1
+          fi
+          SPARKLE_SIG=$("$SPARKLE_BIN" "build/$APP_NAME.dmg" --ed-key-file <(echo "$SPARKLE_PRIVATE_KEY"))
+          echo "SPARKLE_SIG<<EOF" >> "$GITHUB_ENV"
+          echo "$SPARKLE_SIG" >> "$GITHUB_ENV"
+          echo "EOF" >> "$GITHUB_ENV"
+          DMG_SIZE=$(stat -f%z "build/$APP_NAME.dmg")
+          echo "DMG_SIZE=$DMG_SIZE" >> "$GITHUB_ENV"
+
       # ── GitHub Release ──
       - name: Create GitHub Release
         env:
@@ -132,6 +157,25 @@ jobs:
             --title "$APP_NAME $VERSION" \
             --generate-notes
 
+      # ── appcast.xml 更新 ──
+      - name: Update appcast.xml
+        run: |
+          SPARKLE_ATTRS=$(echo "$SPARKLE_SIG" | sed -n 's/.*edSignature="\([^"]*\)".*/\1/p')
+          PUB_DATE=$(date -u '+%a, %d %b %Y %H:%M:%S %z')
+          DMG_URL="https://github.com/sawasige/clipboard-mac/releases/download/${GITHUB_REF_NAME}/${APP_NAME}.dmg"
+
+          ITEM="\\
+        <item>\\
+          <title>${VERSION}</title>\\
+          <pubDate>${PUB_DATE}</pubDate>\\
+          <sparkle:version>${GITHUB_RUN_NUMBER}</sparkle:version>\\
+          <sparkle:shortVersionString>${VERSION}</sparkle:shortVersionString>\\
+          <enclosure url=\"${DMG_URL}\" length=\"${DMG_SIZE}\" type=\"application/octet-stream\" sparkle:edSignature=\"${SPARKLE_ATTRS}\" />\\
+        </item>"
+
+          sed -i '' "s|<!-- Items are prepended by CI on each release -->|${ITEM}\\
+    <!-- Items are prepended by CI on each release -->|" docs/appcast.xml
+
       # ── Homebrew Cask 更新 ──
       - name: Update Homebrew Cask formula
         run: |
@@ -141,8 +185,8 @@ jobs:
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add Casks/clipnyx.rb
-          git commit -m "Homebrew Cask を v${VERSION} に更新"
+          git add Casks/clipnyx.rb docs/appcast.xml
+          git commit -m "Homebrew Cask を v${VERSION} に更新し appcast.xml を追記"
           git push origin HEAD:main
 
       # ── クリーンアップ ──
