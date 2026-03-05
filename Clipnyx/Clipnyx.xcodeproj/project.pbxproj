@@ -109,11 +109,11 @@
 			);
 			mainGroup = 8A0000000000000000000002;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
-			productRefGroup = 8A0000000000000000000003 /* Products */;
 			packageReferences = (
 				8A0000000000000000000030 /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 8A0000000000000000000003 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -122,10 +122,20 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		8A0000000000000000000009 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXShellScriptBuildPhase section */
 		8A0000000000000000000040 /* Strip Sparkle from App Store builds */ = {
-			alwaysOutOfDate = 1;
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -139,16 +149,6 @@
 			shellScript = "if [ \"$ENABLE_SPARKLE\" != \"YES\" ]; then\n  rm -rf \"${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/Sparkle.framework\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
-
-/* Begin PBXResourcesBuildPhase section */
-		8A0000000000000000000009 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		8A0000000000000000000007 /* Sources */ = {
@@ -476,7 +476,7 @@
 				MARKETING_VERSION = 1.1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.himatsubu.Clipnyx;
 				PRODUCT_NAME = Clipnyx;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "ENABLE_AUTOPASTE ENABLE_SPARKLE $(inherited)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "ENABLE_SPARKLE $(inherited)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 6.0;
 			};
@@ -507,7 +507,7 @@
 				MARKETING_VERSION = 1.1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.himatsubu.Clipnyx;
 				PRODUCT_NAME = Clipnyx;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "ENABLE_AUTOPASTE ENABLE_SPARKLE $(inherited)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "ENABLE_SPARKLE $(inherited)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 6.0;
 			};
@@ -539,6 +539,7 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
 /* Begin XCRemoteSwiftPackageReference section */
 		8A0000000000000000000030 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
 			isa = XCRemoteSwiftPackageReference;

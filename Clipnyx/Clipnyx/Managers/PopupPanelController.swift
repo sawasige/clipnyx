@@ -67,11 +67,7 @@ final class PopupPanelController {
                 self?.close()
             },
             onPaste: { [weak self] in
-                #if ENABLE_AUTOPASTE
                 self?.closeAndPaste()
-                #else
-                self?.closeAndCopy()
-                #endif
             }
         )
 
@@ -100,7 +96,6 @@ final class PopupPanelController {
         previousApp?.activate()
     }
 
-    #if ENABLE_AUTOPASTE
     func closeAndPaste() {
         let targetApp = previousApp
         close()
@@ -138,58 +133,6 @@ final class PopupPanelController {
             keyUp.post(tap: .cghidEventTap)
         }
     }
-    #else
-    private var toastPanel: NSPanel?
-
-    func closeAndCopy() {
-        let panelFrame = panel?.frame
-        close()
-
-        guard let panelFrame else { return }
-        showToast(near: panelFrame)
-    }
-
-    private func showToast(near frame: NSRect) {
-        let toastWidth: CGFloat = frame.width
-        let toastHeight: CGFloat = 40
-
-        let toast = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: toastWidth, height: toastHeight),
-            styleMask: [.nonactivatingPanel, .fullSizeContentView],
-            backing: .buffered,
-            defer: false
-        )
-        toast.isFloatingPanel = true
-        toast.level = .floating
-        toast.backgroundColor = .clear
-        toast.isOpaque = false
-        toast.hasShadow = true
-        toast.hidesOnDeactivate = false
-        toast.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-
-        let toastView = NSHostingView(rootView: ToastContentView())
-        toast.contentView = toastView
-
-        let origin = NSPoint(
-            x: frame.midX - toastWidth / 2,
-            y: frame.midY - toastHeight / 2
-        )
-        toast.setFrameOrigin(origin)
-        toast.alphaValue = 1
-        toast.orderFrontRegardless()
-        self.toastPanel = toast
-
-        Task { @MainActor [weak self] in
-            try? await Task.sleep(for: .milliseconds(800))
-            await NSAnimationContext.runAnimationGroup { context in
-                context.duration = 0.3
-                toast.animator().alphaValue = 0
-            }
-            toast.orderOut(nil)
-            self?.toastPanel = nil
-        }
-    }
-    #endif
 
     // MARK: - Panel Positioning
 
@@ -214,21 +157,3 @@ final class PopupPanelController {
         }
     }
 }
-
-#if !ENABLE_AUTOPASTE
-private struct ToastContentView: View {
-    var body: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundStyle(.green)
-            Text("コピーしました")
-                .font(.system(size: 13, weight: .medium))
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .frame(maxWidth: .infinity)
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 10))
-    }
-}
-#endif

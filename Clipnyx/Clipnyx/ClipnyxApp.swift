@@ -25,12 +25,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     #endif
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        #if ENABLE_AUTOPASTE
-        // アクセシビリティ権限の確認（未許可ならシステムダイアログを表示）
-        AXIsProcessTrustedWithOptions(
-            ["AXTrustedCheckOptionPrompt": true] as CFDictionary
-        )
-        #endif
+        // PostEvent 権限の確認（未許可ならシステムダイアログを表示）
+        CGRequestPostEventAccess()
 
         // Register hotkey
         HotKeyManager.shared.onHotKey = { [weak self] in

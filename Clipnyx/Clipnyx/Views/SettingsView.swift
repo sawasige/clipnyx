@@ -19,12 +19,6 @@ struct GeneralTab: View {
                 HotKeyRecorderRow()
             }
 
-            #if ENABLE_AUTOPASTE
-            Section("Accessibility") {
-                AccessibilityStatusView()
-            }
-            #endif
-
             #if ENABLE_SPARKLE
             Section("Software Update") {
                 SoftwareUpdateView(updateManager: updateManager)
@@ -135,45 +129,6 @@ private struct SoftwareUpdateView: View {
             updateManager.checkForUpdates()
         }
         .disabled(!updateManager.canCheckForUpdates)
-    }
-}
-#endif
-
-#if ENABLE_AUTOPASTE
-// MARK: - Accessibility Status
-
-private struct AccessibilityStatusView: View {
-    @State private var isGranted = AXIsProcessTrusted()
-    var body: some View {
-        LabeledContent("Permission Status") {
-            HStack(spacing: 6) {
-                Image(systemName: isGranted ? "checkmark.circle.fill" : "xmark.circle.fill")
-                    .foregroundStyle(isGranted ? .green : .red)
-                if isGranted {
-                    Text("Granted")
-                } else {
-                    Text("Not Granted")
-                }
-            }
-        }
-        .task {
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(2))
-                isGranted = AXIsProcessTrusted()
-            }
-        }
-
-        if !isGranted {
-            Text("Accessibility permission is required for paste and cursor detection. You may need to restart the app after granting permission.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-
-            Button("Open System Settings") {
-                NSWorkspace.shared.open(
-                    URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!
-                )
-            }
-        }
     }
 }
 #endif

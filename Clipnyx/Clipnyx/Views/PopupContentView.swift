@@ -142,15 +142,9 @@ struct PopupContentView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Spacer()
-                #if ENABLE_AUTOPASTE
                 Text("↩ Paste")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                #else
-                Text("↩ Copy")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                #endif
                 Text("⇧↩ Plain Text")
                     .font(.caption)
                     .foregroundStyle(.secondary)

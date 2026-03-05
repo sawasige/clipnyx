@@ -1,8 +1,0 @@
-<svg id="layer-board" width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <filter id="b-shadow-lg" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="16" stdDeviation="20" flood-opacity="0.35"/></filter>
-                            <linearGradient id="b-boardGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4b5563"/><stop offset="100%" stop-color="#1f2937"/></linearGradient>
-                        </defs>
-                        <rect x="76" y="48" width="360" height="432" rx="40" fill="url(#b-boardGrad)" filter="url(#b-shadow-lg)"/>
-                        <rect x="78" y="50" width="356" height="428" rx="38" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.15"/>
-                    </svg>
