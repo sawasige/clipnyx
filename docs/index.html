@@ -95,6 +95,11 @@
       opacity: 0.8;
     }
 
+    .app-store-badge.disabled {
+      pointer-events: none;
+      opacity: 0.35;
+    }
+
     .app-store-badge img {
       height: 40px;
       vertical-align: middle;
@@ -439,7 +444,7 @@
     <h1>Clipnyx</h1>
     <p class="tagline" data-ja="macOSメニューバーに常駐する、軽量クリップボード履歴マネージャー。" data-en="A lightweight clipboard history manager that lives in your macOS menu bar."></p>
     <div class="download-buttons">
-      <a class="app-store-badge" href="https://apps.apple.com/app/clipnyx/id6759652985" aria-label="Download on the App Store">
+      <a class="app-store-badge disabled" href="https://apps.apple.com/app/clipnyx/id6759652985" aria-label="Download on the App Store">
         <picture>
           <source srcset="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/white/ja-jp" media="(prefers-color-scheme: dark)">
           <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/ja-jp" alt="Download on the App Store">
