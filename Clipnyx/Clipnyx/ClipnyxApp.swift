@@ -20,7 +20,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let clipboardManager = ClipboardManager()
     private var popupController = PopupPanelController()
     private var settingsWindow: NSWindow?
-    #if ENABLE_AUTOPASTE
+    #if ENABLE_SPARKLE
     let updateManager = UpdateManager()
     #endif
 
@@ -65,7 +65,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         tabVC.tabStyle = .toolbar
         tabVC.title = String(localized: "Settings")
 
-        #if ENABLE_AUTOPASTE
+        #if ENABLE_SPARKLE
         let generalItem = NSTabViewItem(viewController: NSHostingController(
             rootView: GeneralTab(updateManager: updateManager).formStyle(.grouped)
         ))

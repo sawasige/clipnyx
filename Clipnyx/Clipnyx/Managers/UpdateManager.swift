@@ -1,4 +1,4 @@
-#if ENABLE_AUTOPASTE
+#if ENABLE_SPARKLE
 import AppKit
 import Sparkle
 

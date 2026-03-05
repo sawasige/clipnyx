@@ -5,7 +5,7 @@ import ServiceManagement
 // MARK: - General Tab
 
 struct GeneralTab: View {
-    #if ENABLE_AUTOPASTE
+    #if ENABLE_SPARKLE
     let updateManager: UpdateManager
     #endif
 
@@ -23,7 +23,9 @@ struct GeneralTab: View {
             Section("Accessibility") {
                 AccessibilityStatusView()
             }
+            #endif
 
+            #if ENABLE_SPARKLE
             Section("Software Update") {
                 SoftwareUpdateView(updateManager: updateManager)
             }
@@ -34,7 +36,7 @@ struct GeneralTab: View {
                     Text(verbatim: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "–")
                 }
                 LabeledContent("Edition") {
-                    #if ENABLE_AUTOPASTE
+                    #if ENABLE_SPARKLE
                     Text("Full")
                     #else
                     Text("App Store")
@@ -111,7 +113,7 @@ private struct LaunchAtLoginToggle: View {
     }
 }
 
-#if ENABLE_AUTOPASTE
+#if ENABLE_SPARKLE
 // MARK: - Software Update
 
 private struct SoftwareUpdateView: View {
@@ -135,7 +137,9 @@ private struct SoftwareUpdateView: View {
         .disabled(!updateManager.canCheckForUpdates)
     }
 }
+#endif
 
+#if ENABLE_AUTOPASTE
 // MARK: - Accessibility Status
 
 private struct AccessibilityStatusView: View {
