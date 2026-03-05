@@ -147,7 +147,7 @@ jobs:
         run: |
           SPARKLE_ATTRS=$(echo "$SPARKLE_SIG" | sed -n 's/.*edSignature="\([^"]*\)".*/\1/p')
           PUB_DATE=$(date -u '+%a, %d %b %Y %H:%M:%S %z')
-          DMG_URL="https://github.com/sawasige/clipboard-mac/releases/download/${TAG}/${APP_NAME}.dmg"
+          DMG_URL="https://github.com/sawasige/clipnyx/releases/download/${TAG}/${APP_NAME}.dmg"
           python3 -c "
           import sys
           appcast = open('docs/appcast.xml').read()
@@ -163,18 +163,30 @@ jobs:
           open('docs/appcast.xml', 'w').write(appcast)
           "
 
-      # ── Homebrew Cask 更新 ──
-      - name: Update Homebrew Cask formula
+      # ── appcast.xml コミット ──
+      - name: Commit appcast.xml
         run: |
-          SHA256=$(shasum -a 256 "build/$APP_NAME.dmg" | awk '{print $1}')
-          sed -i '' -E "s/^(  version ).*/\1\"${VERSION}\"/" Casks/clipnyx.rb
-          sed -i '' -E "s/^(  sha256 ).*/\1\"${SHA256}\"/" Casks/clipnyx.rb
-
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add Casks/clipnyx.rb docs/appcast.xml
-          git commit -m "Homebrew Cask を v${VERSION} に更新し appcast.xml を追記"
+          git add docs/appcast.xml
+          git commit -m "appcast.xml を v${VERSION} に更新"
           git push origin HEAD:main
+
+      # ── Homebrew Cask 更新（外部タップリポ） ──
+      - name: Update Homebrew Cask formula
+        env:
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          SHA256=$(shasum -a 256 "build/$APP_NAME.dmg" | awk '{print $1}')
+          git clone "https://x-access-token:${HOMEBREW_TAP_TOKEN}@github.com/sawasige/homebrew-clipnyx.git" /tmp/homebrew-clipnyx
+          cd /tmp/homebrew-clipnyx
+          sed -i '' -E "s/^(  version ).*/\1\"${VERSION}\"/" Casks/clipnyx.rb
+          sed -i '' -E "s/^(  sha256 ).*/\1\"${SHA256}\"/" Casks/clipnyx.rb
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Casks/clipnyx.rb
+          git commit -m "Cask を v${VERSION} に更新"
+          git push origin main
 
       # ── タグ作成 ──
       - name: Create and push tag
