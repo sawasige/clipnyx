@@ -32,5 +32,7 @@
     <string>GVgO4TFMFaBMefInaxcQmaQXx2y+UKD6D8Gecwk1l9M=</string>
     <key>SUFeedURL</key>
     <string>https://sawasige.github.io/clipnyx/appcast.xml</string>
+    <key>SUEnableInstallerLauncherService</key>
+    <true/>
 </dict>
 </plist>

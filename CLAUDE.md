@@ -35,14 +35,21 @@ Clipnyx/Clipnyx/
 - **@Observable** パターン（Observation framework）を使用
 - ClipboardManager が中心。0.5秒間隔で NSPasteboard をポーリング
 - ホットキーは Carbon `RegisterEventHotKey` で登録（イベント消費のため）
-- ペースト: Accessibility API で直接テキスト挿入 → 失敗時は CGEvent ⌘V フォールバック
+- ペースト: `CGEvent.post` で ⌘V を送信（PostEvent 権限、サンドボックス互換）
+- 権限チェック: `CGRequestPostEventAccess()` / `CGPreflightPostEventAccess()`
 - 履歴は JSON で `~/Library/Application Support/Clipnyx/` に永続化
+
+## ビルド構成
+- **Debug / Release**: App Store 版（サンドボックス、Sparkle なし）
+- **Debug-Full / Release-Full**: Full 版（サンドボックス + Sparkle）
+- `ENABLE_SPARKLE` コンパイルフラグで Sparkle 関連コードを分岐
 
 ## CI/CD
 - **Xcode Cloud**: タグ `v*` プッシュ → Archive → TestFlight アップロード
+- **GitHub Actions** (`release-full.yml`): Full 版ビルド → 署名 → 公証 → DMG → appcast.xml 更新 → Homebrew Cask 更新
 - **ci_scripts/ci_post_clone.sh**: タグからバージョン抽出して pbxproj を更新
 - **Fastlane**: `fastlane metadata` でApp Storeメタデータ・スクリーンショットをアップロード
-- **GitHub Pages**: `docs/` 配下を自動デプロイ（プライバシーポリシー）
+- **GitHub Pages**: `docs/` 配下を自動デプロイ（ランディングページ、プライバシーポリシー、appcast.xml）
 
 ## コミット規約
 - コミットメッセージは日本語
