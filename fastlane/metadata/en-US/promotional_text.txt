@@ -1,1 +1,1 @@
-Automatically records everything you copy. Recall your clipboard history with a single hotkey and paste instantly. Auto-categorizes 11 content types including text, images, URLs, and code.
+Automatically saves everything you copy. Recall clipboard history with a hotkey and paste instantly. Auto-categorizes 11 types including text, images, URLs, and code.
