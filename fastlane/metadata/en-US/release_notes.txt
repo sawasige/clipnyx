@@ -1,1 +1,1 @@
-Initial release
+- Direct paste: Paste items directly from clipboard history
