@@ -127,10 +127,10 @@ final class PopupPanelController {
               let keyUp = CGEvent(keyboardEventSource: nil, virtualKey: 0x09, keyDown: false) else { return }
         keyDown.flags = .maskCommand
         keyUp.flags = .maskCommand
-        keyDown.post(tap: .cghidEventTap)
+        keyDown.post(tap: .cgSessionEventTap)
         Task {
             try? await Task.sleep(for: .milliseconds(50))
-            keyUp.post(tap: .cghidEventTap)
+            keyUp.post(tap: .cgSessionEventTap)
         }
     }
 
