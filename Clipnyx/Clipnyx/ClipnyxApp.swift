@@ -25,7 +25,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     #endif
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        NSApp.setActivationPolicy(.regular)
         CGRequestPostEventAccess()
 
         HotKeyManager.shared.onHotKey = { [weak self] in
@@ -42,23 +41,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         )
     }
 
-    @objc private func handleShowSettings() {
-        showSettings()
-    }
-
     func applicationWillTerminate(_ notification: Notification) {
         HotKeyManager.shared.unregister()
         clipboardManager.stopPolling()
     }
 
-    // Dock アイコンクリックで設定を開く
-    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        showSettings()
-        return true
-    }
-
-    func showSettings() {
-        // MenuBarExtra パネルが開いていたら先に閉じる
+    @objc private func handleShowSettings() {
+        // MenuBarExtra パネルを閉じる
         for window in NSApp.windows where window is NSPanel && window.isVisible {
             window.orderOut(nil)
         }
@@ -107,6 +96,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         window.delegate = self
         self.settingsWindow = window
 
+        NSApp.setActivationPolicy(.regular)
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }
@@ -116,6 +106,7 @@ extension AppDelegate: NSWindowDelegate {
     func windowWillClose(_ notification: Notification) {
         guard (notification.object as? NSWindow) === settingsWindow else { return }
         settingsWindow = nil
+        NSApp.setActivationPolicy(.accessory)
     }
 }
 
