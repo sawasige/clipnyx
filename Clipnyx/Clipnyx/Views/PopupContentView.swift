@@ -341,7 +341,7 @@ private struct UnifiedItemRow: View {
             if let index, !isMenuBar {
                 if index < 9 {
                     Text("\(index + 1)")
-                        .font(.caption2.monospaced())
+                        .font(.caption.monospaced())
                         .foregroundStyle(.secondary)
                         .frame(width: 16)
                 } else {
@@ -352,13 +352,13 @@ private struct UnifiedItemRow: View {
             // Category icon (with pin overlay)
             ZStack(alignment: .bottomTrailing) {
                 Image(systemName: item.category.icon)
-                    .font(.caption)
+                    .font(.callout)
                     .foregroundStyle(item.category.color)
-                    .frame(width: 16)
+                    .frame(width: 18)
 
                 if item.isPinned {
                     Image(systemName: "pin.fill")
-                        .font(.system(size: 6))
+                        .font(.system(size: 7))
                         .foregroundStyle(.orange)
                         .offset(x: 4, y: 2)
                 }
@@ -368,7 +368,7 @@ private struct UnifiedItemRow: View {
                 ItemPreviewContent(item: item, maxThumbnailHeight: isMenuBar ? 36 : 40)
                 if isMenuBar {
                     Text(item.timestamp, style: .relative)
-                        .font(.caption2)
+                        .font(.caption)
                         .foregroundStyle(.tertiary)
                 }
             }
@@ -380,7 +380,7 @@ private struct UnifiedItemRow: View {
                     onPin()
                 } label: {
                     Image(systemName: item.isPinned ? "pin.slash" : "pin")
-                        .font(.caption)
+                        .font(.callout)
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(item.isPinned ? .orange : .secondary)
@@ -390,7 +390,7 @@ private struct UnifiedItemRow: View {
                         onShowDetail()
                     } label: {
                         Image(systemName: "info.circle")
-                            .font(.caption)
+                            .font(.callout)
                     }
                     .buttonStyle(.plain)
                     .foregroundStyle(.secondary)
@@ -400,13 +400,13 @@ private struct UnifiedItemRow: View {
                     onDelete()
                 } label: {
                     Image(systemName: "trash")
-                        .font(.caption)
+                        .font(.callout)
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.red)
             } else {
                 Text(item.formattedDataSize)
-                    .font(.caption2)
+                    .font(.caption)
                     .foregroundStyle(.tertiary)
             }
         }
@@ -476,9 +476,9 @@ private struct FooterIconLabel: View {
 
     var body: some View {
         Image(systemName: icon)
-            .font(.system(size: 13))
+            .font(.system(size: 14))
             .foregroundStyle(isHovered ? color : .secondary)
-            .frame(width: 26, height: 26)
+            .frame(width: 28, height: 28)
             .background(isHovered ? color.opacity(0.1) : .clear)
             .clipShape(RoundedRectangle(cornerRadius: 5))
             .onHover { isHovered = $0 }
