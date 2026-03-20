@@ -25,23 +25,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     #endif
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // PostEvent 権限の確認（未許可ならシステムダイアログを表示）
+        NSApp.setActivationPolicy(.regular)
         CGRequestPostEventAccess()
 
-        // Register hotkey
         HotKeyManager.shared.onHotKey = { [weak self] in
             guard let self else { return }
             self.popupController.toggle(clipboardManager: self.clipboardManager)
         }
         HotKeyManager.shared.register()
 
-        // 設定ウィンドウ表示リクエスト
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(showSettings),
+            selector: #selector(handleShowSettings),
             name: .openSettingsRequest,
             object: nil
         )
+    }
+
+    @objc private func handleShowSettings() {
+        showSettings()
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -49,21 +51,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         clipboardManager.stopPolling()
     }
 
-    @objc func showSettings() {
+    // Dock アイコンクリックで設定を開く
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        showSettings()
+        return true
+    }
+
+    func showSettings() {
+        // MenuBarExtra パネルが開いていたら先に閉じる
+        for window in NSApp.windows where window is NSPanel && window.isVisible {
+            window.orderOut(nil)
+        }
+
         if let settingsWindow {
-            settingsWindow.orderFrontRegardless()
+            settingsWindow.makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: true)
-            settingsWindow.makeKey()
             return
         }
 
-        // MenuBarExtra ポップアップが閉じるのを待ってからウィンドウを表示
-        DispatchQueue.main.async { [self] in
-            self.createAndShowSettingsWindow()
-        }
-    }
-
-    private func createAndShowSettingsWindow() {
         let tabVC = NSTabViewController()
         tabVC.tabStyle = .toolbar
         tabVC.title = String(localized: "Settings")
@@ -102,19 +107,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         window.delegate = self
         self.settingsWindow = window
 
-        NSApp.setActivationPolicy(.regular)
-        window.orderFrontRegardless()
+        window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
-        window.makeKey()
     }
 }
-
 
 extension AppDelegate: NSWindowDelegate {
     func windowWillClose(_ notification: Notification) {
         guard (notification.object as? NSWindow) === settingsWindow else { return }
         settingsWindow = nil
-        NSApp.setActivationPolicy(.accessory)
     }
 }
 
