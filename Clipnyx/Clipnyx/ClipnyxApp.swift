@@ -57,6 +57,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
+        // MenuBarExtra ポップアップが閉じるのを待ってからウィンドウを表示
+        DispatchQueue.main.async { [self] in
+            self.createAndShowSettingsWindow()
+        }
+    }
+
+    private func createAndShowSettingsWindow() {
         let tabVC = NSTabViewController()
         tabVC.tabStyle = .toolbar
         tabVC.title = String(localized: "Settings")
