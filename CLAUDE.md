@@ -51,8 +51,9 @@ Clipnyx/Clipnyx/
 - `ENABLE_SPARKLE` コンパイルフラグで Sparkle 関連コードを分岐
 
 ## CI/CD
-- **Xcode Cloud**: タグ `v*` プッシュ → Archive → TestFlight アップロード
-- **GitHub Actions** (`release-full.yml`): Full 版ビルド → 署名 → 公証 → DMG → appcast.xml 更新 → Homebrew Cask 更新
+- **リリース**: `gh workflow run "Release Full (Homebrew)" --ref main` を実行するだけで両エディションがデプロイされる
+  - Full 版: GitHub Actions でビルド → 署名 → 公証 → DMG → appcast.xml 更新 → Homebrew Cask 更新 → タグ `v*` 作成
+  - App Store 版: 上記タグ作成が Xcode Cloud をトリガー → Archive → TestFlight アップロード
 - **ci_scripts/ci_post_clone.sh**: タグからバージョン抽出して pbxproj を更新
 - **Fastlane**: `fastlane metadata` でApp Storeメタデータ・スクリーンショットをアップロード
 - **GitHub Pages**: `docs/` 配下を自動デプロイ（ランディングページ、プライバシーポリシー、appcast.xml）
