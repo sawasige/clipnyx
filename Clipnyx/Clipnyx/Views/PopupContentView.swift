@@ -8,7 +8,13 @@ struct PopupContentView: View {
 
     @State private var searchText = ""
     @State private var selectedIndex = 0
-    @State private var hoveredIndex: Int?
+    /// キーボード操作中は onHover による選択更新とスクロール追従を切り替える。
+    /// キー入力で true、マウス移動で false。
+    @State private var keyboardNavigation = true
+    /// マウスが実際に動いたかを判定するためのスクリーン座標。
+    /// onContinuousHover はビュー相対座標を返すため、layout shift（contentHeight 変化等）で
+    /// マウスが静止していても座標が変わる。NSEvent.mouseLocation（スクリーン座標）なら影響を受けない。
+    @State private var lastScreenPosition: CGPoint?
     @State private var selectedCategory: ClipboardContentCategory?
     @State private var showPinnedOnly = false
     @State private var listContentHeight: CGFloat = 0
@@ -142,6 +148,24 @@ struct PopupContentView: View {
         }
         .background(Color(nsColor: .windowBackgroundColor))
         .clipShape(RoundedRectangle(cornerRadius: 12))
+        // マウスが実際に動いた時だけ keyboardNavigation を解除する。
+        // onContinuousHover のビュー相対座標は layout shift で変わるため、
+        // スクリーン座標（NSEvent.mouseLocation）で判定する。
+        .onContinuousHover { phase in
+            if case .active = phase {
+                let screenPos = NSEvent.mouseLocation
+                if let last = lastScreenPosition {
+                    let dx = abs(screenPos.x - last.x)
+                    let dy = abs(screenPos.y - last.y)
+                    if dx > 1 || dy > 1 {
+                        keyboardNavigation = false
+                        lastScreenPosition = screenPos
+                    }
+                } else {
+                    lastScreenPosition = screenPos
+                }
+            }
+        }
         .onKeyPress(keys: [.upArrow, .downArrow, .return, .escape, .tab]) { press in
             handleKeyPress(press)
         }
@@ -183,25 +207,33 @@ struct PopupContentView: View {
         } else {
             ScrollViewReader { proxy in
                 ScrollView {
-                    LazyVStack(spacing: 2) {
-                        ForEach(Array(filteredItems.enumerated()), id: \.element.id) { index, item in
-                            itemRow(item: item, index: index)
+                    Group {
+                        if isMenuBar {
+                            LazyVStack(spacing: 2) {
+                                ForEach(Array(filteredItems.enumerated()), id: \.element.id) { index, item in
+                                    itemRow(item: item, index: index)
+                                }
+                            }
+                        } else {
+                            VStack(spacing: 2) {
+                                ForEach(Array(filteredItems.enumerated()), id: \.element.id) { index, item in
+                                    itemRow(item: item, index: index)
+                                }
+                            }
+                            .background(GeometryReader { geo in
+                                Color.clear.preference(key: ListContentHeightKey.self, value: geo.size.height)
+                            })
                         }
                     }
                     .padding(.vertical, 4)
-                    .background(GeometryReader { geo in
-                        Color.clear.preference(key: ListContentHeightKey.self, value: geo.size.height)
-                    })
                 }
                 .modifier(ScrollHeightModifier(isMenuBar: isMenuBar, contentHeight: listContentHeight))
                 .onPreferenceChange(ListContentHeightKey.self) { newHeight in
-                    DispatchQueue.main.async { listContentHeight = newHeight }
+                    listContentHeight = newHeight
                 }
                 .onChange(of: selectedIndex) { _, newValue in
-                    if let item = filteredItems[safe: newValue] {
-                        withAnimation(.easeOut(duration: 0.1)) {
-                            proxy.scrollTo(item.id, anchor: .center)
-                        }
+                    if keyboardNavigation, let item = filteredItems[safe: newValue] {
+                        proxy.scrollTo(item.id)
                     }
                 }
             }
@@ -213,8 +245,7 @@ struct PopupContentView: View {
         UnifiedItemRow(
             item: item,
             index: isMenuBar ? nil : index,
-            isSelected: !isMenuBar && index == selectedIndex,
-            isHovered: index == hoveredIndex,
+            isSelected: index == selectedIndex,
             isMenuBar: isMenuBar,
             onPin: {
                 clipboardManager.togglePin(item)
@@ -224,7 +255,6 @@ struct PopupContentView: View {
                     clipboardManager.restoreToClipboard(item)
                 } else {
                     selectedIndex = index
-                    hoveredIndex = nil
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
                         selectAndPaste(item: item)
                     }
@@ -240,7 +270,9 @@ struct PopupContentView: View {
         )
         .id(item.id)
         .onHover { hovering in
-            hoveredIndex = hovering ? index : nil
+            if hovering, !keyboardNavigation {
+                selectedIndex = index
+            }
         }
     }
 
@@ -265,11 +297,13 @@ struct PopupContentView: View {
         switch press.key {
         case .upArrow:
             if selectedIndex > 0 {
+                keyboardNavigation = true
                 selectedIndex -= 1
             }
             return .handled
         case .downArrow:
             if selectedIndex < filteredItems.count - 1 {
+                keyboardNavigation = true
                 selectedIndex += 1
             }
             return .handled
@@ -288,11 +322,13 @@ struct PopupContentView: View {
         switch press.characters {
         case "n":
             if selectedIndex < filteredItems.count - 1 {
+                keyboardNavigation = true
                 selectedIndex += 1
             }
             return .handled
         case "p":
             if selectedIndex > 0 {
+                keyboardNavigation = true
                 selectedIndex -= 1
             }
             return .handled
@@ -327,7 +363,6 @@ private struct UnifiedItemRow: View {
     let item: ClipboardItem
     let index: Int?
     let isSelected: Bool
-    let isHovered: Bool
     let isMenuBar: Bool
     let onPin: () -> Void
     let onSelect: () -> Void
@@ -374,45 +409,49 @@ private struct UnifiedItemRow: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            if isHovered {
-                // ピンボタン
-                Button {
-                    onPin()
-                } label: {
-                    Image(systemName: item.isPinned ? "pin.slash" : "pin")
-                        .font(.callout)
-                }
-                .buttonStyle(.plain)
-                .foregroundStyle(item.isPinned ? .orange : .secondary)
+            ZStack {
+                if isSelected {
+                    HStack(spacing: 8) {
+                        Button {
+                            onPin()
+                        } label: {
+                            Image(systemName: item.isPinned ? "pin.slash" : "pin")
+                                .font(.callout)
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(item.isPinned ? .orange : .secondary)
 
-                if let onShowDetail {
-                    Button {
-                        onShowDetail()
-                    } label: {
-                        Image(systemName: "info.circle")
-                            .font(.callout)
+                        if let onShowDetail {
+                            Button {
+                                onShowDetail()
+                            } label: {
+                                Image(systemName: "info.circle")
+                                    .font(.callout)
+                            }
+                            .buttonStyle(.plain)
+                            .foregroundStyle(.secondary)
+                        }
+
+                        Button {
+                            onDelete()
+                        } label: {
+                            Image(systemName: "trash")
+                                .font(.callout)
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.red)
                     }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(.secondary)
+                } else {
+                    Text(item.formattedDataSize)
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
                 }
-
-                Button {
-                    onDelete()
-                } label: {
-                    Image(systemName: "trash")
-                        .font(.callout)
-                }
-                .buttonStyle(.plain)
-                .foregroundStyle(.red)
-            } else {
-                Text(item.formattedDataSize)
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
             }
+            .frame(width: 72, alignment: .trailing)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
-        .background(isSelected ? Color.accentColor.opacity(0.15) : isHovered ? Color.accentColor.opacity(0.1) : Color.clear)
+        .background(isSelected ? Color.accentColor.opacity(0.15) : Color.clear)
         .clipShape(RoundedRectangle(cornerRadius: 6))
         .contentShape(Rectangle())
         .onTapGesture {
