@@ -9,7 +9,6 @@ struct ClipnyxApp: App {
             MenuBarView()
                 .environment(appDelegate.clipboardManager)
         }
-        .menuBarExtraStyle(.window)
     }
 }
 
@@ -39,11 +38,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             name: .openSettingsRequest,
             object: nil
         )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleOpenPopupPanel),
+            name: .openPopupPanel,
+            object: nil
+        )
     }
 
     func applicationWillTerminate(_ notification: Notification) {
         HotKeyManager.shared.unregister()
         clipboardManager.stopPolling()
+    }
+
+    @objc private func handleOpenPopupPanel() {
+        popupController.toggle(clipboardManager: clipboardManager)
     }
 
     @objc private func handleShowSettings() {
@@ -112,5 +121,6 @@ extension AppDelegate: NSWindowDelegate {
 
 extension Notification.Name {
     static let openSettingsRequest = Notification.Name("openSettingsRequest")
+    static let openPopupPanel = Notification.Name("openPopupPanel")
     static let closePopupPanel = Notification.Name("closePopupPanel")
 }

@@ -2,20 +2,45 @@ import SwiftUI
 
 struct MenuBarView: View {
     @Environment(ClipboardManager.self) private var clipboardManager
-    @State private var viewId = UUID()
 
     var body: some View {
-        PopupContentView(
-            clipboardManager: clipboardManager,
-            isMenuBar: true,
-            onDismiss: {},
-            onPaste: {}
-        )
-        .id(viewId)
-        .frame(width: 360)
-        .onAppear {
-            viewId = UUID()
-            NotificationCenter.default.post(name: .closePopupPanel, object: nil)
+        VStack(spacing: 4) {
+            Button {
+                NotificationCenter.default.post(name: .openPopupPanel, object: nil)
+            } label: {
+                let hotKeyDisplay = HotKeyManager.displayString(
+                    keyCode: HotKeyManager.shared.currentKeyCode,
+                    modifiers: HotKeyManager.shared.currentModifiers
+                )
+                Label("Show History (\(hotKeyDisplay))", systemImage: "clipboard")
+            }
+
+            Divider()
+
+            Button {
+                clipboardManager.isPaused.toggle()
+            } label: {
+                Label(
+                    clipboardManager.isPaused ? "Resume Monitoring" : "Pause Monitoring",
+                    systemImage: clipboardManager.isPaused ? "play.fill" : "pause.fill"
+                )
+            }
+
+            Button {
+                NotificationCenter.default.post(name: .openSettingsRequest, object: nil)
+            } label: {
+                Label("Settings", systemImage: "gearshape")
+            }
+            .keyboardShortcut(",", modifiers: .command)
+
+            Divider()
+
+            Button {
+                NSApplication.shared.terminate(nil)
+            } label: {
+                Label("Quit", systemImage: "power")
+            }
+            .keyboardShortcut("q", modifiers: .command)
         }
     }
 }

@@ -72,7 +72,6 @@ final class PopupPanelController {
 
         let contentView = PopupContentView(
             clipboardManager: clipboardManager,
-            isMenuBar: false,
             onDismiss: { [weak self] in
                 self?.close()
             },

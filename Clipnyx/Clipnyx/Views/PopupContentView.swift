@@ -2,7 +2,6 @@ import SwiftUI
 
 struct PopupContentView: View {
     var clipboardManager: ClipboardManager
-    var isMenuBar: Bool
     var onDismiss: () -> Void
     var onPaste: () -> Void
 
@@ -45,7 +44,7 @@ struct PopupContentView: View {
                     .foregroundStyle(.secondary)
                 TextField("Search...", text: $searchText)
                     .textFieldStyle(.plain)
-                    .font(.system(size: isMenuBar ? 13 : 14))
+                    .font(.system(size: 14))
                     .focused($isSearchFocused)
                 if !searchText.isEmpty {
                     Button {
@@ -91,18 +90,6 @@ struct PopupContentView: View {
                 .fixedSize()
                 .help("Filter")
 
-                if isMenuBar {
-                    // Pause toggle
-                    Button {
-                        clipboardManager.isPaused.toggle()
-                    } label: {
-                        Image(systemName: clipboardManager.isPaused ? "play.fill" : "pause.fill")
-                            .contentTransition(.symbolEffect(.replace))
-                            .foregroundStyle(clipboardManager.isPaused ? .orange : .secondary)
-                    }
-                    .buttonStyle(.plain)
-                    .help(clipboardManager.isPaused ? Text("Resume Monitoring") : Text("Pause Monitoring"))
-                }
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
@@ -111,35 +98,6 @@ struct PopupContentView: View {
 
             historyContent
 
-            if isMenuBar {
-                Divider()
-
-                // Footer
-                HStack(spacing: 12) {
-                    Text("\(clipboardManager.items.count) items")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                    Text(verbatim: "·")
-                        .foregroundStyle(.quaternary)
-                    Text(clipboardManager.formattedTotalSize)
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-
-                    Spacer()
-
-                    FooterIconButton(icon: "gearshape", color: .secondary) {
-                        NotificationCenter.default.post(name: .openSettingsRequest, object: nil)
-                    }
-                    .help("Settings")
-
-                    FooterIconButton(icon: "power", color: .red) {
-                        NSApplication.shared.terminate(nil)
-                    }
-                    .help("Quit")
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 10)
-            }
         }
         .background(Color(nsColor: .windowBackgroundColor))
         .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -202,27 +160,17 @@ struct PopupContentView: View {
         } else {
             ScrollViewReader { proxy in
                 ScrollView {
-                    Group {
-                        if isMenuBar {
-                            LazyVStack(spacing: 2) {
-                                ForEach(Array(filteredItems.enumerated()), id: \.element.id) { index, item in
-                                    itemRow(item: item, index: index)
-                                }
-                            }
-                        } else {
-                            VStack(spacing: 2) {
-                                ForEach(Array(filteredItems.enumerated()), id: \.element.id) { index, item in
-                                    itemRow(item: item, index: index)
-                                }
-                            }
-                            .background(GeometryReader { geo in
-                                Color.clear.preference(key: ListContentHeightKey.self, value: geo.size.height)
-                            })
+                    VStack(spacing: 2) {
+                        ForEach(Array(filteredItems.enumerated()), id: \.element.id) { index, item in
+                            itemRow(item: item, index: index)
                         }
                     }
+                    .background(GeometryReader { geo in
+                        Color.clear.preference(key: ListContentHeightKey.self, value: geo.size.height)
+                    })
                     .padding(.vertical, 4)
                 }
-                .modifier(ScrollHeightModifier(isMenuBar: isMenuBar, contentHeight: listContentHeight))
+                .frame(height: min(listContentHeight, 450))
                 .onPreferenceChange(ListContentHeightKey.self) { newHeight in
                     listContentHeight = newHeight
                 }
@@ -239,29 +187,24 @@ struct PopupContentView: View {
     private func itemRow(item: ClipboardItem, index: Int) -> some View {
         UnifiedItemRow(
             item: item,
-            index: isMenuBar ? nil : index,
+            index: index,
             isSelected: index == selectedIndex,
-            isMenuBar: isMenuBar,
             onPin: {
                 clipboardManager.togglePin(item)
             },
             onSelect: {
-                if isMenuBar {
-                    clipboardManager.restoreToClipboard(item)
-                } else {
-                    selectedIndex = index
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
-                        selectAndPaste(item: item)
-                    }
+                selectedIndex = index
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+                    selectAndPaste(item: item)
                 }
             },
-            onShowDetail: isMenuBar ? { detailItem = item } : nil,
+            onShowDetail: { detailItem = item },
             onDelete: {
                 clipboardManager.removeItem(item)
             },
-            onPastePlainText: isMenuBar ? {
-                clipboardManager.restoreToClipboard(item, asPlainText: true)
-            } : nil
+            onPastePlainText: {
+                selectAndPaste(item: item, asPlainText: true)
+            }
         )
         .id(item.id)
         .onHover { hovering in
@@ -356,27 +299,24 @@ struct PopupContentView: View {
 
 private struct UnifiedItemRow: View {
     let item: ClipboardItem
-    let index: Int?
+    let index: Int
     let isSelected: Bool
-    let isMenuBar: Bool
     let onPin: () -> Void
     let onSelect: () -> Void
-    let onShowDetail: (() -> Void)?
+    let onShowDetail: () -> Void
     let onDelete: () -> Void
-    let onPastePlainText: (() -> Void)?
+    let onPastePlainText: () -> Void
 
     var body: some View {
         HStack(spacing: 8) {
-            // Number badge (1-9) for popup mode
-            if let index, !isMenuBar {
-                if index < 9 {
-                    Text("\(index + 1)")
-                        .font(.caption.monospaced())
-                        .foregroundStyle(.secondary)
-                        .frame(width: 16)
-                } else {
-                    Spacer().frame(width: 16)
-                }
+            // Number badge (1-9)
+            if index < 9 {
+                Text("\(index + 1)")
+                    .font(.caption.monospaced())
+                    .foregroundStyle(.secondary)
+                    .frame(width: 16)
+            } else {
+                Spacer().frame(width: 16)
             }
 
             // Category icon (with pin overlay)
@@ -395,12 +335,7 @@ private struct UnifiedItemRow: View {
             }
 
             VStack(alignment: .leading, spacing: 2) {
-                ItemPreviewContent(item: item, maxThumbnailHeight: isMenuBar ? 36 : 40)
-                if isMenuBar {
-                    Text(item.timestamp, style: .relative)
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                }
+                ItemPreviewContent(item: item, maxThumbnailHeight: 40)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -416,16 +351,14 @@ private struct UnifiedItemRow: View {
                         .buttonStyle(.plain)
                         .foregroundStyle(item.isPinned ? .orange : .secondary)
 
-                        if let onShowDetail {
-                            Button {
-                                onShowDetail()
-                            } label: {
-                                Image(systemName: "info.circle")
-                                    .font(.callout)
-                            }
-                            .buttonStyle(.plain)
-                            .foregroundStyle(.secondary)
+                        Button {
+                            onShowDetail()
+                        } label: {
+                            Image(systemName: "info.circle")
+                                .font(.callout)
                         }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.secondary)
 
                         Button {
                             onDelete()
@@ -456,14 +389,12 @@ private struct UnifiedItemRow: View {
             Button {
                 onSelect()
             } label: {
-                Text(isMenuBar ? "Copy" : "Paste")
+                Text("Paste")
             }
-            if let onPastePlainText {
-                Button {
-                    onPastePlainText()
-                } label: {
-                    Label("Paste as Plain Text", systemImage: "doc.plaintext")
-                }
+            Button {
+                onPastePlainText()
+            } label: {
+                Label("Paste as Plain Text", systemImage: "doc.plaintext")
             }
             Divider()
             Button {
@@ -471,65 +402,16 @@ private struct UnifiedItemRow: View {
             } label: {
                 Label(item.isPinned ? "Unpin" : "Pin", systemImage: item.isPinned ? "pin.slash" : "pin")
             }
-            if let onShowDetail {
-                Button {
-                    onShowDetail()
-                } label: {
-                    Label("Detail", systemImage: "info.circle")
-                }
+            Button {
+                onShowDetail()
+            } label: {
+                Label("Detail", systemImage: "info.circle")
             }
             Button(role: .destructive) {
                 onDelete()
             } label: {
                 Label("Delete", systemImage: "trash")
             }
-        }
-    }
-}
-
-// MARK: - Footer
-
-private struct FooterIconButton: View {
-    let icon: String
-    let color: Color
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            FooterIconLabel(icon: icon, color: color)
-        }
-        .buttonStyle(.plain)
-    }
-}
-
-private struct FooterIconLabel: View {
-    let icon: String
-    let color: Color
-
-    @State private var isHovered = false
-
-    var body: some View {
-        Image(systemName: icon)
-            .font(.system(size: 14))
-            .foregroundStyle(isHovered ? color : .secondary)
-            .frame(width: 28, height: 28)
-            .background(isHovered ? color.opacity(0.1) : .clear)
-            .clipShape(RoundedRectangle(cornerRadius: 5))
-            .onHover { isHovered = $0 }
-    }
-}
-
-/// メニューバーは maxHeight でスクロール可能にし、
-/// ポップアップパネルはコンテンツ高さに合わせて縮む。
-private struct ScrollHeightModifier: ViewModifier {
-    let isMenuBar: Bool
-    let contentHeight: CGFloat
-
-    func body(content: Content) -> some View {
-        if isMenuBar {
-            content.frame(maxHeight: 450)
-        } else {
-            content.frame(height: min(contentHeight, 450))
         }
     }
 }

@@ -244,16 +244,6 @@
         }
       }
     },
-    "Copy" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "コピー"
-          }
-        }
-      }
-    },
     "CSV" : {
       "localizations" : {
         "ja" : {
@@ -690,6 +680,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "すべて表示"
+          }
+        }
+      }
+    },
+    "Show History (%@)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "履歴を表示（%@）"
           }
         }
       }
