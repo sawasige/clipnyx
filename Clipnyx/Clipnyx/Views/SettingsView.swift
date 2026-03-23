@@ -45,7 +45,6 @@ struct GeneralTab: View {
 
 struct HistoryTab: View {
     @Bindable var clipboardManager: ClipboardManager
-
     private let historyCountOptions = [20, 50, 100, 200, 500]
     private let totalSizeOptions = [256, 512, 1024, 2048, 5120]
 
@@ -69,7 +68,12 @@ struct HistoryTab: View {
                 }
 
                 LabeledContent("Current Items") {
-                    Text("\(clipboardManager.items.count) items")
+                    let pinnedCount = clipboardManager.items.filter(\.isPinned).count
+                    if pinnedCount > 0 {
+                        Text("\(clipboardManager.items.count) items (\(pinnedCount) pinned)")
+                    } else {
+                        Text("\(clipboardManager.items.count) items")
+                    }
                 }
 
                 LabeledContent("Current Usage") {
@@ -78,9 +82,11 @@ struct HistoryTab: View {
             }
 
             Section {
-                Button("Delete All History", role: .destructive) {
+                Button("Delete History", role: .destructive) {
                     clipboardManager.removeAllItems()
                 }
+            } footer: {
+                Text("Pinned items will not be deleted.")
             }
         }
     }

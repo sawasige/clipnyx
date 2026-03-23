@@ -101,6 +101,16 @@
         }
       }
     },
+    "%lld items (%lld pinned)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld 件（%2$lld 件ピン留め）"
+          }
+        }
+      }
+    },
     "%lld MB" : {
       "localizations" : {
         "ja" : {
@@ -304,22 +314,12 @@
         }
       }
     },
-    "Delete All" : {
+    "Delete History" : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "全削除"
-          }
-        }
-      }
-    },
-    "Delete All History" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "すべての履歴を削除"
+            "value" : "履歴を削除"
           }
         }
       }
@@ -580,6 +580,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "アイテムをピン留めするとここに表示されます"
+          }
+        }
+      }
+    },
+    "Pinned items will not be deleted." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ピン留めしたアイテムは削除されません。"
           }
         }
       }
