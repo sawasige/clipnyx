@@ -127,11 +127,6 @@ struct PopupContentView: View {
 
                     Spacer()
 
-                    FooterIconButton(icon: "trash", color: .red) {
-                        clipboardManager.removeAllItems()
-                    }
-                    .help("Delete All")
-
                     FooterIconButton(icon: "gearshape", color: .secondary) {
                         NotificationCenter.default.post(name: .openSettingsRequest, object: nil)
                     }
