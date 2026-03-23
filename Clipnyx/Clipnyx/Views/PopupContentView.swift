@@ -221,12 +221,19 @@ struct PopupContentView: View {
 
     // MARK: - Key Handling
 
+    /// IMEが未確定文字列を持っているかを判定する。
+    private var isIMEComposing: Bool {
+        guard let inputContext = NSTextInputContext.current else { return false }
+        return inputContext.client.markedRange().length > 0
+    }
+
     private func handleKeyPress(_ press: KeyPress) -> KeyPress.Result {
         if press.key == .tab {
             showPinnedOnly.toggle()
             selectedIndex = 0
             return .handled
         }
+        if isIMEComposing { return .ignored }
         if press.key == .escape {
             onDismiss()
             return .handled
