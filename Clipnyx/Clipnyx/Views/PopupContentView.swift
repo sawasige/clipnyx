@@ -215,7 +215,7 @@ struct PopupContentView: View {
             index: index,
             isSelected: index == selectedIndex,
             onBookmark: {
-                NotificationCenter.default.post(name: .openSnippetEditor, object: item)
+                clipboardManager.toggleSave(item)
             },
             onSelect: {
                 selectedIndex = index
@@ -378,33 +378,10 @@ private struct UnifiedItemRow: View {
 
             ZStack {
                 if isSelected {
-                    HStack(spacing: 8) {
-                        Button {
-                            onBookmark()
-                        } label: {
-                            Image(systemName: item.isSaved ? "bookmark.fill" : "bookmark")
-                                .font(.callout)
-                        }
-                        .buttonStyle(.plain)
-                        .foregroundStyle(item.isSaved ? .orange : .secondary)
-
-                        Button {
-                            onShowDetail()
-                        } label: {
-                            Image(systemName: "info.circle")
-                                .font(.callout)
-                        }
-                        .buttonStyle(.plain)
-                        .foregroundStyle(.secondary)
-
-                        Button {
-                            onDelete()
-                        } label: {
-                            Image(systemName: "trash")
-                                .font(.callout)
-                        }
-                        .buttonStyle(.plain)
-                        .foregroundStyle(.red)
+                    HStack(spacing: 4) {
+                        ActionButton(icon: item.isSaved ? "bookmark.fill" : "bookmark", color: item.isSaved ? .orange : .secondary, action: onBookmark)
+                        ActionButton(icon: "info.circle", color: .secondary, action: onShowDetail)
+                        ActionButton(icon: "trash", color: .red, action: onDelete)
                     }
                 } else {
                     Text(item.formattedDataSize)
@@ -412,7 +389,7 @@ private struct UnifiedItemRow: View {
                         .foregroundStyle(.tertiary)
                 }
             }
-            .frame(width: 72, alignment: .trailing)
+            .frame(width: 84, height: 24, alignment: .trailing)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
@@ -450,6 +427,26 @@ private struct UnifiedItemRow: View {
                 Label("Delete", systemImage: "trash")
             }
         }
+    }
+}
+
+private struct ActionButton: View {
+    let icon: String
+    let color: Color
+    let action: () -> Void
+    @State private var isHovered = false
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: icon)
+                .font(.system(size: 13))
+                .foregroundStyle(isHovered ? color : .secondary)
+                .frame(width: 24, height: 24)
+                .background(isHovered ? color.opacity(0.12) : .clear)
+                .clipShape(RoundedRectangle(cornerRadius: 5))
+        }
+        .buttonStyle(.plain)
+        .onHover { isHovered = $0 }
     }
 }
 

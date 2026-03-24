@@ -87,6 +87,16 @@ struct ItemDetailView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+
+            if item.isSaved {
+                Divider()
+                Button {
+                    NotificationCenter.default.post(name: .openSnippetEditor, object: item)
+                } label: {
+                    Label("Edit Snippet", systemImage: "pencil")
+                }
+                .buttonStyle(.link)
+            }
         }
         .padding()
         .frame(width: 350)

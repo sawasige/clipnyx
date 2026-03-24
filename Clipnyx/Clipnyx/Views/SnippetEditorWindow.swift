@@ -129,6 +129,7 @@ struct SnippetEditorView: View {
                 }
                 .keyboardShortcut(.cancelAction)
                 Button(isNewSnippet ? "Create" : "Save") {
+                    NSApp.keyWindow?.makeFirstResponder(nil)
                     save()
                     onDismiss()
                 }
