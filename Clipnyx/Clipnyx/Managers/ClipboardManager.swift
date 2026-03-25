@@ -210,6 +210,28 @@ final class ClipboardManager: @unchecked Sendable {
         store.saveIndex(items)
     }
 
+    func convertToPlainText(_ item: ClipboardItem) {
+        guard let index = items.firstIndex(where: { $0.id == item.id }) else { return }
+        let text = item.previewText
+        let current = items[index]
+        items[index] = ClipboardItem(
+            id: current.id,
+            timestamp: current.timestamp,
+            category: .plainText,
+            previewText: current.previewText,
+            thumbnailData: nil,
+            totalDataSize: text.utf8.count,
+            contentHash: current.contentHash,
+            representationInfos: [RepresentationInfo(type: NSPasteboard.PasteboardType.string.rawValue, size: text.utf8.count)],
+            isSaved: current.isSaved,
+            favoriteName: current.favoriteName,
+            favoriteFolderId: current.favoriteFolderId
+        )
+        let rep = PasteboardRepresentation(type: .string, data: Data(text.utf8))
+        store.saveBlobs(for: item.id, representations: [rep], thumbnail: nil)
+        store.saveIndex(items)
+    }
+
     func createFavorite(text: String, name: String, folderId: UUID?) {
         let id = UUID()
         let item = ClipboardItem(

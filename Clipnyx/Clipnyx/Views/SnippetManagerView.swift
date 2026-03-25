@@ -393,6 +393,14 @@ private struct ItemDetailEditor: View {
                                 RoundedRectangle(cornerRadius: 6)
                                     .stroke(Color(nsColor: .separatorColor))
                             )
+
+                        if canConvertToPlainText(item) {
+                            Button {
+                                clipboardManager.convertToPlainText(item)
+                            } label: {
+                                Label("Convert to Plain Text", systemImage: "doc.plaintext")
+                            }
+                        }
                     }
 
                     Divider()
@@ -423,6 +431,15 @@ private struct ItemDetailEditor: View {
             }
         }
         .onAppear { loadItem() }
+    }
+
+    private func canConvertToPlainText(_ item: ClipboardItem) -> Bool {
+        switch item.category {
+        case .richText, .html, .url, .sourceCode, .csv:
+            return true
+        default:
+            return false
+        }
     }
 
     private func loadItem() {

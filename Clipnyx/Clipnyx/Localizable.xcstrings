@@ -1024,6 +1024,16 @@
           }
         }
       }
+    },
+    "Convert to Plain Text": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "プレーンテキストに変換"
+          }
+        }
+      }
     }
   },
   "version": "1.1"
