@@ -70,7 +70,7 @@ struct HistoryTab: View {
                 LabeledContent("Current Items") {
                     let savedCount = clipboardManager.items.filter(\.isSaved).count
                     if savedCount > 0 {
-                        Text("\(clipboardManager.items.count) items (\(savedCount) saved)")
+                        Text("\(clipboardManager.items.count) items (\(savedCount) favorites)")
                     } else {
                         Text("\(clipboardManager.items.count) items")
                     }
@@ -92,7 +92,7 @@ struct HistoryTab: View {
                     clipboardManager.removeAllItems()
                 }
             } footer: {
-                Text("Saved items will not be deleted.")
+                Text("Favorite items will not be deleted.")
             }
         }
     }

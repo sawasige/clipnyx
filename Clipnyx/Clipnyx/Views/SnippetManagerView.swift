@@ -119,7 +119,7 @@ struct FavoriteManagerView: View {
                 .tag(FolderFilter.allHistory)
 
             Section("Favorites") {
-                Label("All Saved", systemImage: "bookmark.fill")
+                Label("All Favorites", systemImage: "bookmark.fill")
                     .tag(FolderFilter.allSaved)
                 Label("Uncategorized", systemImage: "tray")
                     .tag(FolderFilter.uncategorized)
@@ -202,7 +202,7 @@ struct FavoriteManagerView: View {
                     Label(isShowingFavorites ? "No Favorites" : "No History",
                           systemImage: isShowingFavorites ? "bookmark.slash" : "clipboard")
                 } description: {
-                    Text(isShowingFavorites ? "Save items to keep them here" : "Copied content will appear here")
+                    Text(isShowingFavorites ? "Add to favorites to keep them here" : "Copied content will appear here")
                 }
             } else {
                 List(filteredItems, selection: $selectedItemId) { item in
@@ -410,7 +410,7 @@ private struct ItemDetailEditor: View {
                         Button {
                             clipboardManager.toggleSave(item)
                         } label: {
-                            Label(item.isSaved ? "Unsave" : "Save",
+                            Label(item.isSaved ? "Unfavorite" : "Favorite",
                                   systemImage: item.isSaved ? "bookmark.slash" : "bookmark")
                         }
 

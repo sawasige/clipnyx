@@ -111,16 +111,6 @@
         }
       }
     },
-    "%lld items (%lld saved)": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$lld 件（%2$lld 件保存済み）"
-          }
-        }
-      }
-    },
     "%lld MB": {
       "localizations": {
         "ja": {
@@ -188,16 +178,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "すべての履歴"
-          }
-        }
-      }
-    },
-    "All Saved": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "すべての保存済み"
           }
         }
       }
@@ -664,16 +644,6 @@
         }
       }
     },
-    "No Saved Items": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "保存済みなし"
-          }
-        }
-      }
-    },
     "No Selection": {
       "localizations": {
         "ja": {
@@ -854,36 +824,6 @@
         }
       }
     },
-    "Save items to keep them here": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "アイテムを保存するとここに表示されます"
-          }
-        }
-      }
-    },
-    "Saved items will not be deleted.": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "保存済みアイテムは削除されません。"
-          }
-        }
-      }
-    },
-    "Saved Only": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "保存済みのみ"
-          }
-        }
-      }
-    },
     "Search...": {
       "localizations": {
         "ja": {
@@ -975,16 +915,6 @@
         }
       }
     },
-    "Unsave": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "保存解除"
-          }
-        }
-      }
-    },
     "URL": {
       "localizations": {
         "ja": {
@@ -1031,6 +961,66 @@
           "stringUnit": {
             "state": "translated",
             "value": "プレーンテキストに変換"
+          }
+        }
+      }
+    },
+    "Unfavorite": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "お気に入り解除"
+          }
+        }
+      }
+    },
+    "Favorites Only": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "お気に入りのみ"
+          }
+        }
+      }
+    },
+    "All Favorites": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すべてのお気に入り"
+          }
+        }
+      }
+    },
+    "Add to favorites to keep them here": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "お気に入りに追加するとここに表示されます"
+          }
+        }
+      }
+    },
+    "Favorite items will not be deleted.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "お気に入りは削除されません。"
+          }
+        }
+      }
+    },
+    "%lld items (%lld favorites)": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld 件（%2$lld 件お気に入り）"
           }
         }
       }

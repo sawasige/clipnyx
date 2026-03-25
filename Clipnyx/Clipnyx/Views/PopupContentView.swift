@@ -32,7 +32,7 @@ struct PopupContentView: View {
     private var savedFilterLabel: String? {
         switch savedFilterIndex {
         case 0: return nil
-        case 1: return String(localized: "All Saved")
+        case 1: return String(localized: "All Favorites")
         case 2: return String(localized: "Uncategorized")
         default:
             if let id = selectedFavoriteFolderId,
@@ -97,7 +97,7 @@ struct PopupContentView: View {
                         .foregroundStyle(showSavedOnly ? .orange : .secondary)
                 }
                 .buttonStyle(.plain)
-                .help(showSavedOnly ? Text("Show All") : Text("Saved Only"))
+                .help(showSavedOnly ? Text("Show All") : Text("Favorites Only"))
 
                 // Category filter (content categories only)
                 Menu {
@@ -141,7 +141,7 @@ struct PopupContentView: View {
             if showSavedOnly {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 6) {
-                        folderChip(String(localized: "All Saved"), isSelected: savedFilterIndex == 1) {
+                        folderChip(String(localized: "All Favorites"), isSelected: savedFilterIndex == 1) {
                             savedFilterIndex = 1
                             selectedIndex = 0
                         }
@@ -216,10 +216,10 @@ struct PopupContentView: View {
     private var historyContent: some View {
         if filteredItems.isEmpty {
             ContentUnavailableView {
-                Label(showSavedOnly ? "No Saved Items" : "No History", systemImage: showSavedOnly ? "bookmark.slash" : "clipboard")
+                Label(showSavedOnly ? "No Favorites" : "No History", systemImage: showSavedOnly ? "bookmark.slash" : "clipboard")
             } description: {
                 if showSavedOnly {
-                    Text("Save items to keep them here")
+                    Text("Add to favorites to keep them here")
                 } else if searchText.isEmpty {
                     Text("Copied content will appear here")
                 } else {
@@ -477,7 +477,7 @@ private struct UnifiedItemRow: View {
             Button {
                 onBookmark()
             } label: {
-                Label(item.isSaved ? "Unsave" : "Save", systemImage: item.isSaved ? "bookmark.slash" : "bookmark")
+                Label(item.isSaved ? "Unfavorite" : "Favorite", systemImage: item.isSaved ? "bookmark.slash" : "bookmark")
             }
             Button {
                 onShowDetail()

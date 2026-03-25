@@ -116,7 +116,7 @@ struct FavoriteEditorView: View {
             // Buttons
             HStack {
                 if item?.isSaved == true {
-                    Button("Unsave", role: .destructive) {
+                    Button("Unfavorite", role: .destructive) {
                         if let item {
                             clipboardManager.toggleSave(item)
                         }
