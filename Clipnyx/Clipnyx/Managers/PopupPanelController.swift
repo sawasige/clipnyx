@@ -187,7 +187,7 @@ final class PopupPanelController {
         }
         localClickMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
             guard let self, let panel = self.panel else { return event }
-            if event.window !== panel {
+            if event.window !== panel && event.window?.parent !== panel {
                 self.close(restoreFocus: false)
             }
             return event

@@ -124,7 +124,7 @@ struct PopupContentView: View {
 
                 // New favorite
                 Button {
-                    NotificationCenter.default.post(name: .openFavoriteEditor, object: nil)
+                    NotificationCenter.default.post(name: .openFavoriteManager, object: nil)
                 } label: {
                     Image(systemName: "plus")
                         .foregroundStyle(.secondary)
@@ -206,7 +206,7 @@ struct PopupContentView: View {
             selectedIndex = 0
         }
         .popover(item: $detailItem) { item in
-            ItemDetailView(item: item, clipboardManager: clipboardManager)
+            ItemDetailView(item: item, clipboardManager: clipboardManager, onDismiss: { detailItem = nil })
         }
     }
 

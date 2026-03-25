@@ -3,6 +3,7 @@ import SwiftUI
 struct ItemDetailView: View {
     let item: ClipboardItem
     var clipboardManager: ClipboardManager? = nil
+    var onDismiss: (() -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -88,14 +89,11 @@ struct ItemDetailView: View {
                 }
             }
 
-            if item.isSaved {
-                Divider()
-                Button {
-                    NotificationCenter.default.post(name: .openFavoriteEditor, object: item)
-                } label: {
-                    Label("Edit Favorite", systemImage: "pencil")
-                }
-                .buttonStyle(.link)
+            Divider()
+            Button {
+                NotificationCenter.default.post(name: .openFavoriteManager, object: item)
+            } label: {
+                Label("Open in Library", systemImage: "books.vertical")
             }
         }
         .padding()
