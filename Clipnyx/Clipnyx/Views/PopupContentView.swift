@@ -10,20 +10,49 @@ struct PopupContentView: View {
     @State private var keyboardNavigation = true
     @State private var lastScreenPosition: CGPoint?
     @State private var selectedCategory: ClipboardContentCategory?
-    @State private var selectedSnippetCategory: UUID?
-    @State private var showSavedOnly = false
+    @State private var savedFilterIndex = 0  // 0=off, 1=all saved, 2=uncategorized, 3+=snippet categories
     @State private var listContentHeight: CGFloat = 0
     @State private var detailItem: ClipboardItem?
     @FocusState private var isSearchFocused: Bool
 
+    private var showSavedOnly: Bool { savedFilterIndex > 0 }
+
+    /// Tab cycle: 0=off, 1=all saved, 2=uncategorized, 3,4,...=snippet categories
+    private var savedFilterCycleCount: Int {
+        3 + clipboardManager.snippetCategories.count
+    }
+
+    private var selectedSnippetCategoryId: UUID? {
+        let sortedCategories = clipboardManager.snippetCategories.sorted(by: { $0.order < $1.order })
+        let catIndex = savedFilterIndex - 3
+        guard catIndex >= 0, catIndex < sortedCategories.count else { return nil }
+        return sortedCategories[catIndex].id
+    }
+
+    private var savedFilterLabel: String? {
+        switch savedFilterIndex {
+        case 0: return nil
+        case 1: return String(localized: "All Saved")
+        case 2: return String(localized: "Uncategorized")
+        default:
+            if let id = selectedSnippetCategoryId,
+               let cat = clipboardManager.snippetCategories.first(where: { $0.id == id }) {
+                return cat.name
+            }
+            return nil
+        }
+    }
+
     private var filteredItems: [ClipboardItem] {
         var result = clipboardManager.items
-        if showSavedOnly {
+        if savedFilterIndex == 1 {
             result = result.filter(\.isSaved)
+        } else if savedFilterIndex == 2 {
+            result = result.filter { $0.isSaved && $0.snippetCategoryId == nil }
+        } else if let catId = selectedSnippetCategoryId {
+            result = result.filter { $0.snippetCategoryId == catId }
         }
-        if let snippetCategoryId = selectedSnippetCategory {
-            result = result.filter { $0.snippetCategoryId == snippetCategoryId }
-        } else if let category = selectedCategory {
+        if let category = selectedCategory {
             result = result.filter { $0.category == category }
         }
         if !searchText.isEmpty {
@@ -57,7 +86,11 @@ struct PopupContentView: View {
 
                 // Saved filter
                 Button {
-                    showSavedOnly.toggle()
+                    if savedFilterIndex > 0 {
+                        savedFilterIndex = 0
+                    } else {
+                        savedFilterIndex = 1
+                    }
                     selectedIndex = 0
                 } label: {
                     Image(systemName: showSavedOnly ? "bookmark.fill" : "bookmark")
@@ -66,45 +99,24 @@ struct PopupContentView: View {
                 .buttonStyle(.plain)
                 .help(showSavedOnly ? Text("Show All") : Text("Saved Only"))
 
-                // Category filter
+                // Category filter (content categories only)
                 Menu {
                     Button {
                         selectedCategory = nil
-                        selectedSnippetCategory = nil
                     } label: {
                         Label(String(localized: "All"), systemImage: "tray.full")
                     }
                     Divider()
                     ForEach(activeCategories, id: \.self) { category in
                         Button {
-                            if selectedCategory == category {
-                                selectedCategory = nil
-                            } else {
-                                selectedCategory = category
-                                selectedSnippetCategory = nil
-                            }
+                            selectedCategory = selectedCategory == category ? nil : category
                         } label: {
                             Label(category.label, systemImage: category.icon)
                         }
                     }
-                    if !clipboardManager.snippetCategories.isEmpty {
-                        Divider()
-                        ForEach(clipboardManager.snippetCategories.sorted(by: { $0.order < $1.order })) { cat in
-                            Button {
-                                if selectedSnippetCategory == cat.id {
-                                    selectedSnippetCategory = nil
-                                } else {
-                                    selectedSnippetCategory = cat.id
-                                    selectedCategory = nil
-                                }
-                            } label: {
-                                Label(cat.name, systemImage: "tag")
-                            }
-                        }
-                    }
                 } label: {
-                    Image(systemName: (selectedCategory != nil || selectedSnippetCategory != nil) ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
-                        .foregroundStyle((selectedCategory != nil || selectedSnippetCategory != nil) ? Color.accentColor : Color.secondary)
+                    Image(systemName: selectedCategory != nil ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
+                        .foregroundStyle(selectedCategory != nil ? Color.accentColor : Color.secondary)
                 }
                 .menuStyle(.borderlessButton)
                 .fixedSize()
@@ -125,6 +137,31 @@ struct PopupContentView: View {
 
             Divider()
 
+            // Snippet category chips (visible when saved filter is active)
+            if showSavedOnly {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        snippetChip(String(localized: "All Saved"), isSelected: savedFilterIndex == 1) {
+                            savedFilterIndex = 1
+                            selectedIndex = 0
+                        }
+                        snippetChip(String(localized: "Uncategorized"), isSelected: savedFilterIndex == 2) {
+                            savedFilterIndex = 2
+                            selectedIndex = 0
+                        }
+                        ForEach(Array(clipboardManager.snippetCategories.sorted(by: { $0.order < $1.order }).enumerated()), id: \.element.id) { i, cat in
+                            snippetChip(cat.name, isSelected: savedFilterIndex == 3 + i) {
+                                savedFilterIndex = 3 + i
+                                selectedIndex = 0
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                }
+                Divider()
+            }
+
             historyContent
         }
         .background(Color(nsColor: .windowBackgroundColor))
@@ -144,7 +181,10 @@ struct PopupContentView: View {
                 }
             }
         }
-        .onKeyPress(keys: [.upArrow, .downArrow, .return, .escape, .tab]) { press in
+        .onKeyPress(keys: [.upArrow, .downArrow, .return, .escape]) { press in
+            handleKeyPress(press)
+        }
+        .onKeyPress(keys: [.tab], phases: [.down, .repeat]) { press in
             handleKeyPress(press)
         }
         .onKeyPress(characters: CharacterSet(charactersIn: "np")) { press in
@@ -158,6 +198,11 @@ struct PopupContentView: View {
             isSearchFocused = true
         }
         .onChange(of: searchText) { _, _ in
+            selectedIndex = 0
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .shiftTabPressed)) { _ in
+            let count = savedFilterCycleCount
+            savedFilterIndex = (savedFilterIndex - 1 + count) % count
             selectedIndex = 0
         }
         .popover(item: $detailItem) { item in
@@ -239,6 +284,19 @@ struct PopupContentView: View {
         }
     }
 
+    private func snippetChip(_ label: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(label)
+                .font(.caption)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(isSelected ? Color.accentColor.opacity(0.2) : Color.secondary.opacity(0.1))
+                .foregroundStyle(isSelected ? Color.accentColor : .secondary)
+                .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
+    }
+
     private var activeCategories: [ClipboardContentCategory] {
         let present = Set(clipboardManager.items.map(\.category))
         return ClipboardContentCategory.allCases.filter { present.contains($0) }
@@ -253,7 +311,12 @@ struct PopupContentView: View {
 
     private func handleKeyPress(_ press: KeyPress) -> KeyPress.Result {
         if press.key == .tab {
-            showSavedOnly.toggle()
+            let count = savedFilterCycleCount
+            if press.modifiers.contains(.shift) {
+                savedFilterIndex = (savedFilterIndex - 1 + count) % count
+            } else {
+                savedFilterIndex = (savedFilterIndex + 1) % count
+            }
             selectedIndex = 0
             return .handled
         }

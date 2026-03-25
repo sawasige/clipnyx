@@ -11,6 +11,16 @@ private class KeyablePanel: NSPanel {
     override func cancelOperation(_ sender: Any?) {
         onEscape?()
     }
+
+    override func sendEvent(_ event: NSEvent) {
+        if event.type == .keyDown,
+           event.keyCode == 48 /* Tab */,
+           event.modifierFlags.contains(.shift) {
+            NotificationCenter.default.post(name: .shiftTabPressed, object: nil)
+            return
+        }
+        super.sendEvent(event)
+    }
 }
 
 @MainActor

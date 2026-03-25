@@ -228,4 +228,5 @@ extension Notification.Name {
     static let closePopupPanel = Notification.Name("closePopupPanel")
     static let openSnippetEditor = Notification.Name("openSnippetEditor")
     static let openSnippetManager = Notification.Name("openSnippetManager")
+    static let shiftTabPressed = Notification.Name("shiftTabPressed")
 }
