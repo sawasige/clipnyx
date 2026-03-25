@@ -139,25 +139,35 @@ struct PopupContentView: View {
 
             // Favorite folder chips (visible when saved filter is active)
             if showSavedOnly {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 6) {
-                        folderChip(String(localized: "All Favorites"), isSelected: savedFilterIndex == 1) {
-                            savedFilterIndex = 1
-                            selectedIndex = 0
-                        }
-                        folderChip(String(localized: "Uncategorized"), isSelected: savedFilterIndex == 2) {
-                            savedFilterIndex = 2
-                            selectedIndex = 0
-                        }
-                        ForEach(Array(clipboardManager.favoriteFolders.sorted(by: { $0.order < $1.order }).enumerated()), id: \.element.id) { i, folder in
-                            folderChip(folder.name, isSelected: savedFilterIndex == 3 + i) {
-                                savedFilterIndex = 3 + i
+                ScrollViewReader { proxy in
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 6) {
+                            folderChip(String(localized: "All Favorites"), isSelected: savedFilterIndex == 1) {
+                                savedFilterIndex = 1
                                 selectedIndex = 0
                             }
+                            .id(1)
+                            folderChip(String(localized: "Uncategorized"), isSelected: savedFilterIndex == 2) {
+                                savedFilterIndex = 2
+                                selectedIndex = 0
+                            }
+                            .id(2)
+                            ForEach(Array(clipboardManager.favoriteFolders.sorted(by: { $0.order < $1.order }).enumerated()), id: \.element.id) { i, folder in
+                                folderChip(folder.name, isSelected: savedFilterIndex == 3 + i) {
+                                    savedFilterIndex = 3 + i
+                                    selectedIndex = 0
+                                }
+                                .id(3 + i)
+                            }
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                    }
+                    .onChange(of: savedFilterIndex) { _, newValue in
+                        withAnimation {
+                            proxy.scrollTo(newValue, anchor: .center)
                         }
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
                 }
                 Divider()
             }
