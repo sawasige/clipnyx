@@ -594,16 +594,6 @@
         }
       }
     },
-    "Library": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ライブラリ"
-          }
-        }
-      }
-    },
     "Max Items": {
       "localizations": {
         "ja": {
@@ -700,16 +690,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "なし"
-          }
-        }
-      }
-    },
-    "Open in Library": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ライブラリで開く"
           }
         }
       }
@@ -1021,6 +1001,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "バージョン"
+          }
+        }
+      }
+    },
+    "Collection": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コレクション"
+          }
+        }
+      }
+    },
+    "Open in Collection": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コレクションで開く"
           }
         }
       }

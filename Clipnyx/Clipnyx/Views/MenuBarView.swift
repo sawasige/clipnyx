@@ -20,7 +20,7 @@ struct MenuBarView: View {
             Button {
                 NotificationCenter.default.post(name: .openFavoriteManager, object: nil)
             } label: {
-                Label("Library", systemImage: "books.vertical")
+                Label("Collection", systemImage: "books.vertical")
             }
 
             Divider()

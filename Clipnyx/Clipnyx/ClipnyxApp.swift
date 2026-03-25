@@ -87,7 +87,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             contentViewController: NSHostingController(rootView: managerView)
         )
         window.styleMask = [.titled, .closable, .resizable]
-        window.title = String(localized: "Library")
+        window.title = String(localized: "Collection")
         window.setContentSize(NSSize(width: 800, height: 500))
         window.isReleasedWhenClosed = false
         self.favoriteManagerWindow = window

@@ -93,7 +93,7 @@ struct ItemDetailView: View {
             Button {
                 NotificationCenter.default.post(name: .openFavoriteManager, object: item)
             } label: {
-                Label("Open in Library", systemImage: "books.vertical")
+                Label("Open in Collection", systemImage: "books.vertical")
             }
         }
         .padding()

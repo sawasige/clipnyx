@@ -82,7 +82,7 @@ struct HistoryTab: View {
             }
 
             Section {
-                Button("Library") {
+                Button("Collection") {
                     NotificationCenter.default.post(name: .openFavoriteManager, object: nil)
                 }
             }
