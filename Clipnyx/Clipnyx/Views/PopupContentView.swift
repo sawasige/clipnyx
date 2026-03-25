@@ -122,15 +122,15 @@ struct PopupContentView: View {
                 .fixedSize()
                 .help("Filter")
 
-                // New favorite
+                // Collection
                 Button {
                     NotificationCenter.default.post(name: .openFavoriteManager, object: nil)
                 } label: {
-                    Image(systemName: "plus")
+                    Image(systemName: "books.vertical")
                         .foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)
-                .help("New Favorite")
+                .help("Collection")
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
