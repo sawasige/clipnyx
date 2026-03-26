@@ -59,7 +59,7 @@ final class PopupPanelController {
         // パネル表示前の最前面アプリを記憶
         previousApp = NSWorkspace.shared.frontmostApplication
 
-        let panelWidth: CGFloat = 380
+        let panelWidth: CGFloat = 420
         let panelHeight: CGFloat = 560
 
         let panel = KeyablePanel(

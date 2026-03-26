@@ -412,15 +412,15 @@ private struct UnifiedItemRow: View {
     let onPastePlainText: () -> Void
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 6) {
             // Number badge (1-9)
             if index < 9 {
                 Text("\(index + 1)")
                     .font(.caption.monospaced())
                     .foregroundStyle(.secondary)
-                    .frame(width: 16)
+                    .frame(width: 14)
             } else {
-                Spacer().frame(width: 16)
+                Spacer().frame(width: 14)
             }
 
             // Category icon (with saved overlay)
@@ -451,7 +451,7 @@ private struct UnifiedItemRow: View {
 
             ZStack {
                 if isSelected {
-                    HStack(spacing: 4) {
+                    HStack(spacing: 0) {
                         ActionButton(icon: item.isSaved ? "bookmark.fill" : "bookmark", color: item.isSaved ? .orange : .secondary, action: onBookmark)
                         ActionButton(icon: "info.circle", color: .secondary, action: onShowDetail)
                         ActionButton(icon: "trash", color: .red, action: onDelete)
@@ -462,9 +462,9 @@ private struct UnifiedItemRow: View {
                         .foregroundStyle(.tertiary)
                 }
             }
-            .frame(width: 84, height: 24, alignment: .trailing)
+            .frame(width: 72, height: 24, alignment: .trailing)
         }
-        .padding(.horizontal, 12)
+        .padding(.horizontal, 8)
         .padding(.vertical, 6)
         .background(isSelected ? Color.accentColor.opacity(0.15) : Color.clear)
         .clipShape(RoundedRectangle(cornerRadius: 6))
