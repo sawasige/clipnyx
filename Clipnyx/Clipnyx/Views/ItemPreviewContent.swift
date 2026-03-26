@@ -31,7 +31,7 @@ struct ItemPreviewContent: View {
                         .strokeBorder(Color.primary.opacity(0.2), lineWidth: 0.5)
                 )
             Text(item.previewText)
-                .font(.system(size: 12, design: .monospaced))
+                .font(.body.monospaced())
                 .lineLimit(1)
         }
     }
@@ -40,7 +40,7 @@ struct ItemPreviewContent: View {
 
     private var urlPreview: some View {
         Text(item.previewText)
-            .font(.system(size: 12))
+            .font(.body)
             .foregroundStyle(.cyan)
             .lineLimit(2)
             .truncationMode(.middle)
@@ -60,7 +60,7 @@ struct ItemPreviewContent: View {
                     .clipShape(RoundedRectangle(cornerRadius: 4))
             }
             Text(item.previewText)
-                .font(.system(size: 12))
+                .font(.body)
                 .foregroundStyle(.secondary)
                 .lineLimit(2)
                 .truncationMode(.tail)
@@ -72,7 +72,7 @@ struct ItemPreviewContent: View {
 
     private var sourceCodePreview: some View {
         Text(item.previewText)
-            .font(.system(size: 11, design: .monospaced))
+            .font(.body.monospaced())
             .lineLimit(2)
             .truncationMode(.tail)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -95,7 +95,7 @@ struct ItemPreviewContent: View {
                     .clipShape(RoundedRectangle(cornerRadius: 4))
             }
             Text(item.previewText)
-                .font(.system(size: 12))
+                .font(.body)
                 .lineLimit(2)
                 .truncationMode(.tail)
                 .frame(maxWidth: .infinity, alignment: .leading)
