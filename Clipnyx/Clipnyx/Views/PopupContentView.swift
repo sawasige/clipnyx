@@ -84,53 +84,48 @@ struct PopupContentView: View {
                     .buttonStyle(.plain)
                 }
 
-                // Saved filter
-                Button {
-                    if savedFilterIndex > 0 {
-                        savedFilterIndex = 0
-                    } else {
-                        savedFilterIndex = 1
+                HStack(spacing: 0) {
+                    // Saved filter
+                    ToolbarIconButton(
+                        icon: showSavedOnly ? "bookmark.fill" : "bookmark",
+                        color: showSavedOnly ? .orange : .secondary
+                    ) {
+                        if savedFilterIndex > 0 {
+                            savedFilterIndex = 0
+                        } else {
+                            savedFilterIndex = 1
+                        }
+                        selectedIndex = 0
                     }
-                    selectedIndex = 0
-                } label: {
-                    Image(systemName: showSavedOnly ? "bookmark.fill" : "bookmark")
-                        .foregroundStyle(showSavedOnly ? .orange : .secondary)
-                }
-                .buttonStyle(.plain)
-                .help(showSavedOnly ? Text("Show All") : Text("Favorites Only"))
+                    .help(showSavedOnly ? Text("Show All") : Text("Favorites Only"))
 
-                // Category filter (content categories only)
-                Menu {
-                    Button {
-                        selectedCategory = nil
-                    } label: {
-                        Label(String(localized: "All"), systemImage: "tray.full")
-                    }
-                    Divider()
-                    ForEach(activeCategories, id: \.self) { category in
+                    // Category filter (content categories only)
+                    ToolbarMenuButton(
+                        icon: selectedCategory != nil ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle",
+                        color: selectedCategory != nil ? Color.accentColor : .secondary
+                    ) {
                         Button {
-                            selectedCategory = selectedCategory == category ? nil : category
+                            selectedCategory = nil
                         } label: {
-                            Label(category.label, systemImage: category.icon)
+                            Label(String(localized: "All"), systemImage: "tray.full")
+                        }
+                        Divider()
+                        ForEach(activeCategories, id: \.self) { category in
+                            Button {
+                                selectedCategory = selectedCategory == category ? nil : category
+                            } label: {
+                                Label(category.label, systemImage: category.icon)
+                            }
                         }
                     }
-                } label: {
-                    Image(systemName: selectedCategory != nil ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
-                        .foregroundStyle(selectedCategory != nil ? Color.accentColor : Color.secondary)
-                }
-                .menuStyle(.borderlessButton)
-                .fixedSize()
-                .help("Filter")
+                    .help("Filter")
 
-                // Collection
-                Button {
-                    NotificationCenter.default.post(name: .openFavoriteManager, object: nil)
-                } label: {
-                    Image(systemName: "books.vertical")
-                        .foregroundStyle(.secondary)
+                    // Collection
+                    ToolbarIconButton(icon: "books.vertical", color: .secondary) {
+                        NotificationCenter.default.post(name: .openFavoriteManager, object: nil)
+                    }
+                    .help("Collection")
                 }
-                .buttonStyle(.plain)
-                .help("Collection")
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
@@ -519,6 +514,53 @@ private struct ActionButton: View {
                 .clipShape(RoundedRectangle(cornerRadius: 5))
         }
         .buttonStyle(.plain)
+        .onHover { isHovered = $0 }
+    }
+}
+
+private struct ToolbarIconButton: View {
+    let icon: String
+    let color: Color
+    let action: () -> Void
+    @State private var isHovered = false
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: icon)
+                .foregroundStyle(isHovered ? color : .secondary)
+                .frame(width: 28, height: 28)
+                .background(isHovered ? color.opacity(0.1) : .clear)
+                .clipShape(RoundedRectangle(cornerRadius: 5))
+        }
+        .buttonStyle(.plain)
+        .onHover { isHovered = $0 }
+    }
+}
+
+private struct ToolbarMenuButton<MenuContent: View>: View {
+    let icon: String
+    let color: Color
+    @ViewBuilder let menuContent: () -> MenuContent
+    @State private var isHovered = false
+
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 5)
+                .fill(isHovered ? color.opacity(0.1) : .clear)
+                .frame(width: 28, height: 28)
+
+            Menu {
+                menuContent()
+            } label: {
+                Image(systemName: icon)
+                    .foregroundStyle(isHovered ? color : .secondary)
+            }
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .fixedSize()
+            .tint(isHovered ? color : .secondary)
+        }
+        .frame(width: 28, height: 28)
         .onHover { isHovered = $0 }
     }
 }
