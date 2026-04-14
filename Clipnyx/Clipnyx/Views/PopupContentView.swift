@@ -385,7 +385,10 @@ struct PopupContentView: View {
         }
         let index = num - 1
         if let item = filteredItems[safe: index] {
-            selectAndPaste(item: item)
+            selectedIndex = index
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+                selectAndPaste(item: item)
+            }
             return .handled
         }
         return .ignored
