@@ -1,4 +1,4 @@
-- ペーストパネルの検索欄が空のときのみ数字キー(1-9)でダイレクトペーストが動作するように変更。検索中は数字を入力できるようになりました
+- 数字キーでペースト時に選択アイテムをハイライト表示するように改善
 
 <!-- en -->
-- Number keys (1-9) now trigger direct paste only when the search field is empty. You can now type numbers while searching
+- Number key paste now highlights the selected item before pasting
