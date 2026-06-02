@@ -1,1 +1,3 @@
-- Direct paste: Paste items directly from clipboard history
+- Direct paste: paste items directly from your clipboard history
+- Added favorites, folders, and a Collection view
+- Convert rich text, URLs, and more to plain text
