@@ -19,6 +19,14 @@ struct GeneralTab: View {
                 HotKeyRecorderRow()
             }
 
+            Section {
+                AutoPasteToggle()
+            } header: {
+                Text("Paste")
+            } footer: {
+                Text("When enabled, selecting an item pastes it directly into the active app. Otherwise the item is copied and you paste it yourself with ⌘V.")
+            }
+
             #if ENABLE_SPARKLE
             Section("Software Update") {
                 SoftwareUpdateView(updateManager: updateManager)
@@ -93,6 +101,26 @@ struct HistoryTab: View {
                 }
             } footer: {
                 Text("Favorite items will not be deleted.")
+            }
+        }
+    }
+}
+
+// MARK: - Auto Paste
+
+private struct AutoPasteToggle: View {
+    @AppStorage(PasteAccess.autoPasteEnabledKey) private var autoPasteEnabled = true
+
+    var body: some View {
+        Toggle("Paste Automatically on Selection", isOn: $autoPasteEnabled)
+
+        if autoPasteEnabled {
+            // 権限の有無はプロセス内でキャッシュされ正確なライブ表示ができないため、
+            // 状態表示は行わず、常に設定画面への導線だけを置く（許可・確認・取り消し兼用）。
+            LabeledContent("Accessibility Permission") {
+                Button("System Settings…") {
+                    PasteAccess.openAccessibilitySettings()
+                }
             }
         }
     }

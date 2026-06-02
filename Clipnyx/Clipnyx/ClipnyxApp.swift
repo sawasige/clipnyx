@@ -25,8 +25,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     #endif
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        CGRequestPostEventAccess()
-
+        // PostEvent 権限は起動時には要求しない。ユーザーが初めて直接ペーストした
+        // タイミングでのみ要求する（App Store ガイドライン 2.4.5 対策。
+        // 要求箇所は PopupPanelController.closeAndPaste を参照）
         HotKeyManager.shared.onHotKey = { [weak self] in
             guard let self else { return }
             self.popupController.toggle(clipboardManager: self.clipboardManager)
