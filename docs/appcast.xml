@@ -135,6 +135,19 @@
     <description xml:lang="ja"><![CDATA[- ペーストパネルの表示を高速化（パネル可視まで約460ms→約60ms、入力可能まで約910ms→約120ms）]]></description>
     <enclosure url="https://github.com/sawasige/clipnyx/releases/download/v1.3.4/Clipnyx.dmg" length="4762968" type="application/octet-stream" sparkle:edSignature="xhvsDxlpA18akNUyLf60VkNdpfw8wMZfuXeQzm2YqdM9HE5KaVQB7utRHbsD2s/24P1OkTlq7Cnu5U+G6FYfBg==" />
   </item>
+        <item>
+    <title>1.3.5</title>
+    <pubDate>Tue, 02 Jun 2026 07:07:43 +0000</pubDate>
+    <sparkle:version>23</sparkle:version>
+    <sparkle:shortVersionString>1.3.5</sparkle:shortVersionString>
+    <description><![CDATA[- Accessibility permission is now requested the first time you paste directly, instead of at launch
+- Automatic paste now works right after you grant permission, with no need to restart
+- Added an on/off setting for automatic paste]]></description>
+    <description xml:lang="ja"><![CDATA[- アクセシビリティ権限を起動時ではなく、初めて直接貼り付けるときに案内するよう改善しました
+- 権限を許可した後は、再起動せずにそのまま自動貼り付けが使えるようになりました
+- 設定に「自動ペースト」のオン/オフを追加しました]]></description>
+    <enclosure url="https://github.com/sawasige/clipnyx/releases/download/v1.3.5/Clipnyx.dmg" length="4769785" type="application/octet-stream" sparkle:edSignature="gDDrsDETEOscJS831xA2gBgZyDVNsraKl2GW0FLIlaSLiwFxXdrQURvRy4vAo5s4Rssd1jmUcqLttz17l3oOCQ==" />
+  </item>
     <!-- Items are prepended by CI on each release -->
   </channel>
 </rss>
