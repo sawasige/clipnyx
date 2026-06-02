@@ -31,6 +31,7 @@ final class PopupPanelController {
     private var clickMonitor: Any?
     private var localClickMonitor: Any?
     private var appActivationObserver: NSObjectProtocol?
+    private var hasShownPastePermissionPrompt = false
     var isVisible: Bool = false
 
     init() {
@@ -131,10 +132,54 @@ final class PopupPanelController {
         close(restoreFocus: false)
 
         guard let targetApp else { return }
+
+        // アイテムは selectAndPaste で既にクリップボードへ復元済み。自動ペーストは
+        // 「⌘V を省く」便宜機能で、無効時・未許可時は手動 ⌘V にフォールバックする。
+
+        // 自動ペーストが無効なら直接ペーストせず、元アプリへ戻して手動 ⌘V を可能にする。
+        guard PasteAccess.isAutoPasteEnabled else {
+            targetApp.activate()
+            return
+        }
+
+        // 権限がなさそうなら、初回だけ自前の説明を提示する（起動時やいきなりの
+        // システムダイアログを避ける。App Store ガイドライン 2.4.5 対策）。
+        // hasPermission() はプロセス内でキャッシュされ付与後も更新されないため、
+        // これは「初回に説明を出すか」の best-effort 判定に留める。実際の投函（下の
+        // performPaste）はライブの TCC 状態で判定されるので、付与直後でも
+        // 再起動なしで動作する。未許可ならポストは無視され、手動 ⌘V で貼れる。
+        if !PasteAccess.hasPermission() && !hasShownPastePermissionPrompt {
+            hasShownPastePermissionPrompt = true
+            presentPastePermissionExplanation(restoreFocusTo: targetApp)
+            return
+        }
+
         Task { @MainActor in
             try? await Task.sleep(for: .milliseconds(50))
             targetApp.activate()
             await performPaste(targetPID: targetApp.processIdentifier, attempt: 0)
+        }
+    }
+
+    /// 直接ペースト権限が未許可のとき、初回だけ表示する説明。システムのダイアログを
+    /// いきなり出さず、目的とフォールバック（手動 ⌘V）を伝えてから要求する。
+    private func presentPastePermissionExplanation(restoreFocusTo targetApp: NSRunningApplication) {
+        NSApp.activate(ignoringOtherApps: true)
+
+        let alert = NSAlert()
+        alert.messageText = String(localized: "Copied — press ⌘V to paste")
+        alert.informativeText = String(localized: "To paste automatically with a single click, Clipnyx needs permission to control your computer (System Settings ▸ Privacy & Security ▸ Accessibility). Without it, your selection is still copied and you can paste it yourself with ⌘V.")
+        alert.addButton(withTitle: String(localized: "Enable One-Click Paste…"))
+        alert.addButton(withTitle: String(localized: "Not Now"))
+
+        if alert.runModal() == .alertFirstButtonReturn {
+            // 権限を要求する。システムダイアログ表示中に他アプリへフォーカスを移すと
+            // ダイアログが閉じて登録が完了しないため、ここでは元アプリへ戻さず
+            // Clipnyx を前面に保つ。
+            PasteAccess.requestPermission()
+        } else {
+            // 「後で」の場合のみ、手動 ⌘V 用に元アプリへ戻す。
+            targetApp.activate()
         }
     }
 
@@ -208,6 +253,46 @@ final class PopupPanelController {
             MainActor.assumeIsolated {
                 self?.close(restoreFocus: false)
             }
+        }
+    }
+}
+
+// MARK: - PasteAccess
+
+/// 直接ペースト（⌘V 注入）に必要な PostEvent 権限と、自動ペースト設定の窓口。
+/// ペースト経路（PopupPanelController）と設定画面（SettingsView）で共有する。
+enum PasteAccess {
+    /// 自動ペーストの有効/無効（デフォルト ON）。未設定時は true を返す。
+    static let autoPasteEnabledKey = "autoPasteEnabled"
+
+    static var isAutoPasteEnabled: Bool {
+        UserDefaults.standard.object(forKey: autoPasteEnabledKey) as? Bool ?? true
+    }
+
+    /// 権限の有無を確認する。ダイアログは出さない。
+    static func hasPermission() -> Bool {
+        CGPreflightPostEventAccess()
+    }
+
+    /// 権限を要求する。未判定ならシステムのダイアログを表示しつつ、アクセシビリティ
+    /// 一覧へアプリを登録する。一度拒否されると `CGRequestPostEventAccess()` は
+    /// 二度とダイアログを出さない（macOS の仕様）ため、その場合はシステム設定の
+    /// アクセシビリティ画面を直接開いて誘導する。
+    /// 直接ペースト権限を要求する。未判定なら `CGRequestPostEventAccess()` が
+    /// システムダイアログを表示し、アプリをアクセシビリティ一覧へ登録する。
+    /// このダイアログ自体に「システム設定を開く」導線があるため、こちらからは
+    /// 設定を開かない（二重表示の防止）。一度応答済み（拒否含む）でダイアログが
+    /// 出ないケースは、設定画面の常設「システム設定…」ボタンで誘導する。
+    @discardableResult
+    static func requestPermission() -> Bool {
+        CGRequestPostEventAccess()
+    }
+
+    /// システム設定の「プライバシーとセキュリティ ▸ アクセシビリティ」画面を開く。
+    /// 許可済みのユーザーが権限を確認・取り消したい場合にも使う。
+    static func openAccessibilitySettings() {
+        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
+            NSWorkspace.shared.open(url)
         }
     }
 }
