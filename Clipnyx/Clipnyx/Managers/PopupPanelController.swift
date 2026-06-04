@@ -142,17 +142,28 @@ final class PopupPanelController {
             return
         }
 
-        // 権限がなさそうなら、初回だけ自前の説明を提示する（起動時やいきなりの
-        // システムダイアログを避ける。App Store ガイドライン 2.4.5 対策）。
-        // hasPermission() はプロセス内でキャッシュされ付与後も更新されないため、
-        // これは「初回に説明を出すか」の best-effort 判定に留める。実際の投函（下の
-        // performPaste）はライブの TCC 状態で判定されるので、付与直後でも
-        // 再起動なしで動作する。未許可ならポストは無視され、手動 ⌘V で貼れる。
+        #if ENABLE_SPARKLE
+        // Full 版: 権限がなさそうなら、初回だけ自前の説明を提示してから要求する
+        // （起動時やいきなりのシステムダイアログを避ける）。hasPermission() は
+        // プロセス内でキャッシュされ付与後も更新されないため、これは「初回に説明を
+        // 出すか」の best-effort 判定に留める。実際の投函（下の performPaste）は
+        // ライブの TCC 状態で判定されるので、付与直後でも再起動なしで動作する。
         if !PasteAccess.hasPermission() && !hasShownPastePermissionPrompt {
             hasShownPastePermissionPrompt = true
             presentPastePermissionExplanation(restoreFocusTo: targetApp)
             return
         }
+        #else
+        // App Store 版: 権限を一切「要求」しない（システムダイアログを出さない・
+        // アクセシビリティへの言及も一切しない）。ユーザーが自分でアクセシビリティへ
+        // Clipnyx を追加済みのとき（preflight が true）だけ自動ペーストする。未許可
+        // なら何もせず元アプリへ戻し、手動 ⌘V で貼れるようにする。preflight は
+        // プロセス内キャッシュのため、付与後は Clipnyx の再起動で有効になる。
+        guard PasteAccess.hasPermission() else {
+            targetApp.activate()
+            return
+        }
+        #endif
 
         Task { @MainActor in
             try? await Task.sleep(for: .milliseconds(50))
@@ -161,8 +172,10 @@ final class PopupPanelController {
         }
     }
 
+    #if ENABLE_SPARKLE
     /// 直接ペースト権限が未許可のとき、初回だけ表示する説明。システムのダイアログを
     /// いきなり出さず、目的とフォールバック（手動 ⌘V）を伝えてから要求する。
+    /// App Store 版では権限を要求しないため、この説明自体を持たない。
     private func presentPastePermissionExplanation(restoreFocusTo targetApp: NSRunningApplication) {
         NSApp.activate(ignoringOtherApps: true)
 
@@ -182,6 +195,7 @@ final class PopupPanelController {
             targetApp.activate()
         }
     }
+    #endif
 
     private func performPaste(targetPID: pid_t, attempt: Int) async {
         let maxAttempts = 10
@@ -274,15 +288,14 @@ enum PasteAccess {
         CGPreflightPostEventAccess()
     }
 
-    /// 権限を要求する。未判定ならシステムのダイアログを表示しつつ、アクセシビリティ
-    /// 一覧へアプリを登録する。一度拒否されると `CGRequestPostEventAccess()` は
-    /// 二度とダイアログを出さない（macOS の仕様）ため、その場合はシステム設定の
-    /// アクセシビリティ画面を直接開いて誘導する。
+    #if ENABLE_SPARKLE
     /// 直接ペースト権限を要求する。未判定なら `CGRequestPostEventAccess()` が
     /// システムダイアログを表示し、アプリをアクセシビリティ一覧へ登録する。
     /// このダイアログ自体に「システム設定を開く」導線があるため、こちらからは
     /// 設定を開かない（二重表示の防止）。一度応答済み（拒否含む）でダイアログが
     /// 出ないケースは、設定画面の常設「システム設定…」ボタンで誘導する。
+    /// App Store 版ではこの API（および CGRequestPostEventAccess シンボル）を
+    /// バイナリに含めない（ガイドライン 2.4.5 対策）。
     @discardableResult
     static func requestPermission() -> Bool {
         CGRequestPostEventAccess()
@@ -295,4 +308,5 @@ enum PasteAccess {
             NSWorkspace.shared.open(url)
         }
     }
+    #endif
 }
