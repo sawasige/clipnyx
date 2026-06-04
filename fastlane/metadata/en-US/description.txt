@@ -4,10 +4,11 @@ It automatically records copied text, images, URLs, source code, colors, and mor
 
 KEY FEATURES
 - Instantly open the history panel with a hotkey (⌘⇧V)
-- Select and paste directly with number keys (1–9)
+- Quickly pick items with number keys (1–9)
 - Auto-categorizes 11 content types: text, images, PDF, URLs, HTML, CSV, source code, and more
 - Category filters and text search to quickly find what you need
-- Pastes directly at the cursor position in the source app
+- Organize items with favorites, folders, and a Collection view
+- Convert rich text and URLs to plain text
 - Thumbnail previews for images and PDFs
 - Store up to 500 history items (choose from 20/50/100/200/500)
 - Customize which categories to record
