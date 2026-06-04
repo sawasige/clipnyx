@@ -1,3 +1,4 @@
-- Direct paste: paste items directly from your clipboard history
 - Added favorites, folders, and a Collection view
 - Convert rich text, URLs, and more to plain text
+- Choose which categories to record with per-category filters
+- Quickly open the history panel with a global hot key
