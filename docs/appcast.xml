@@ -148,6 +148,15 @@
 - 設定に「自動ペースト」のオン/オフを追加しました]]></description>
     <enclosure url="https://github.com/sawasige/clipnyx/releases/download/v1.3.5/Clipnyx.dmg" length="4769785" type="application/octet-stream" sparkle:edSignature="gDDrsDETEOscJS831xA2gBgZyDVNsraKl2GW0FLIlaSLiwFxXdrQURvRy4vAo5s4Rssd1jmUcqLttz17l3oOCQ==" />
   </item>
+        <item>
+    <title>1.3.6</title>
+    <pubDate>Thu, 04 Jun 2026 06:07:52 +0000</pubDate>
+    <sparkle:version>24</sparkle:version>
+    <sparkle:shortVersionString>1.3.6</sparkle:shortVersionString>
+    <description><![CDATA[- Stability improvements and minor refinements]]></description>
+    <description xml:lang="ja"><![CDATA[- 安定性の向上と細かな改善を行いました]]></description>
+    <enclosure url="https://github.com/sawasige/clipnyx/releases/download/v1.3.6/Clipnyx.dmg" length="4772345" type="application/octet-stream" sparkle:edSignature="M4v/h6xW+M9U4kUEmJQpCkbd9BTXcKG8Gvq5+439vws/eNSfuqe3LTh+P1y6A6+zxw3CBPLHey8utJrmuza6Bw==" />
+  </item>
     <!-- Items are prepended by CI on each release -->
   </channel>
 </rss>
