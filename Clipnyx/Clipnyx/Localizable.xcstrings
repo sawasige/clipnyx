@@ -152,6 +152,16 @@
         }
       }
     },
+    "Accessibility Permission" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アクセシビリティ権限"
+          }
+        }
+      }
+    },
     "Add" : {
       "localizations" : {
         "ja" : {
@@ -324,6 +334,16 @@
         }
       }
     },
+    "Copied — press ⌘V to paste" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コピーしました — ⌘V で貼り付け"
+          }
+        }
+      }
+    },
     "Copied At" : {
       "localizations" : {
         "ja" : {
@@ -470,6 +490,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "エディション"
+          }
+        }
+      }
+    },
+    "Enable One-Click Paste…" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ワンクリック貼り付けを有効にする…"
           }
         }
       }
@@ -734,6 +764,16 @@
         }
       }
     },
+    "Not Now" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "後で"
+          }
+        }
+      }
+    },
     "Open in Collection" : {
       "localizations" : {
         "ja" : {
@@ -770,6 +810,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "プレーンテキストで貼り付け"
+          }
+        }
+      }
+    },
+    "Paste Automatically on Selection" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選択した項目を自動で貼り付ける"
           }
         }
       }
@@ -985,6 +1035,26 @@
         }
       }
     },
+    "System Settings…" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "システム設定…"
+          }
+        }
+      }
+    },
+    "To paste automatically with a single click, Clipnyx needs permission to control your computer (System Settings ▸ Privacy & Security ▸ Accessibility). Without it, your selection is still copied and you can paste it yourself with ⌘V." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ワンクリックで自動貼り付けするには、Clipnyx に「コンピュータの制御」の許可が必要です（システム設定 ▸ プライバシーとセキュリティ ▸ アクセシビリティ）。許可がなくても選択した項目はコピーされるので、⌘V で手動で貼り付けられます。"
+          }
+        }
+      }
+    },
     "Uncategorized" : {
       "localizations" : {
         "ja" : {
@@ -1025,82 +1095,12 @@
         }
       }
     },
-    "Copied — press ⌘V to paste" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "コピーしました — ⌘V で貼り付け"
-          }
-        }
-      }
-    },
-    "To paste automatically with a single click, Clipnyx needs permission to control your computer (System Settings ▸ Privacy & Security ▸ Accessibility). Without it, your selection is still copied and you can paste it yourself with ⌘V." : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ワンクリックで自動貼り付けするには、Clipnyx に「コンピュータの制御」の許可が必要です（システム設定 ▸ プライバシーとセキュリティ ▸ アクセシビリティ）。許可がなくても選択した項目はコピーされるので、⌘V で手動で貼り付けられます。"
-          }
-        }
-      }
-    },
-    "Enable One-Click Paste…" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ワンクリック貼り付けを有効にする…"
-          }
-        }
-      }
-    },
-    "Not Now" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "後で"
-          }
-        }
-      }
-    },
     "When enabled, selecting an item pastes it directly into the active app. Otherwise the item is copied and you paste it yourself with ⌘V." : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "有効にすると、項目を選択すると同時にアクティブなアプリへ直接貼り付けます。無効の場合は項目をコピーするので、⌘V で手動で貼り付けてください。"
-          }
-        }
-      }
-    },
-    "Paste Automatically on Selection" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "選択した項目を自動で貼り付ける"
-          }
-        }
-      }
-    },
-    "Accessibility Permission" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アクセシビリティ権限"
-          }
-        }
-      }
-    },
-    "System Settings…" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "システム設定…"
           }
         }
       }
