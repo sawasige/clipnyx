@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clipnyx - Support</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; line-height: 1.8; color: #333; }
+    @media (prefers-color-scheme: dark) {
+      body { background: #000; color: #f5f5f7; }
+      a { color: #2997ff; }
+    }
+    h1 { font-size: 1.5em; border-bottom: 1px solid #ddd; padding-bottom: 8px; }
+    h2 { font-size: 1.2em; margin-top: 2em; }
+    h3 { font-size: 1.05em; margin-top: 1.5em; }
+    p { margin: 1em 0; }
+    .updated { color: #888; font-size: 0.9em; }
+    .contact { padding: 16px 20px; border: 1px solid #ddd; border-radius: 8px; }
+    @media (prefers-color-scheme: dark) { .contact { border-color: #444; } }
+    .lang-toggle { background: none; border: 1px solid #888; border-radius: 4px; padding: 4px 12px; color: inherit; cursor: pointer; font-family: inherit; font-size: 0.85em; float: right; }
+    .lang-toggle:hover { border-color: #0071e3; color: #0071e3; }
+  </style>
+</head>
+<body>
+  <button class="lang-toggle" onclick="toggleLang()" aria-label="Switch language">EN / 日本語</button>
+  <h1 data-ja="Clipnyx サポート" data-en="Clipnyx Support"></h1>
+  <p class="updated" data-ja="最終更新日: 2026年6月4日" data-en="Last updated: June 4, 2026"></p>
+
+  <p data-ja="Clipnyx は macOS のメニューバーに常駐するクリップボード履歴マネージャーです。ご質問・不具合のご報告・ご要望は、下記の窓口までお気軽にお寄せください。" data-en="Clipnyx is a clipboard history manager that lives in your macOS menu bar. For questions, bug reports, or feature requests, please contact us through any of the channels below."></p>
+
+  <h2 data-ja="お問い合わせ" data-en="Contact Us"></h2>
+  <div class="contact">
+    <p style="margin-top:0">
+      <strong data-ja="メール: " data-en="Email: "></strong>
+      <a href="mailto:sawasige@gmail.com?subject=Clipnyx%20Support">sawasige@gmail.com</a>
+    </p>
+    <p style="margin-bottom:0">
+      <strong data-ja="不具合の報告・ご要望: " data-en="Report a bug / request a feature: "></strong>
+      <a href="https://github.com/sawasige/clipnyx/issues">GitHub Issues</a>
+    </p>
+  </div>
+  <p data-ja="メールでのお問い合わせには、通常2〜3営業日以内に返信いたします。" data-en="We typically respond to email inquiries within 2–3 business days."></p>
+
+  <h2 data-ja="動作環境" data-en="System Requirements"></h2>
+  <p data-ja="macOS 15.0 以降。Apple シリコンおよび Intel の Mac に対応しています。" data-en="macOS 15.0 or later. Compatible with both Apple silicon and Intel Macs."></p>
+
+  <h2 data-ja="よくある質問" data-en="Frequently Asked Questions"></h2>
+
+  <h3 data-ja="クリップボード履歴を開くには？" data-en="How do I open my clipboard history?"></h3>
+  <p data-ja="メニューバーの Clipnyx アイコンをクリックするか、設定したグローバルホットキーを押すと、履歴パネルが表示されます。一覧から項目を選ぶだけで貼り付けに使えます。" data-en="Click the Clipnyx icon in the menu bar, or press your configured global hot key, to open the history panel. Select any item to use it for pasting."></p>
+
+  <h3 data-ja="ホットキーを変更するには？" data-en="How do I change the hot key?"></h3>
+  <p data-ja="設定画面の「ホットキー」項目から、お好みのキーの組み合わせに変更できます。" data-en="Open Settings and use the “Hot Key” section to assign your preferred key combination."></p>
+
+  <h3 data-ja="履歴の保存件数や容量を変えられますか？" data-en="Can I change how many items are kept?"></h3>
+  <p data-ja="設定画面の「履歴」項目で、保存する最大件数と最大容量を選択できます。お気に入りに登録した項目は件数制限の対象外です。" data-en="Yes. In Settings under “History,” you can choose the maximum number of items and the maximum storage size. Items saved as favorites are excluded from these limits."></p>
+
+  <h3 data-ja="履歴を削除するには？" data-en="How do I delete my history?"></h3>
+  <p data-ja="設定画面の「履歴を削除」から、まとめて削除できます。お気に入りに登録した項目は削除されません。" data-en="Use “Delete History” in Settings to clear all items at once. Items saved as favorites are not deleted."></p>
+
+  <h3 data-ja="データはどこに保存されますか？" data-en="Where is my data stored?"></h3>
+  <p data-ja="クリップボード履歴はすべてお使いの Mac 上にローカル保存されます。外部サーバーへ送信されることはありません。詳しくは" data-en="All clipboard history is stored locally on your Mac and is never sent to any external server. For details, see our "></p>
+  <p style="margin-top:-0.5em"><a href="privacy-policy.html" data-ja="プライバシーポリシー" data-en="Privacy Policy"></a><span data-ja="をご覧ください。" data-en="."></span></p>
+
+  <h2 data-ja="リンク" data-en="Links"></h2>
+  <p>
+    <a href="index.html" data-ja="ホーム" data-en="Home"></a> ·
+    <a href="changelog.html" data-ja="更新履歴" data-en="Changelog"></a> ·
+    <a href="privacy-policy.html" data-ja="プライバシーポリシー" data-en="Privacy Policy"></a> ·
+    <a href="https://github.com/sawasige/clipnyx">GitHub</a>
+  </p>
+
+  <script>
+    (function () {
+      var lang = 'ja';
+      var elements = document.querySelectorAll('[data-ja]');
+
+      function applyLang(l) {
+        lang = l;
+        elements.forEach(function (el) {
+          el.textContent = el.getAttribute('data-' + lang);
+        });
+        document.documentElement.lang = lang;
+      }
+
+      window.toggleLang = function () {
+        applyLang(lang === 'ja' ? 'en' : 'ja');
+      };
+
+      applyLang((navigator.language || '').startsWith('ja') ? 'ja' : 'en');
+    })();
+  </script>
+</body>
+</html>

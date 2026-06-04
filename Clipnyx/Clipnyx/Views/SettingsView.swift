@@ -19,6 +19,9 @@ struct GeneralTab: View {
                 HotKeyRecorderRow()
             }
 
+            #if ENABLE_SPARKLE
+            // App Store 版では自動ペースト設定を UI に出さない（ガイドライン 2.4.5 対策）。
+            // 機能自体は preflight が true のときだけ裏で動作する。
             Section {
                 AutoPasteToggle()
             } header: {
@@ -26,6 +29,7 @@ struct GeneralTab: View {
             } footer: {
                 Text("When enabled, selecting an item pastes it directly into the active app. Otherwise the item is copied and you paste it yourself with ⌘V.")
             }
+            #endif
 
             #if ENABLE_SPARKLE
             Section("Software Update") {
@@ -108,6 +112,7 @@ struct HistoryTab: View {
 
 // MARK: - Auto Paste
 
+#if ENABLE_SPARKLE
 private struct AutoPasteToggle: View {
     @AppStorage(PasteAccess.autoPasteEnabledKey) private var autoPasteEnabled = true
 
@@ -125,6 +130,7 @@ private struct AutoPasteToggle: View {
         }
     }
 }
+#endif
 
 // MARK: - Launch at Login
 
