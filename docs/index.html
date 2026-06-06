@@ -57,34 +57,69 @@
     /* Hero */
     .hero {
       text-align: center;
-      padding: 120px 24px 100px;
+      padding: 64px 24px 80px;
     }
 
-    .hero-icon {
-      margin-bottom: 24px;
+    .hero-banner {
+      position: relative;
+      max-width: 980px;
+      margin: 0 auto 40px;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.25);
+    }
+
+    .hero-banner > img {
       display: block;
+      width: 100%;
+      height: auto;
     }
 
-    .hero-icon img {
-      width: 160px;
-      height: 160px;
-      border-radius: 36px;
+    .hero-overlay {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 56%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(10px, 1.6vw, 20px);
+      padding: 4% 5%;
+      text-align: center;
+      background: linear-gradient(90deg, rgba(2, 6, 28, 0) 0%, rgba(2, 6, 28, 0.35) 60%);
     }
 
-    .hero h1 {
-      font-size: 56px;
+    .hero-overlay-lockup {
+      display: flex;
+      align-items: center;
+      gap: clamp(10px, 1.6vw, 20px);
+    }
+
+    .hero-overlay-icon {
+      width: clamp(48px, 8vw, 96px);
+      height: clamp(48px, 8vw, 96px);
+      border-radius: clamp(10px, 1.6vw, 22px);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+    }
+
+    .hero-overlay-name {
+      font-size: clamp(2.2rem, 6vw, 4.5rem);
       font-weight: 700;
       letter-spacing: -0.025em;
-      margin-bottom: 16px;
+      line-height: 1;
+      color: #ffffff;
+      text-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
     }
 
-    .hero .tagline {
-      font-size: 24px;
+    .hero-overlay-tagline {
+      font-size: clamp(0.85rem, 1.5vw, 1.25rem);
       font-weight: 400;
-      color: var(--color-text-secondary);
-      max-width: 560px;
-      margin: 0 auto 48px;
-      line-height: 1.4;
+      line-height: 1.5;
+      max-width: 22em;
+      color: rgba(255, 255, 255, 0.92);
+      text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
     }
 
     .app-store-badge {
@@ -393,15 +428,12 @@
     /* Responsive */
     @media (max-width: 768px) {
       .hero {
-        padding: 80px 24px 60px;
+        padding: 40px 16px 60px;
       }
 
-      .hero h1 {
-        font-size: 40px;
-      }
-
-      .hero .tagline {
-        font-size: 20px;
+      .hero-overlay {
+        width: 64%;
+        background: linear-gradient(90deg, rgba(2, 6, 28, 0) 0%, rgba(2, 6, 28, 0.45) 55%);
       }
 
       .features-heading {
@@ -418,12 +450,11 @@
     }
 
     @media (max-width: 480px) {
-      .hero h1 {
-        font-size: 32px;
-      }
-
-      .hero .tagline {
-        font-size: 18px;
+      .hero-overlay {
+        width: 100%;
+        justify-content: flex-end;
+        padding-bottom: 8%;
+        background: linear-gradient(180deg, rgba(2, 6, 28, 0) 35%, rgba(2, 6, 28, 0.55) 100%);
       }
 
       .feature-card {
@@ -441,12 +472,19 @@
 
   <!-- Hero -->
   <section class="hero">
-    <picture class="hero-icon">
-      <source srcset="icon-dark.png" media="(prefers-color-scheme: dark)">
-      <img src="icon-light.png" alt="Clipnyx" width="160" height="160">
-    </picture>
-    <h1>Clipnyx</h1>
-    <p class="tagline" data-ja="macOSメニューバーに常駐する、軽量クリップボード履歴マネージャー。" data-en="A lightweight clipboard history manager that lives in your macOS menu bar."></p>
+    <div class="hero-banner">
+      <img src="hero.png" alt="Clipnyx" data-alt-ja="夜空と月をまとう Clipnyx のイメージ" data-alt-en="Clipnyx hero artwork of a moonlit starry night">
+      <div class="hero-overlay">
+        <div class="hero-overlay-lockup">
+          <picture>
+            <source srcset="icon-dark.png" media="(prefers-color-scheme: dark)">
+            <img src="icon-light.png" alt="" class="hero-overlay-icon">
+          </picture>
+          <h1 class="hero-overlay-name">Clipnyx</h1>
+        </div>
+        <p class="hero-overlay-tagline" data-ja="macOSメニューバーに常駐する、軽量クリップボード履歴マネージャー。" data-en="A lightweight clipboard history manager that lives in your macOS menu bar."></p>
+      </div>
+    </div>
     <div class="download-buttons">
       <a class="app-store-badge" href="https://apps.apple.com/jp/app/clipnyx/id6759652985" aria-label="Download on the App Store">
         <picture>
