@@ -6,6 +6,22 @@
   <title>Clipnyx — クリップボード履歴マネージャー for macOS</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Clipnyx はmacOSメニューバーに常駐するクリップボード履歴マネージャーです。コピー履歴を自動保存し、ホットキーで瞬時にアクセス。">
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Clipnyx">
+  <meta property="og:title" content="Clipnyx — クリップボード履歴マネージャー for macOS">
+  <meta property="og:description" content="Clipnyx はmacOSメニューバーに常駐するクリップボード履歴マネージャーです。コピー履歴を自動保存し、ホットキーで瞬時にアクセス。">
+  <meta property="og:url" content="https://sawasige.github.io/clipnyx/">
+  <meta property="og:image" content="https://sawasige.github.io/clipnyx/hero.png">
+  <meta property="og:image:width" content="1536">
+  <meta property="og:image:height" content="1024">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Clipnyx — クリップボード履歴マネージャー for macOS">
+  <meta name="twitter:description" content="Clipnyx はmacOSメニューバーに常駐するクリップボード履歴マネージャーです。コピー履歴を自動保存し、ホットキーで瞬時にアクセス。">
+  <meta name="twitter:image" content="https://sawasige.github.io/clipnyx/hero.png">
   <style>
     :root {
       --color-bg: #ffffff;
@@ -194,32 +210,27 @@
       letter-spacing: -0.01em;
     }
 
-    .install-hint {
-      margin-top: 32px;
-      text-align: center;
-    }
-
-    .install-hint p {
-      font-size: 14px;
-      color: var(--color-text-secondary);
-      margin-bottom: 8px;
-    }
-
-    .install-hint-cmd {
-      display: inline-flex;
-      align-items: center;
-      gap: 0;
+    .brew-cmd {
+      display: flex;
+      align-items: stretch;
+      width: 100%;
+      max-width: 280px;
       background: var(--color-surface);
       border: 1px solid var(--color-border);
       border-radius: 8px;
       overflow: hidden;
     }
 
-    .install-hint-cmd code {
-      padding: 8px 12px;
+    .brew-cmd code {
+      flex: 1;
+      min-width: 0;
+      padding: 8px 10px;
       font-family: "SF Mono", SFMono-Regular, Menlo, monospace;
-      font-size: 13px;
+      font-size: 11.5px;
       color: var(--color-text);
+      white-space: nowrap;
+      overflow-x: auto;
+      text-align: left;
       user-select: all;
       cursor: text;
     }
@@ -339,40 +350,56 @@
       margin-bottom: 48px;
     }
 
-    .editions-table {
-      width: 100%;
-      max-width: 640px;
+    .get-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      max-width: 720px;
       margin: 0 auto;
-      border-collapse: collapse;
     }
 
-    .editions-table th,
-    .editions-table td {
-      padding: 14px 20px;
+    .get-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--color-card-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 20px;
+      padding: 36px 32px;
       text-align: center;
-      font-size: 15px;
-      border-bottom: 1px solid var(--color-border);
     }
 
-    .editions-table th:first-child,
-    .editions-table td:first-child {
-      text-align: left;
-      font-weight: 500;
+    .get-icon {
+      font-size: 36px;
+      margin-bottom: 14px;
+      display: block;
     }
 
-    .editions-table thead th {
-      font-size: 16px;
+    .get-card h3 {
+      font-size: 20px;
       font-weight: 600;
-      padding-bottom: 16px;
+      margin-bottom: 8px;
     }
 
-    .editions-table tbody tr:last-child td {
-      border-bottom: none;
+    .get-card p {
+      font-size: 15px;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
     }
 
-    .editions-note {
-      max-width: 640px;
-      margin: 16px auto 0;
+    .get-card-cta {
+      padding-top: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+    }
+
+    .section-note {
+      max-width: 720px;
+      margin: 32px auto 0;
+      text-align: center;
       font-size: 13px;
       color: var(--color-text-secondary);
       line-height: 1.5;
@@ -440,7 +467,8 @@
         font-size: 32px;
       }
 
-      .features-grid {
+      .features-grid,
+      .get-grid {
         grid-template-columns: 1fr;
       }
 
@@ -500,15 +528,6 @@
         </span>
       </a>
     </div>
-    <div class="install-hint">
-      <p data-ja="Homebrew でもインストールできます:" data-en="Also available via Homebrew:"></p>
-      <span class="install-hint-cmd">
-        <code>brew install sawasige/clipnyx/clipnyx</code>
-        <button class="copy-btn" onclick="copyBrewCmd()" aria-label="Copy">
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-        </button>
-      </span>
-    </div>
   </section>
 
   <!-- Screenshot -->
@@ -552,41 +571,50 @@
           <p data-ja="クリップボードデータはすべてMac上にローカル保存。外部サーバーへの送信やトラッキングは一切ありません。" data-en="All clipboard data stays on your Mac. No data is sent to external servers, no tracking, no data collection."></p>
         </div>
       </div>
+      <p class="section-note" data-ja="※ ダイレクトペースト（ワンクリックで貼り付け）を使うには、システム設定 ▸ アクセシビリティで Clipnyx を許可してください。" data-en="* To use direct paste (one-click paste), allow Clipnyx in System Settings ▸ Accessibility."></p>
     </div>
   </section>
 
-  <!-- Editions -->
+  <!-- Download -->
   <section class="editions">
     <div class="container">
-      <h2 class="editions-heading" data-ja="2つのエディション" data-en="Two Editions"></h2>
-      <p class="editions-sub" data-ja="用途に合わせてお選びください。" data-en="Choose the one that fits your needs."></p>
-      <table class="editions-table">
-        <thead>
-          <tr>
-            <th></th>
-            <th>App Store</th>
-            <th>Full (.dmg)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td data-ja="配布元" data-en="Distribution"></td>
-            <td>Mac App Store</td>
-            <td>Homebrew / .dmg</td>
-          </tr>
-          <tr>
-            <td data-ja="ダイレクトペースト" data-en="Direct Paste"></td>
-            <td>✓</td>
-            <td>✓</td>
-          </tr>
-          <tr>
-            <td data-ja="自動アップデート" data-en="Auto Update"></td>
-            <td>App Store</td>
-            <td data-ja="アプリ内" data-en="In-app"></td>
-          </tr>
-        </tbody>
-      </table>
-      <p class="editions-note" data-ja="※ ダイレクトペーストを使うには、システム設定 ▸ アクセシビリティで Clipnyx を許可してください。" data-en="* To use direct paste, allow Clipnyx in System Settings ▸ Accessibility."></p>
+      <h2 class="editions-heading" data-ja="ダウンロード" data-en="Download"></h2>
+      <p class="editions-sub" data-ja="App Store からでも、直接ダウンロードでも。お好みの方法でどうぞ。" data-en="From the App Store or a direct download — whichever you prefer."></p>
+      <div class="get-grid">
+        <div class="get-card">
+          <span class="get-icon" aria-hidden="true">🛍️</span>
+          <h3 data-ja="App Store" data-en="App Store"></h3>
+          <p data-ja="ワンタップでインストール。アップデートは App Store にお任せ。" data-en="Install in one tap. Updates are handled by the App Store."></p>
+          <div class="get-card-cta">
+            <a class="app-store-badge" href="https://apps.apple.com/jp/app/clipnyx/id6759652985" aria-label="Download on the App Store">
+              <picture>
+                <source srcset="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/white/ja-jp" media="(prefers-color-scheme: dark)">
+                <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/ja-jp" alt="Download on the App Store">
+              </picture>
+            </a>
+          </div>
+        </div>
+        <div class="get-card">
+          <span class="get-icon" aria-hidden="true">⬇️</span>
+          <h3 data-ja="ダウンロード / Homebrew" data-en="Download / Homebrew"></h3>
+          <p data-ja="アプリ自身が自動でアップデート。Homebrew からも導入できます。" data-en="The app keeps itself up to date automatically. Also available via Homebrew."></p>
+          <div class="get-card-cta">
+            <a class="dmg-badge" href="https://github.com/sawasige/clipnyx/releases/latest/download/Clipnyx.dmg">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+              <span class="dmg-badge-text">
+                <span class="dmg-badge-label" data-ja="ダウンロード" data-en="Download"></span>
+                <span class="dmg-badge-title">Clipnyx.dmg</span>
+              </span>
+            </a>
+            <span class="brew-cmd">
+              <code>brew install sawasige/clipnyx/clipnyx</code>
+              <button class="copy-btn" onclick="copyBrewCmd(this)" aria-label="Copy">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+              </button>
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -623,14 +651,16 @@
           el.src = el.getAttribute('data-src-' + lang);
         });
         document.documentElement.lang = lang;
-        // Update App Store badge language
-        var img = document.querySelector('.app-store-badge img');
-        var source = document.querySelector('.app-store-badge source');
-        if (img && source) {
-          var locale = lang === 'ja' ? 'ja-jp' : 'en-us';
-          img.src = 'https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/' + locale;
-          source.srcset = 'https://tools.applemediaservices.com/api/badges/download-on-the-app-store/white/' + locale;
-        }
+        // Update App Store badge language (all instances)
+        var locale = lang === 'ja' ? 'ja-jp' : 'en-us';
+        document.querySelectorAll('.app-store-badge').forEach(function (badge) {
+          var img = badge.querySelector('img');
+          var source = badge.querySelector('source');
+          if (img && source) {
+            img.src = 'https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/' + locale;
+            source.srcset = 'https://tools.applemediaservices.com/api/badges/download-on-the-app-store/white/' + locale;
+          }
+        });
       }
 
       window.toggleLang = function () {
@@ -641,9 +671,9 @@
       applyLang(initialLang);
     })();
 
-    function copyBrewCmd() {
+    function copyBrewCmd(btn) {
       navigator.clipboard.writeText('brew install sawasige/clipnyx/clipnyx');
-      var btn = document.querySelector('.copy-btn');
+      btn = btn || document.querySelector('.copy-btn');
       btn.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/></svg>';
       setTimeout(function () {
         btn.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" fill="currentColor"/></svg>';
