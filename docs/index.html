@@ -335,6 +335,14 @@
       border-bottom: none;
     }
 
+    .editions-note {
+      max-width: 640px;
+      margin: 16px auto 0;
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+
     /* Footer */
     footer {
       border-top: 1px solid var(--color-border);
@@ -529,11 +537,6 @@
             <td>Homebrew / .dmg</td>
           </tr>
           <tr>
-            <td data-ja="サンドボックス" data-en="Sandbox"></td>
-            <td data-ja="あり" data-en="Yes"></td>
-            <td data-ja="あり" data-en="Yes"></td>
-          </tr>
-          <tr>
             <td data-ja="ダイレクトペースト" data-en="Direct Paste"></td>
             <td>✓</td>
             <td>✓</td>
@@ -541,10 +544,11 @@
           <tr>
             <td data-ja="自動アップデート" data-en="Auto Update"></td>
             <td>App Store</td>
-            <td>Sparkle / brew</td>
+            <td data-ja="アプリ内 / brew" data-en="In-app / brew"></td>
           </tr>
         </tbody>
       </table>
+      <p class="editions-note" data-ja="※ ダイレクトペーストを使うには、システム設定 ▸ アクセシビリティで Clipnyx を許可してください。" data-en="* To use direct paste, allow Clipnyx in System Settings ▸ Accessibility."></p>
     </div>
   </section>
 
@@ -559,7 +563,7 @@
           <a href="https://github.com/sawasige/clipnyx" data-ja="GitHub" data-en="GitHub">GitHub</a>
           <button class="lang-toggle" onclick="toggleLang()" aria-label="Switch language">EN / 日本語</button>
         </div>
-        <span class="copyright">&copy; 2026 Clipnyx</span>
+        <span class="copyright">&copy; 2026 Shigeru Sawada</span>
       </div>
     </div>
   </footer>
