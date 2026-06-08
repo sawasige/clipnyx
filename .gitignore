@@ -21,3 +21,6 @@ build/
 fastlane/api_key.json
 fastlane/README.md
 fastlane/report.xml
+
+# Note (記事下書き・審査記録などローカル専用)
+note/
