@@ -272,6 +272,14 @@
       padding: 0 24px 80px;
     }
 
+    .screenshot picture {
+      display: block;
+    }
+
+    .screenshot picture + picture {
+      margin-top: 48px;
+    }
+
     .screenshot img {
       max-width: 720px;
       width: 100%;
@@ -539,7 +547,14 @@
 
   <!-- Screenshot -->
   <section class="screenshot">
-    <img src="screenshot-ja.png" alt="Clipnyx の履歴パネル" data-src-ja="screenshot-ja.png" data-src-en="screenshot-en.png" data-alt-ja="Clipnyx の履歴パネル" data-alt-en="Clipnyx history panel">
+    <picture>
+      <source srcset="screenshot-ja-dark.png" media="(prefers-color-scheme: dark)" data-srcset-ja="screenshot-ja-dark.png" data-srcset-en="screenshot-en-dark.png">
+      <img src="screenshot-ja.png" loading="lazy" width="1440" height="900" alt="Clipnyx の履歴パネル" data-src-ja="screenshot-ja.png" data-src-en="screenshot-en.png" data-alt-ja="Clipnyx の履歴パネル" data-alt-en="Clipnyx history panel">
+    </picture>
+    <picture>
+      <source srcset="screenshot-collection-ja-dark.png" media="(prefers-color-scheme: dark)" data-srcset-ja="screenshot-collection-ja-dark.png" data-srcset-en="screenshot-collection-en-dark.png">
+      <img src="screenshot-collection-ja.png" loading="lazy" width="1440" height="900" alt="Clipnyx のコレクション画面" data-src-ja="screenshot-collection-ja.png" data-src-en="screenshot-collection-en.png" data-alt-ja="Clipnyx のコレクション画面" data-alt-en="Clipnyx collection window">
+    </picture>
   </section>
 
   <!-- Features -->
@@ -656,6 +671,9 @@
         });
         document.querySelectorAll('[data-src-' + lang + ']').forEach(function (el) {
           el.src = el.getAttribute('data-src-' + lang);
+        });
+        document.querySelectorAll('[data-srcset-' + lang + ']').forEach(function (el) {
+          el.srcset = el.getAttribute('data-srcset-' + lang);
         });
         document.documentElement.lang = lang;
         // Update App Store badge language (all instances)

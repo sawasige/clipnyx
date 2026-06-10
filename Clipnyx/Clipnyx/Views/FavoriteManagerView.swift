@@ -73,6 +73,45 @@ struct FavoriteManagerView: View {
     // MARK: - Sidebar
 
     private var sidebar: some View {
+        sidebarList
+            .listStyle(.sidebar)
+            .focusable()
+            .focused($focusedArea, equals: .sidebar)
+            .onDeleteCommand {
+                if case .folder(let id) = selectedFolderFilter {
+                    clipboardManager.deleteFavoriteFolder(id: id)
+                    selectedFolderFilter = .allHistory
+                }
+            }
+            .onKeyPress(.return) {
+                guard renamingFolderId == nil,
+                      case .folder(let id) = selectedFolderFilter,
+                      let folder = clipboardManager.favoriteFolders.first(where: { $0.id == id }) else {
+                    return .ignored
+                }
+                renamingText = folder.name
+                renamingFolderId = id
+                return .handled
+            }
+            .safeAreaInset(edge: .bottom) {
+                HStack {
+                    TextField("New Folder", text: $newFolderName)
+                        .textFieldStyle(.roundedBorder)
+                    Button {
+                        guard !newFolderName.isEmpty else { return }
+                        _ = clipboardManager.addFavoriteFolder(name: newFolderName)
+                        newFolderName = ""
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                    .disabled(newFolderName.isEmpty)
+                }
+                .padding(8)
+            }
+            .navigationSplitViewColumnWidth(min: 160, ideal: 180)
+    }
+
+    private var sidebarList: some View {
         List(selection: $selectedFolderFilter) {
             Label("All History", systemImage: "clock")
                 .tag(FavoriteFilter.allHistory)
@@ -132,41 +171,6 @@ struct FavoriteManagerView: View {
                 }
             }
         }
-        .listStyle(.sidebar)
-        .focusable()
-        .focused($focusedArea, equals: .sidebar)
-        .onDeleteCommand {
-            if case .folder(let id) = selectedFolderFilter {
-                clipboardManager.deleteFavoriteFolder(id: id)
-                selectedFolderFilter = .allHistory
-            }
-        }
-        .onKeyPress(.return) {
-            guard renamingFolderId == nil,
-                  case .folder(let id) = selectedFolderFilter,
-                  let folder = clipboardManager.favoriteFolders.first(where: { $0.id == id }) else {
-                return .ignored
-            }
-            renamingText = folder.name
-            renamingFolderId = id
-            return .handled
-        }
-        .safeAreaInset(edge: .bottom) {
-            HStack {
-                TextField("New Folder", text: $newFolderName)
-                    .textFieldStyle(.roundedBorder)
-                Button {
-                    guard !newFolderName.isEmpty else { return }
-                    _ = clipboardManager.addFavoriteFolder(name: newFolderName)
-                    newFolderName = ""
-                } label: {
-                    Image(systemName: "plus")
-                }
-                .disabled(newFolderName.isEmpty)
-            }
-            .padding(8)
-        }
-        .navigationSplitViewColumnWidth(min: 160, ideal: 180)
     }
 
     // MARK: - Item List

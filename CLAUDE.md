@@ -56,6 +56,13 @@ Clipnyx/Clipnyx/
 - **Debug-Full / Release-Full**: Full 版（サンドボックス + Sparkle）
 - `ENABLE_SPARKLE` コンパイルフラグで Sparkle 関連コードを分岐
 
+## スクリーンショット生成
+- `scripts/generate_screenshots.sh` で LP 用（docs/screenshot-*.png）と App Store 用（fastlane/screenshots/）を自動生成
+- Debug ビルドの `ScreenshotRenderer`（`--render-screenshots` 起動引数、`#if DEBUG`）がデモデータでパネルとコレクション画面を一瞬実画面に表示し、ScreenCaptureKit で撮影（Liquid Glass 込みの本物の見た目）
+- プレビュー用 ClipboardManager は読み取り専用ストアを使うため**実データには一切触れない**
+- 初回は実行元（ターミナル）への「画面収録」権限の許可が必要。生成中は画面中央にウィンドウが数秒ずつ表示される
+- ライト/ダーク × 日英の全バリアントがコンテナ内 tmp に出力される（履歴パネル + コレクションの2画面）
+
 ## CI/CD
 - **リリース**: `gh workflow run "Release Full (Homebrew)" --ref main` を実行するだけで両エディションがデプロイされる
   - Full 版: GitHub Actions でビルド → 署名 → 公証 → DMG → appcast.xml 更新 → Homebrew Cask 更新 → タグ `v*` 作成
