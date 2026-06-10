@@ -19,9 +19,12 @@ enum ScreenshotRenderer {
     static func runIfRequested() -> Bool {
         guard CommandLine.arguments.contains("--render-screenshots") else { return false }
 
-        NSApplication.shared.setActivationPolicy(.accessory)
-        NSApplication.shared.activate(ignoringOtherApps: true)
-        NSRunningApplication.current.activate(options: [.activateIgnoringOtherApps])
+        // ウィンドウをアクティブ表示（色付き信号機）で撮るため、通常アプリとして
+        // 起動を完了させ、イベント処理（pumpRunLoop）でアクティブ化を成立させる
+        let app = NSApplication.shared
+        app.setActivationPolicy(.regular)
+        app.finishLaunching()
+        app.activate(ignoringOtherApps: true)
 
         guard CGPreflightScreenCaptureAccess() else {
             CGRequestScreenCaptureAccess()
@@ -36,6 +39,11 @@ enum ScreenshotRenderer {
 
         let isJapanese = Locale.preferredLanguages.first?.hasPrefix("ja") ?? false
         let lang = isJapanese ? "ja" : "en"
+
+        // 実カーソルのホバーで選択状態が動かないよう、生成中はカーソルを画面隅へ退避
+        let savedMouseLocation = CGEvent(source: nil)?.location ?? .zero
+        CGWarpMouseCursorPosition(CGPoint(x: 2, y: 2))
+        defer { CGWarpMouseCursorPosition(savedMouseLocation) }
 
         for dark in [false, true] {
             let style = dark ? "dark" : "light"
@@ -217,8 +225,21 @@ enum ScreenshotRenderer {
         return NSImage(cgImage: cgImage, size: size)
     }
 
+    /// ランループを回しつつ NSApp のイベントも処理する（アクティブ化・
+    /// キーウィンドウ化のハンドシェイクは run() なしでは進まないため）
     private static func pumpRunLoop(seconds: TimeInterval) {
-        RunLoop.main.run(until: Date().addingTimeInterval(seconds))
+        let end = Date().addingTimeInterval(seconds)
+        while Date() < end {
+            if let event = NSApp.nextEvent(
+                matching: .any,
+                until: Date().addingTimeInterval(0.02),
+                inMode: .default,
+                dequeue: true
+            ) {
+                NSApp.sendEvent(event)
+            }
+            RunLoop.main.run(until: Date().addingTimeInterval(0.01))
+        }
     }
 
     // MARK: - Marketing Composition (2560×1600 = 1280×800 @2x)

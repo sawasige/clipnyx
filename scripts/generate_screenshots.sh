@@ -7,26 +7,55 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-echo "==> Building (Debug)..."
+# 画面収録の TCC 許可をパス変動で失わないよう、固定パスへビルドする
+# （初回にシステム設定 ▸ 画面収録 でこの .app を許可する）
+BUILD_DIR="$PWD/build/screenshots"
+APP="$BUILD_DIR/Clipnyx.app"
+
+echo "==> Building (Debug) to $BUILD_DIR ..."
+# Sparkle 除去フェーズの残骸と再ビルドが衝突するため、前回の成果物を消してから build
+rm -rf "$BUILD_DIR/Clipnyx.app"
 xcodebuild build \
   -project Clipnyx/Clipnyx.xcodeproj \
   -scheme Clipnyx \
   -configuration Debug \
   -destination 'platform=macOS,arch=arm64' \
+  CONFIGURATION_BUILD_DIR="$BUILD_DIR" \
   -quiet
 
-PRODUCTS_DIR=$(xcodebuild \
-  -project Clipnyx/Clipnyx.xcodeproj \
-  -scheme Clipnyx \
-  -configuration Debug \
-  -destination 'platform=macOS,arch=arm64' \
-  -showBuildSettings 2>/dev/null | awk '/ BUILT_PRODUCTS_DIR/{print $3; exit}')
-BIN="$PRODUCTS_DIR/Clipnyx.app/Contents/MacOS/Clipnyx"
+# LaunchServices（open）経由で起動するとユーザー起動扱いになり、ウィンドウが
+# アクティブ（色付き信号機）で撮れる。同じ Bundle ID の本番アプリと干渉しない
+# よう、生成中だけ本番を終了して最後に復帰させる。
+PROD_WAS_RUNNING=0
+if pgrep -fx "/Applications/Clipnyx.app/Contents/MacOS/Clipnyx" >/dev/null; then
+  PROD_WAS_RUNNING=1
+  echo "==> Quitting production Clipnyx during rendering..."
+  osascript -e 'tell application "Clipnyx" to quit' >/dev/null 2>&1 || true
+  sleep 1
+fi
+restore_production() {
+  if [ "$PROD_WAS_RUNNING" = "1" ]; then
+    echo "==> Restoring production Clipnyx..."
+    open /Applications/Clipnyx.app
+  fi
+}
+trap restore_production EXIT
+
+render() { # render <lang>
+  local log
+  log=$(mktemp)
+  open -n -W --stdout "$log" --stderr /dev/null "$APP" --args --render-screenshots -AppleLanguages "($1)"
+  if grep -q "SCREENSHOTS_ERROR" "$log"; then
+    cat "$log" >&2
+    exit 1
+  fi
+  awk '/^SCREENSHOTS_DIR:/{print $2}' "$log"
+}
 
 echo "==> Rendering (ja)..."
-OUT_JA=$("$BIN" --render-screenshots -AppleLanguages '(ja)' | awk '/^SCREENSHOTS_DIR:/{print $2}')
+OUT_JA=$(render ja)
 echo "==> Rendering (en)..."
-OUT_EN=$("$BIN" --render-screenshots -AppleLanguages '(en)' | awk '/^SCREENSHOTS_DIR:/{print $2}')
+OUT_EN=$(render en)
 
 echo "==> Copying outputs..."
 # App Store 用は 2560×1600 のまま
