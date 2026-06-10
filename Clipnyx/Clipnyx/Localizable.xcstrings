@@ -161,17 +161,6 @@
         }
       }
     },
-    "Add" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "追加"
-          }
-        }
-      }
-    },
     "Add Text" : {
       "localizations" : {
         "ja" : {
@@ -243,17 +232,6 @@
         }
       }
     },
-    "Cancel" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "キャンセル"
-          }
-        }
-      }
-    },
     "Category" : {
       "localizations" : {
         "ja" : {
@@ -315,17 +293,6 @@
         }
       }
     },
-    "Content" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "コンテンツ"
-          }
-        }
-      }
-    },
     "Convert to Plain Text" : {
       "localizations" : {
         "ja" : {
@@ -372,17 +339,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "クリップボードにコピー"
-          }
-        }
-      }
-    },
-    "Create" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "作成"
           }
         }
       }
@@ -907,28 +863,6 @@
         }
       }
     },
-    "Register" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "登録"
-          }
-        }
-      }
-    },
-    "Register as Favorite" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "お気に入りに登録"
-          }
-        }
-      }
-    },
     "Rename" : {
       "localizations" : {
         "ja" : {
@@ -955,17 +889,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "リッチテキスト"
-          }
-        }
-      }
-    },
-    "Save" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "保存"
           }
         }
       }
@@ -1137,17 +1060,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "他%lld件"
-          }
-        }
-      }
-    },
-    "↩ Paste" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "↩ 貼り付け"
           }
         }
       }
