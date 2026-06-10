@@ -1,7 +1,9 @@
 import AppKit
+import os
 
 final class ClipboardStore: Sendable {
     private let writeQueue = DispatchQueue(label: "com.clipnyx.store.write", qos: .utility)
+    private static let logger = Logger(subsystem: "com.himatsubu.Clipnyx", category: "ClipboardStore")
 
     private static let baseURL: URL = {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
@@ -95,7 +97,7 @@ final class ClipboardStore: Sendable {
                 let data = try JSONEncoder().encode(entries)
                 try data.write(to: Self.indexURL, options: .atomic)
             } catch {
-                print("Failed to save index: \(error)")
+                Self.logger.error("Failed to save index: \(error)")
             }
         }
     }
@@ -128,7 +130,7 @@ final class ClipboardStore: Sendable {
                 let metaData = try JSONEncoder().encode(meta)
                 try metaData.write(to: blobDir.appendingPathComponent("meta.json"))
             } catch {
-                print("Failed to save blobs for \(itemID): \(error)")
+                Self.logger.error("Failed to save blobs for \(itemID): \(error)")
             }
         }
     }
@@ -165,7 +167,7 @@ final class ClipboardStore: Sendable {
                 )
             }
         } catch {
-            print("Failed to load index: \(error)")
+            Self.logger.error("Failed to load index: \(error)")
             return []
         }
     }
@@ -221,7 +223,7 @@ final class ClipboardStore: Sendable {
                 let data = try JSONEncoder().encode(folders)
                 try data.write(to: Self.favoriteFoldersURL, options: .atomic)
             } catch {
-                print("Failed to save favorite folders: \(error)")
+                Self.logger.error("Failed to save favorite folders: \(error)")
             }
         }
     }
@@ -233,7 +235,7 @@ final class ClipboardStore: Sendable {
                 let data = try Data(contentsOf: Self.favoriteFoldersURL)
                 return try JSONDecoder().decode([FavoriteFolder].self, from: data)
             } catch {
-                print("Failed to load favorite folders: \(error)")
+                Self.logger.error("Failed to load favorite folders: \(error)")
                 return []
             }
         }
@@ -243,7 +245,7 @@ final class ClipboardStore: Sendable {
                 let data = try Data(contentsOf: Self.legacySnippetCategoriesURL)
                 return try JSONDecoder().decode([FavoriteFolder].self, from: data)
             } catch {
-                print("Failed to load legacy snippet categories: \(error)")
+                Self.logger.error("Failed to load legacy snippet categories: \(error)")
                 return []
             }
         }
