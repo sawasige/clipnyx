@@ -3,7 +3,7 @@ import SwiftUI
 struct FavoriteManagerView: View {
     var clipboardManager: ClipboardManager
     var initialItemId: UUID? = nil
-    @State var selectedFolderFilter: FolderFilter = .allHistory
+    @State var selectedFolderFilter: FavoriteFilter = .allHistory
     @State var selectedItemId: UUID?
     @State private var newFolderName = ""
     @State private var renamingFolderId: UUID?
@@ -16,31 +16,12 @@ struct FavoriteManagerView: View {
         case detail
     }
 
-    enum FolderFilter: Hashable {
-        case allHistory
-        case allSaved
-        case uncategorized
-        case folder(UUID)
-    }
-
     private var isShowingFavorites: Bool {
-        switch selectedFolderFilter {
-        case .allHistory: return false
-        default: return true
-        }
+        selectedFolderFilter != .allHistory
     }
 
     private var filteredItems: [ClipboardItem] {
-        switch selectedFolderFilter {
-        case .allHistory:
-            return clipboardManager.items
-        case .allSaved:
-            return clipboardManager.items.filter(\.isSaved)
-        case .uncategorized:
-            return clipboardManager.items.filter { $0.isSaved && $0.favoriteFolderId == nil }
-        case .folder(let id):
-            return clipboardManager.items.filter { $0.favoriteFolderId == id }
-        }
+        selectedFolderFilter.apply(to: clipboardManager.items)
     }
 
     private var selectedItem: ClipboardItem? {
@@ -116,13 +97,13 @@ struct FavoriteManagerView: View {
     private var sidebar: some View {
         List(selection: $selectedFolderFilter) {
             Label("All History", systemImage: "clock")
-                .tag(FolderFilter.allHistory)
+                .tag(FavoriteFilter.allHistory)
 
             Section("Favorites") {
                 Label("All Favorites", systemImage: "bookmark.fill")
-                    .tag(FolderFilter.allSaved)
+                    .tag(FavoriteFilter.allSaved)
                 Label("Uncategorized", systemImage: "tray")
-                    .tag(FolderFilter.uncategorized)
+                    .tag(FavoriteFilter.uncategorized)
             }
 
             Section("Folders") {
@@ -144,7 +125,7 @@ struct FavoriteManagerView: View {
                         }
                     } else {
                         Label(folder.name, systemImage: "folder")
-                            .tag(FolderFilter.folder(folder.id))
+                            .tag(FavoriteFilter.folder(folder.id))
                             .contextMenu {
                                 Button("Rename") {
                                     renamingText = folder.name
