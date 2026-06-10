@@ -40,6 +40,17 @@ final class ClipboardManager {
         startPolling()
     }
 
+    #if DEBUG
+    /// スクリーンショット生成用: ストアの読み書きもポーリングもしない
+    init(previewItems: [ClipboardItem], previewFolders: [FavoriteFolder]) {
+        maxHistoryCount = 50
+        maxTotalSizeMB = 1024
+        excludedCategories = []
+        items = previewItems
+        favoriteFolders = previewFolders
+    }
+    #endif
+
     // MARK: - Polling
 
     // タイマーはメインランループにスケジュールされるため、コールバックは常にメインスレッド。
