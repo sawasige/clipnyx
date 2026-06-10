@@ -539,7 +539,10 @@
 
   <!-- Screenshot -->
   <section class="screenshot">
-    <img src="screenshot-ja.png" alt="Clipnyx の履歴パネル" data-src-ja="screenshot-ja.png" data-src-en="screenshot-en.png" data-alt-ja="Clipnyx の履歴パネル" data-alt-en="Clipnyx history panel">
+    <picture>
+      <source srcset="screenshot-ja-dark.png" media="(prefers-color-scheme: dark)" data-srcset-ja="screenshot-ja-dark.png" data-srcset-en="screenshot-en-dark.png">
+      <img src="screenshot-ja.png" loading="lazy" width="1440" height="900" alt="Clipnyx の履歴パネル" data-src-ja="screenshot-ja.png" data-src-en="screenshot-en.png" data-alt-ja="Clipnyx の履歴パネル" data-alt-en="Clipnyx history panel">
+    </picture>
   </section>
 
   <!-- Features -->
@@ -656,6 +659,9 @@
         });
         document.querySelectorAll('[data-src-' + lang + ']').forEach(function (el) {
           el.src = el.getAttribute('data-src-' + lang);
+        });
+        document.querySelectorAll('[data-srcset-' + lang + ']').forEach(function (el) {
+          el.srcset = el.getAttribute('data-srcset-' + lang);
         });
         document.documentElement.lang = lang;
         // Update App Store badge language (all instances)

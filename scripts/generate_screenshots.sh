@@ -35,6 +35,8 @@ cp "$OUT_EN/marketing-en-light.png" fastlane/screenshots/en-US/1_history_panel.p
 # LP 用は表示幅 720px（@2x = 1440px）に縮小してファイルサイズを抑える
 sips --resampleWidth 1440 "$OUT_JA/marketing-ja-light.png" --out docs/screenshot-ja.png >/dev/null
 sips --resampleWidth 1440 "$OUT_EN/marketing-en-light.png" --out docs/screenshot-en.png >/dev/null
+sips --resampleWidth 1440 "$OUT_JA/marketing-ja-dark.png" --out docs/screenshot-ja-dark.png >/dev/null
+sips --resampleWidth 1440 "$OUT_EN/marketing-en-dark.png" --out docs/screenshot-en-dark.png >/dev/null
 
 echo "==> Done. All variants (incl. dark) are in:"
 echo "    ja: $OUT_JA"
