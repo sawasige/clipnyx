@@ -51,28 +51,6 @@ struct FavoriteManagerView: View {
         .onChange(of: selectedFolderFilter) { _, _ in
             selectedItemId = nil
         }
-        .background {
-            Button("") {
-                guard focusedArea == .sidebar else { return }
-                if case .folder(let id) = selectedFolderFilter {
-                    clipboardManager.deleteFavoriteFolder(id: id)
-                    selectedFolderFilter = .allHistory
-                }
-            }
-            .keyboardShortcut(.delete, modifiers: [])
-            .hidden()
-
-            Button("") {
-                guard focusedArea == .sidebar else { return }
-                if case .folder(let id) = selectedFolderFilter,
-                   let folder = clipboardManager.favoriteFolders.first(where: { $0.id == id }) {
-                    renamingText = folder.name
-                    renamingFolderId = id
-                }
-            }
-            .keyboardShortcut(.return, modifiers: [])
-            .hidden()
-        }
     }
 
     private func selectItem(id: UUID) {
@@ -109,13 +87,14 @@ struct FavoriteManagerView: View {
             Section("Folders") {
                 ForEach(clipboardManager.sortedFavoriteFolders) { folder in
                     if renamingFolderId == folder.id {
-                        TextField("", text: $renamingText, onCommit: {
+                        TextField("", text: $renamingText)
+                        .onSubmit {
                             if !renamingText.isEmpty {
                                 clipboardManager.renameFavoriteFolder(id: folder.id, name: renamingText)
                             }
                             renamingFolderId = nil
                             isRenamingFocused = false
-                        })
+                        }
                         .textFieldStyle(.roundedBorder)
                         .focused($isRenamingFocused)
                         .onAppear { isRenamingFocused = true }
@@ -156,6 +135,22 @@ struct FavoriteManagerView: View {
         .listStyle(.sidebar)
         .focusable()
         .focused($focusedArea, equals: .sidebar)
+        .onDeleteCommand {
+            if case .folder(let id) = selectedFolderFilter {
+                clipboardManager.deleteFavoriteFolder(id: id)
+                selectedFolderFilter = .allHistory
+            }
+        }
+        .onKeyPress(.return) {
+            guard renamingFolderId == nil,
+                  case .folder(let id) = selectedFolderFilter,
+                  let folder = clipboardManager.favoriteFolders.first(where: { $0.id == id }) else {
+                return .ignored
+            }
+            renamingText = folder.name
+            renamingFolderId = id
+            return .handled
+        }
         .safeAreaInset(edge: .bottom) {
             HStack {
                 TextField("New Folder", text: $newFolderName)
@@ -279,6 +274,7 @@ private struct ItemDetailEditor: View {
     @State private var name: String = ""
     @State private var selectedFolderId: UUID?
     @State private var text: String = ""
+    @State private var pendingContentSave: Task<Void, Never>?
 
     private var item: ClipboardItem? {
         clipboardManager.items.first(where: { $0.id == itemId })
@@ -350,7 +346,21 @@ private struct ItemDetailEditor: View {
                                     .stroke(Color(nsColor: .separatorColor))
                             )
                             .onChange(of: text) { _, newValue in
-                                clipboardManager.updateFavoriteContent(item, text: newValue)
+                                // 打鍵ごとの blob 書き込みを避けるため 0.5 秒 debounce する
+                                pendingContentSave?.cancel()
+                                pendingContentSave = Task {
+                                    try? await Task.sleep(for: .milliseconds(500))
+                                    guard !Task.isCancelled else { return }
+                                    clipboardManager.updateFavoriteContent(item, text: newValue)
+                                    pendingContentSave = nil
+                                }
+                            }
+                            .onDisappear {
+                                // 未保存の編集を即時反映してから破棄する
+                                if let pendingContentSave {
+                                    pendingContentSave.cancel()
+                                    clipboardManager.updateFavoriteContent(item, text: text)
+                                }
                             }
                     } else {
                         if let thumbnailData = item.thumbnailData,
