@@ -178,6 +178,52 @@ final class ClipboardManager {
         store.saveIndex(items)
     }
 
+    /// 複数アイテムへ同じ変更を適用し、一度だけ index を保存する
+    private func updateItems(ids: Set<UUID>, _ mutate: (inout ClipboardItem) -> Void) {
+        var changed = false
+        for index in items.indices where ids.contains(items[index].id) {
+            mutate(&items[index])
+            changed = true
+        }
+        if changed {
+            store.saveIndex(items)
+        }
+    }
+
+    // MARK: - Bulk Operations
+
+    /// 複数アイテムをフォルダへ移動する（未保存のものはお気に入りに昇格）
+    func moveItemsToFolder(itemIds: Set<UUID>, folderId: UUID?) {
+        updateItems(ids: itemIds) {
+            $0.isSaved = true
+            $0.favoriteFolderId = folderId
+        }
+    }
+
+    /// 複数アイテムをお気に入りに登録する（名前・フォルダは付けない）
+    func favoriteItems(itemIds: Set<UUID>) {
+        updateItems(ids: itemIds) {
+            $0.isSaved = true
+        }
+    }
+
+    /// 複数アイテムのお気に入りを解除する
+    func unfavoriteItems(itemIds: Set<UUID>) {
+        updateItems(ids: itemIds) {
+            $0.isSaved = false
+            $0.favoriteName = nil
+            $0.favoriteFolderId = nil
+        }
+    }
+
+    /// 複数アイテムを削除する
+    func removeItems(itemIds: Set<UUID>) {
+        guard !itemIds.isEmpty else { return }
+        items.removeAll { itemIds.contains($0.id) }
+        store.saveIndex(items)
+        store.deleteBlobs(for: Array(itemIds))
+    }
+
     // MARK: - Save (replaces Pin)
 
     func toggleSave(_ item: ClipboardItem) {

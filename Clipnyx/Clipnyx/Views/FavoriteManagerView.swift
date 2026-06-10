@@ -4,12 +4,17 @@ struct FavoriteManagerView: View {
     var clipboardManager: ClipboardManager
     var initialItemId: UUID? = nil
     @State var selectedFolderFilter: FavoriteFilter = .allHistory
-    @State var selectedItemId: UUID?
+    @State var selectedItemIds: Set<UUID> = []
     @State private var newFolderName = ""
     @State private var renamingFolderId: UUID?
     @State private var renamingText = ""
+    @State private var dropTargetFilter: FavoriteFilter?
+    @State private var isConfirmingBulkDelete = false
     @FocusState private var isRenamingFocused: Bool
     @FocusState private var focusedArea: FocusArea?
+
+    /// ドラッグペイロードの接頭辞（プレーンテキストとしての誤解釈を避けるため識別子を付ける）
+    private static let dragPrefix = "clipnyx-item:"
 
     enum FocusArea: Hashable {
         case sidebar
@@ -24,9 +29,14 @@ struct FavoriteManagerView: View {
         selectedFolderFilter.apply(to: clipboardManager.items)
     }
 
+    /// 単一選択時のみ、そのアイテムを返す
     private var selectedItem: ClipboardItem? {
-        guard let id = selectedItemId else { return nil }
+        guard selectedItemIds.count == 1, let id = selectedItemIds.first else { return nil }
         return clipboardManager.items.first(where: { $0.id == id })
+    }
+
+    private var selectedItems: [ClipboardItem] {
+        clipboardManager.items.filter { selectedItemIds.contains($0.id) }
     }
 
     var body: some View {
@@ -49,7 +59,7 @@ struct FavoriteManagerView: View {
             }
         }
         .onChange(of: selectedFolderFilter) { _, _ in
-            selectedItemId = nil
+            selectedItemIds = []
         }
     }
 
@@ -64,10 +74,53 @@ struct FavoriteManagerView: View {
                 selectedFolderFilter = .allHistory
             }
         }
-        // onChangeでnilにされた後にセットする
+        // onChangeでクリアされた後にセットする
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-            selectedItemId = id
+            selectedItemIds = [id]
         }
+    }
+
+    // MARK: - Drag & Drop
+
+    /// ドロップされたペイロードを対象アイテム集合に解決する。
+    /// 選択中の行をドラッグした場合は選択全体を対象にする
+    private func droppedItemIds(_ payloads: [String]) -> Set<UUID> {
+        var ids: Set<UUID> = []
+        for payload in payloads where payload.hasPrefix(Self.dragPrefix) {
+            if let id = UUID(uuidString: String(payload.dropFirst(Self.dragPrefix.count))) {
+                ids.insert(id)
+            }
+        }
+        if !ids.isDisjoint(with: selectedItemIds) {
+            ids.formUnion(selectedItemIds)
+        }
+        return ids
+    }
+
+    /// サイドバー行をアイテムのドロップ先にする
+    private func folderDropDestination<Content: View>(
+        _ content: Content,
+        filter: FavoriteFilter,
+        folderId: UUID?
+    ) -> some View {
+        content
+            .listRowBackground(
+                dropTargetFilter == filter
+                    ? Color.accentColor.opacity(0.25)
+                    : Color.clear
+            )
+            .dropDestination(for: String.self) { payloads, _ in
+                let ids = droppedItemIds(payloads)
+                guard !ids.isEmpty else { return false }
+                clipboardManager.moveItemsToFolder(itemIds: ids, folderId: folderId)
+                return true
+            } isTargeted: { targeting in
+                if targeting {
+                    dropTargetFilter = filter
+                } else if dropTargetFilter == filter {
+                    dropTargetFilter = nil
+                }
+            }
     }
 
     // MARK: - Sidebar
@@ -119,8 +172,12 @@ struct FavoriteManagerView: View {
             Section("Favorites") {
                 Label("All Favorites", systemImage: "bookmark.fill")
                     .tag(FavoriteFilter.allSaved)
-                Label("Uncategorized", systemImage: "tray")
-                    .tag(FavoriteFilter.uncategorized)
+                folderDropDestination(
+                    Label("Uncategorized", systemImage: "tray")
+                        .tag(FavoriteFilter.uncategorized),
+                    filter: .uncategorized,
+                    folderId: nil
+                )
             }
 
             Section("Folders") {
@@ -142,17 +199,21 @@ struct FavoriteManagerView: View {
                             isRenamingFocused = false
                         }
                     } else {
-                        Label(folder.name, systemImage: "folder")
-                            .tag(FavoriteFilter.folder(folder.id))
-                            .contextMenu {
-                                Button("Rename") {
-                                    renamingText = folder.name
-                                    renamingFolderId = folder.id
-                                }
-                                Button("Delete Folder", role: .destructive) {
-                                    clipboardManager.deleteFavoriteFolder(id: folder.id)
-                                }
-                            }
+                        folderDropDestination(
+                            Label(folder.name, systemImage: "folder")
+                                .tag(FavoriteFilter.folder(folder.id))
+                                .contextMenu {
+                                    Button("Rename") {
+                                        renamingText = folder.name
+                                        renamingFolderId = folder.id
+                                    }
+                                    Button("Delete Folder", role: .destructive) {
+                                        clipboardManager.deleteFavoriteFolder(id: folder.id)
+                                    }
+                                },
+                            filter: .folder(folder.id),
+                            folderId: folder.id
+                        )
                     }
                 }
                 .onMove { from, to in
@@ -185,7 +246,7 @@ struct FavoriteManagerView: View {
                     Text(isShowingFavorites ? "Add to favorites to keep them here" : "Copied content will appear here")
                 }
             } else {
-                List(filteredItems, selection: $selectedItemId) { item in
+                List(filteredItems, selection: $selectedItemIds) { item in
                     HStack(spacing: 8) {
                         ZStack(alignment: .bottomTrailing) {
                             Image(systemName: item.category.icon)
@@ -219,6 +280,25 @@ struct FavoriteManagerView: View {
                     }
                     .frame(minHeight: 36)
                     .tag(item.id)
+                    .draggable(Self.dragPrefix + item.id.uuidString)
+                    .contextMenu {
+                        itemContextMenu(for: item)
+                    }
+                }
+                .onDeleteCommand {
+                    guard !selectedItemIds.isEmpty else { return }
+                    isConfirmingBulkDelete = true
+                }
+                .confirmationDialog(
+                    "Delete \(selectedItemIds.count) items?",
+                    isPresented: $isConfirmingBulkDelete
+                ) {
+                    Button("Delete", role: .destructive) {
+                        clipboardManager.removeItems(itemIds: selectedItemIds)
+                        selectedItemIds = []
+                    }
+                } message: {
+                    Text("This cannot be undone.")
                 }
             }
         }
@@ -233,7 +313,7 @@ struct FavoriteManagerView: View {
                         }()
                         clipboardManager.createFavorite(text: "", name: "", folderId: defaultFolderId)
                         if let newItem = clipboardManager.items.first {
-                            selectedItemId = newItem.id
+                            selectedItemIds = [newItem.id]
                         }
                     } label: {
                         Label("New Favorite", systemImage: "plus")
@@ -242,7 +322,7 @@ struct FavoriteManagerView: View {
                     Button {
                         clipboardManager.addTextToHistory(text: "")
                         if let newItem = clipboardManager.items.first {
-                            selectedItemId = newItem.id
+                            selectedItemIds = [newItem.id]
                         }
                     } label: {
                         Label("Add Text", systemImage: "plus")
@@ -252,11 +332,57 @@ struct FavoriteManagerView: View {
         }
     }
 
+    // MARK: - Context Menu
+
+    @ViewBuilder
+    private func itemContextMenu(for item: ClipboardItem) -> some View {
+        // 選択中の行なら選択全体、そうでなければその行だけを対象にする
+        let targets = selectedItemIds.contains(item.id) ? selectedItemIds : [item.id]
+        let targetItems = clipboardManager.items.filter { targets.contains($0.id) }
+
+        Menu {
+            ForEach(clipboardManager.sortedFavoriteFolders) { folder in
+                Button(folder.name) {
+                    clipboardManager.moveItemsToFolder(itemIds: targets, folderId: folder.id)
+                }
+            }
+            Divider()
+            Button("Uncategorized") {
+                clipboardManager.moveItemsToFolder(itemIds: targets, folderId: nil)
+            }
+        } label: {
+            Label("Move to Folder", systemImage: "folder")
+        }
+        if targetItems.contains(where: { !$0.isSaved }) {
+            Button {
+                clipboardManager.favoriteItems(itemIds: targets)
+            } label: {
+                Label("Favorite", systemImage: "bookmark")
+            }
+        }
+        if targetItems.contains(where: \.isSaved) {
+            Button {
+                clipboardManager.unfavoriteItems(itemIds: targets)
+            } label: {
+                Label("Unfavorite", systemImage: "bookmark.slash")
+            }
+        }
+        Divider()
+        Button(role: .destructive) {
+            clipboardManager.removeItems(itemIds: targets)
+            selectedItemIds.subtract(targets)
+        } label: {
+            Label("Delete", systemImage: "trash")
+        }
+    }
+
     // MARK: - Detail
 
     @ViewBuilder
     private var detailArea: some View {
-        if let item = selectedItem {
+        if selectedItemIds.count > 1 {
+            bulkActionView
+        } else if let item = selectedItem {
             ItemDetailEditor(clipboardManager: clipboardManager, itemId: item.id)
                 .id(item.id)
         } else {
@@ -266,6 +392,64 @@ struct FavoriteManagerView: View {
                 Text("Select an item to view")
             }
         }
+    }
+
+    // MARK: - Bulk Actions
+
+    private var bulkActionView: some View {
+        VStack(spacing: 20) {
+            VStack(spacing: 8) {
+                Image(systemName: "square.stack.3d.up")
+                    .font(.largeTitle)
+                    .foregroundStyle(.secondary)
+                Text("\(selectedItemIds.count) items selected")
+                    .font(.headline)
+            }
+
+            VStack(alignment: .leading, spacing: 10) {
+                Menu {
+                    ForEach(clipboardManager.sortedFavoriteFolders) { folder in
+                        Button(folder.name) {
+                            clipboardManager.moveItemsToFolder(itemIds: selectedItemIds, folderId: folder.id)
+                        }
+                    }
+                    Divider()
+                    Button("Uncategorized") {
+                        clipboardManager.moveItemsToFolder(itemIds: selectedItemIds, folderId: nil)
+                    }
+                } label: {
+                    Label("Move to Folder", systemImage: "folder")
+                        .frame(maxWidth: .infinity)
+                }
+
+                if selectedItems.contains(where: { !$0.isSaved }) {
+                    Button {
+                        clipboardManager.favoriteItems(itemIds: selectedItemIds)
+                    } label: {
+                        Label("Favorite", systemImage: "bookmark")
+                            .frame(maxWidth: .infinity)
+                    }
+                }
+
+                if selectedItems.contains(where: \.isSaved) {
+                    Button {
+                        clipboardManager.unfavoriteItems(itemIds: selectedItemIds)
+                    } label: {
+                        Label("Unfavorite", systemImage: "bookmark.slash")
+                            .frame(maxWidth: .infinity)
+                    }
+                }
+
+                Button(role: .destructive) {
+                    isConfirmingBulkDelete = true
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                        .frame(maxWidth: .infinity)
+                }
+            }
+            .frame(width: 220)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 

@@ -11,6 +11,66 @@
         }
       }
     },
+    "%lld" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        }
+      }
+    },
+    "%lld GB" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld GB"
+          }
+        }
+      }
+    },
+    "%lld MB" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld MB"
+          }
+        }
+      }
+    },
+    "%lld items" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 件"
+          }
+        }
+      }
+    },
+    "%lld items (%lld favorites)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld 件（%2$lld 件お気に入り）"
+          }
+        }
+      }
+    },
+    "%lld items selected" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 件を選択中"
+          }
+        }
+      }
+    },
     "(Color)" : {
       "localizations" : {
         "ja" : {
@@ -77,67 +137,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "(URL)"
-          }
-        }
-      }
-    },
-    "%lld" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld"
-          }
-        }
-      }
-    },
-    "%lld GB" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld GB"
-          }
-        }
-      }
-    },
-    "%lld items" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld 件"
-          }
-        }
-      }
-    },
-    "%lld items (%lld favorites)" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld 件（%2$lld 件お気に入り）"
-          }
-        }
-      }
-    },
-    "%lld MB" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld MB"
-          }
-        }
-      }
-    },
-    "↩ Paste" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "↩ 貼り付け"
           }
         }
       }
@@ -223,16 +222,6 @@
         }
       }
     },
-    "and %lld more" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "他%lld件"
-          }
-        }
-      }
-    },
     "Automatically Check for Updates" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -240,6 +229,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "アップデートを自動的に確認"
+          }
+        }
+      }
+    },
+    "CSV" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CSV"
           }
         }
       }
@@ -337,16 +336,6 @@
         }
       }
     },
-    "Copied — press ⌘V to paste" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "コピーしました — ⌘V で貼り付け"
-          }
-        }
-      }
-    },
     "Copied At" : {
       "localizations" : {
         "ja" : {
@@ -363,6 +352,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "コピーした内容がここに表示されます"
+          }
+        }
+      }
+    },
+    "Copied — press ⌘V to paste" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コピーしました — ⌘V で貼り付け"
           }
         }
       }
@@ -384,16 +383,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "作成"
-          }
-        }
-      }
-    },
-    "CSV" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CSV"
           }
         }
       }
@@ -444,6 +433,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "削除"
+          }
+        }
+      }
+    },
+    "Delete %lld items?" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 件を削除しますか？"
           }
         }
       }
@@ -518,22 +517,22 @@
         }
       }
     },
-    "Favorite items will not be deleted." : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "お気に入りは削除されません。"
-          }
-        }
-      }
-    },
     "Favorite Name" : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "お気に入り名"
+          }
+        }
+      }
+    },
+    "Favorite items will not be deleted." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お気に入りは削除されません。"
           }
         }
       }
@@ -618,6 +617,16 @@
         }
       }
     },
+    "HTML" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HTML"
+          }
+        }
+      }
+    },
     "History" : {
       "localizations" : {
         "ja" : {
@@ -634,16 +643,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ホットキー"
-          }
-        }
-      }
-    },
-    "HTML" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "HTML"
           }
         }
       }
@@ -698,6 +697,16 @@
         }
       }
     },
+    "Move to Folder" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "フォルダへ移動"
+          }
+        }
+      }
+    },
     "New Favorite" : {
       "localizations" : {
         "ja" : {
@@ -738,22 +747,22 @@
         }
       }
     },
-    "No results found" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "検索結果が見つかりません"
-          }
-        }
-      }
-    },
     "No Selection" : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "未選択"
+          }
+        }
+      }
+    },
+    "No results found" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "検索結果が見つかりません"
           }
         }
       }
@@ -798,46 +807,6 @@
         }
       }
     },
-    "Paste" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "貼り付け"
-          }
-        }
-      }
-    },
-    "Paste as Plain Text" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "プレーンテキストで貼り付け"
-          }
-        }
-      }
-    },
-    "Paste Automatically on Selection" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "選択した項目を自動で貼り付ける"
-          }
-        }
-      }
-    },
-    "Pause Monitoring" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "監視を一時停止"
-          }
-        }
-      }
-    },
     "PDF" : {
       "localizations" : {
         "ja" : {
@@ -854,6 +823,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "PDF ドキュメント"
+          }
+        }
+      }
+    },
+    "Paste" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "貼り付け"
+          }
+        }
+      }
+    },
+    "Paste Automatically on Selection" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選択した項目を自動で貼り付ける"
+          }
+        }
+      }
+    },
+    "Paste as Plain Text" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プレーンテキストで貼り付け"
+          }
+        }
+      }
+    },
+    "Pause Monitoring" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "監視を一時停止"
           }
         }
       }
@@ -1052,12 +1061,32 @@
         }
       }
     },
+    "This cannot be undone." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この操作は取り消せません。"
+          }
+        }
+      }
+    },
     "To paste automatically with a single click, Clipnyx needs permission to control your computer (System Settings ▸ Privacy & Security ▸ Accessibility). Without it, your selection is still copied and you can paste it yourself with ⌘V." : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "ワンクリックで自動貼り付けするには、Clipnyx に「コンピュータの制御」の許可が必要です（システム設定 ▸ プライバシーとセキュリティ ▸ アクセシビリティ）。許可がなくても選択した項目はコピーされるので、⌘V で手動で貼り付けられます。"
+          }
+        }
+      }
+    },
+    "URL" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL"
           }
         }
       }
@@ -1082,16 +1111,6 @@
         }
       }
     },
-    "URL" : {
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "URL"
-          }
-        }
-      }
-    },
     "Version" : {
       "localizations" : {
         "ja" : {
@@ -1108,6 +1127,27 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "有効にすると、項目を選択すると同時にアクティブなアプリへ直接貼り付けます。無効の場合は項目をコピーするので、⌘V で手動で貼り付けてください。"
+          }
+        }
+      }
+    },
+    "and %lld more" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "他%lld件"
+          }
+        }
+      }
+    },
+    "↩ Paste" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "↩ 貼り付け"
           }
         }
       }
