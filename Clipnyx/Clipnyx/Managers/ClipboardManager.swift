@@ -1,8 +1,9 @@
 import AppKit
 import Observation
 
+@MainActor
 @Observable
-final class ClipboardManager: @unchecked Sendable {
+final class ClipboardManager {
     var items: [ClipboardItem] = []
     var isPaused: Bool = false
     var favoriteFolders: [FavoriteFolder] = []
@@ -39,16 +40,16 @@ final class ClipboardManager: @unchecked Sendable {
         startPolling()
     }
 
-    deinit {
-        pollingTimer?.invalidate()
-    }
-
     // MARK: - Polling
 
+    // タイマーはメインランループにスケジュールされるため、コールバックは常にメインスレッド。
+    // アプリ終了時は applicationWillTerminate が stopPolling() を呼ぶ。
     func startPolling() {
         pollingTimer?.invalidate()
         pollingTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
-            self?.checkForChanges()
+            MainActor.assumeIsolated {
+                self?.checkForChanges()
+            }
         }
     }
 
@@ -137,144 +138,115 @@ final class ClipboardManager: @unchecked Sendable {
         }
     }
 
+    /// ID でアイテムを見つけて変更を適用し、index を保存する
+    private func updateItem(id: UUID, _ mutate: (inout ClipboardItem) -> Void) {
+        guard let index = items.firstIndex(where: { $0.id == id }) else { return }
+        mutate(&items[index])
+        store.saveIndex(items)
+    }
+
     // MARK: - Save (replaces Pin)
 
     func toggleSave(_ item: ClipboardItem) {
-        guard let index = items.firstIndex(where: { $0.id == item.id }) else { return }
-        var updated = items
-        updated[index].isSaved.toggle()
-        if !updated[index].isSaved {
-            updated[index].favoriteName = nil
-            updated[index].favoriteFolderId = nil
+        updateItem(id: item.id) {
+            $0.isSaved.toggle()
+            if !$0.isSaved {
+                $0.favoriteName = nil
+                $0.favoriteFolderId = nil
+            }
         }
-        items = updated
-        store.saveIndex(items)
     }
 
     // MARK: - Favorite
 
     func registerAsFavorite(_ item: ClipboardItem, name: String, folderId: UUID) {
-        guard let index = items.firstIndex(where: { $0.id == item.id }) else { return }
-        var updated = items
-        updated[index].isSaved = true
-        updated[index].favoriteName = name
-        updated[index].favoriteFolderId = folderId
-        items = updated
-        store.saveIndex(items)
+        updateItem(id: item.id) {
+            $0.isSaved = true
+            $0.favoriteName = name
+            $0.favoriteFolderId = folderId
+        }
     }
 
     func removeFromFavorites(_ item: ClipboardItem) {
-        guard let index = items.firstIndex(where: { $0.id == item.id }) else { return }
-        var updated = items
-        updated[index].favoriteName = nil
-        updated[index].favoriteFolderId = nil
-        items = updated
-        store.saveIndex(items)
+        updateItem(id: item.id) {
+            $0.favoriteName = nil
+            $0.favoriteFolderId = nil
+        }
     }
 
     func updateFavoriteName(_ item: ClipboardItem, name: String) {
-        guard let index = items.firstIndex(where: { $0.id == item.id }) else { return }
-        var updated = items
-        updated[index].favoriteName = name.isEmpty ? nil : name
-        items = updated
-        store.saveIndex(items)
+        updateItem(id: item.id) {
+            $0.favoriteName = name.isEmpty ? nil : name
+        }
     }
 
     func updateFavoriteFolder(_ item: ClipboardItem, folderId: UUID?) {
-        guard let index = items.firstIndex(where: { $0.id == item.id }) else { return }
-        var updated = items
-        updated[index].favoriteFolderId = folderId
-        items = updated
-        store.saveIndex(items)
+        updateItem(id: item.id) {
+            $0.favoriteFolderId = folderId
+        }
     }
 
     func updateFavoriteContent(_ item: ClipboardItem, text: String) {
-        guard let index = items.firstIndex(where: { $0.id == item.id }) else { return }
-        let current = items[index]
-        items[index] = ClipboardItem(
-            id: current.id,
-            timestamp: current.timestamp,
-            category: current.category,
+        replaceContentWithPlainText(
+            id: item.id,
+            text: text,
+            category: item.category,
             previewText: String(text.prefix(500)),
-            thumbnailData: current.thumbnailData,
-            totalDataSize: text.utf8.count,
-            contentHash: current.contentHash,
-            representationInfos: [RepresentationInfo(type: NSPasteboard.PasteboardType.string.rawValue, size: text.utf8.count)],
-            isSaved: current.isSaved,
-            favoriteName: current.favoriteName,
-            favoriteFolderId: current.favoriteFolderId
+            thumbnailData: item.thumbnailData
         )
-        // Blob を更新
-        let rep = PasteboardRepresentation(type: .string, data: Data(text.utf8))
-        store.saveBlobs(for: item.id, representations: [rep], thumbnail: nil)
-        store.saveIndex(items)
     }
 
     func convertToPlainText(_ item: ClipboardItem) {
-        guard let index = items.firstIndex(where: { $0.id == item.id }) else { return }
-        let text = item.previewText
-        let current = items[index]
-        items[index] = ClipboardItem(
-            id: current.id,
-            timestamp: current.timestamp,
+        replaceContentWithPlainText(
+            id: item.id,
+            text: item.previewText,
             category: .plainText,
-            previewText: current.previewText,
-            thumbnailData: nil,
-            totalDataSize: text.utf8.count,
-            contentHash: current.contentHash,
-            representationInfos: [RepresentationInfo(type: NSPasteboard.PasteboardType.string.rawValue, size: text.utf8.count)],
-            isSaved: current.isSaved,
-            favoriteName: current.favoriteName,
-            favoriteFolderId: current.favoriteFolderId
+            previewText: item.previewText,
+            thumbnailData: nil
         )
-        let rep = PasteboardRepresentation(type: .string, data: Data(text.utf8))
-        store.saveBlobs(for: item.id, representations: [rep], thumbnail: nil)
+    }
+
+    private func replaceContentWithPlainText(
+        id: UUID,
+        text: String,
+        category: ClipboardContentCategory,
+        previewText: String,
+        thumbnailData: Data?
+    ) {
+        guard let index = items.firstIndex(where: { $0.id == id }) else { return }
+        let (updated, rep) = items[index].replacingContentWithPlainText(
+            text: text,
+            category: category,
+            previewText: previewText,
+            thumbnailData: thumbnailData
+        )
+        items[index] = updated
+        store.saveBlobs(for: id, representations: [rep], thumbnail: nil)
         store.saveIndex(items)
     }
 
     func createFavorite(text: String, name: String, folderId: UUID?) {
-        let id = UUID()
-        let item = ClipboardItem(
-            id: id,
-            timestamp: Date(),
-            category: .plainText,
-            previewText: String(text.prefix(500)),
-            thumbnailData: nil,
-            totalDataSize: text.utf8.count,
-            contentHash: Data(),
-            representationInfos: [RepresentationInfo(type: NSPasteboard.PasteboardType.string.rawValue, size: text.utf8.count)],
-            isSaved: true,
-            favoriteName: name,
-            favoriteFolderId: folderId
-        )
-        items.insert(item, at: 0)
-        let rep = PasteboardRepresentation(type: .string, data: Data(text.utf8))
-        store.saveBlobs(for: id, representations: [rep], thumbnail: nil)
-        store.saveIndex(items)
+        insertPlainTextItem(ClipboardItem.plainText(
+            text: text, isSaved: true, favoriteName: name, favoriteFolderId: folderId
+        ))
     }
 
     func addTextToHistory(text: String) {
-        let id = UUID()
-        let item = ClipboardItem(
-            id: id,
-            timestamp: Date(),
-            category: .plainText,
-            previewText: String(text.prefix(500)),
-            thumbnailData: nil,
-            totalDataSize: text.utf8.count,
-            contentHash: Data(),
-            representationInfos: [RepresentationInfo(type: NSPasteboard.PasteboardType.string.rawValue, size: text.utf8.count)],
-            isSaved: false,
-            favoriteName: nil,
-            favoriteFolderId: nil
-        )
-        items.insert(item, at: 0)
-        let rep = PasteboardRepresentation(type: .string, data: Data(text.utf8))
-        store.saveBlobs(for: id, representations: [rep], thumbnail: nil)
+        insertPlainTextItem(ClipboardItem.plainText(text: text, isSaved: false))
+    }
+
+    private func insertPlainTextItem(_ pair: (item: ClipboardItem, representation: PasteboardRepresentation)) {
+        items.insert(pair.item, at: 0)
+        store.saveBlobs(for: pair.item.id, representations: [pair.representation], thumbnail: nil)
         store.saveIndex(items)
     }
 
     // MARK: - Favorite Folders
+
+    /// 表示順（order 昇順）に並べたお気に入りフォルダ
+    var sortedFavoriteFolders: [FavoriteFolder] {
+        favoriteFolders.sorted { $0.order < $1.order }
+    }
 
     func addFavoriteFolder(name: String) -> FavoriteFolder {
         let maxOrder = favoriteFolders.max(by: { $0.order < $1.order })?.order ?? -1
@@ -331,18 +303,19 @@ final class ClipboardManager: @unchecked Sendable {
         }
         lastChangeCount = NSPasteboard.general.changeCount
 
-        // 使用したアイテムを先頭に移動
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            if let index = self.items.firstIndex(where: { $0.id == item.id }) {
-                let moved = self.items.remove(at: index)
-                self.items.insert(moved, at: 0)
+        // 使用したアイテムを先頭に移動（現在のイベント処理が終わってから行う）
+        Task {
+            if let index = items.firstIndex(where: { $0.id == item.id }) {
+                let moved = items.remove(at: index)
+                items.insert(moved, at: 0)
             }
-            self.store.saveIndex(self.items)
+            store.saveIndex(items)
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-            self?.isRestoringItem = false
+        // ポーリングが自分の書き込みを履歴として拾わないよう、復元直後の1サイクルは監視を止める
+        Task {
+            try? await Task.sleep(for: .milliseconds(500))
+            isRestoringItem = false
         }
     }
 

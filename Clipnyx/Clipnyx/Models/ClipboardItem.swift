@@ -324,6 +324,57 @@ struct ClipboardItem: Identifiable, Sendable {
         return bitmapRep.representation(using: .png, properties: [:])
     }
 
+    // MARK: - Plain Text Construction
+
+    /// 新規のプレーンテキストアイテムと、その blob 表現を作る
+    static func plainText(
+        text: String,
+        isSaved: Bool,
+        favoriteName: String? = nil,
+        favoriteFolderId: UUID? = nil
+    ) -> (item: ClipboardItem, representation: PasteboardRepresentation) {
+        let data = Data(text.utf8)
+        let item = ClipboardItem(
+            id: UUID(),
+            timestamp: Date(),
+            category: .plainText,
+            previewText: String(text.prefix(500)),
+            thumbnailData: nil,
+            totalDataSize: data.count,
+            contentHash: Data(SHA256.hash(data: data)),
+            representationInfos: [RepresentationInfo(type: NSPasteboard.PasteboardType.string.rawValue, size: data.count)],
+            isSaved: isSaved,
+            favoriteName: favoriteName,
+            favoriteFolderId: favoriteFolderId
+        )
+        return (item, PasteboardRepresentation(type: .string, data: data))
+    }
+
+    /// 内容を単一のプレーンテキスト表現で置き換えたコピーと、その blob 表現を返す。
+    /// ID・タイムスタンプ・お気に入り情報は維持する。
+    func replacingContentWithPlainText(
+        text: String,
+        category: ClipboardContentCategory,
+        previewText: String,
+        thumbnailData: Data?
+    ) -> (item: ClipboardItem, representation: PasteboardRepresentation) {
+        let data = Data(text.utf8)
+        let item = ClipboardItem(
+            id: id,
+            timestamp: timestamp,
+            category: category,
+            previewText: previewText,
+            thumbnailData: thumbnailData,
+            totalDataSize: data.count,
+            contentHash: Data(SHA256.hash(data: data)),
+            representationInfos: [RepresentationInfo(type: NSPasteboard.PasteboardType.string.rawValue, size: data.count)],
+            isSaved: isSaved,
+            favoriteName: favoriteName,
+            favoriteFolderId: favoriteFolderId
+        )
+        return (item, PasteboardRepresentation(type: .string, data: data))
+    }
+
     // MARK: - Content Comparison
 
     func hasSameContent(as other: ClipboardItem) -> Bool {

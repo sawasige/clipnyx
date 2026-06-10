@@ -23,7 +23,7 @@ struct PopupContentView: View {
     }
 
     private var selectedFavoriteFolderId: UUID? {
-        let sortedFolders = clipboardManager.favoriteFolders.sorted(by: { $0.order < $1.order })
+        let sortedFolders = clipboardManager.sortedFavoriteFolders
         let folderIndex = savedFilterIndex - 3
         guard folderIndex >= 0, folderIndex < sortedFolders.count else { return nil }
         return sortedFolders[folderIndex].id
@@ -148,7 +148,7 @@ struct PopupContentView: View {
                                 selectedIndex = 0
                             }
                             .id(2)
-                            ForEach(Array(clipboardManager.favoriteFolders.sorted(by: { $0.order < $1.order }).enumerated()), id: \.element.id) { i, folder in
+                            ForEach(Array(clipboardManager.sortedFavoriteFolders.enumerated()), id: \.element.id) { i, folder in
                                 folderChip(folder.name, isSelected: savedFilterIndex == 3 + i) {
                                     savedFilterIndex = 3 + i
                                     selectedIndex = 0
