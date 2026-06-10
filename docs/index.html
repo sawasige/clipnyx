@@ -13,7 +13,7 @@
   <meta property="og:title" content="Clipnyx — クリップボード履歴マネージャー for macOS">
   <meta property="og:description" content="Clipnyx はmacOSメニューバーに常駐するクリップボード履歴マネージャーです。コピー履歴を自動保存し、ホットキーで瞬時にアクセス。">
   <meta property="og:url" content="https://sawasige.github.io/clipnyx/">
-  <meta property="og:image" content="https://sawasige.github.io/clipnyx/hero.png">
+  <meta property="og:image" content="https://sawasige.github.io/clipnyx/hero.jpg">
   <meta property="og:image:width" content="1536">
   <meta property="og:image:height" content="1024">
   <meta property="og:locale" content="ja_JP">
@@ -21,7 +21,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Clipnyx — クリップボード履歴マネージャー for macOS">
   <meta name="twitter:description" content="Clipnyx はmacOSメニューバーに常駐するクリップボード履歴マネージャーです。コピー履歴を自動保存し、ホットキーで瞬時にアクセス。">
-  <meta name="twitter:image" content="https://sawasige.github.io/clipnyx/hero.png">
+  <meta name="twitter:image" content="https://sawasige.github.io/clipnyx/hero.jpg">
   <style>
     :root {
       --color-bg: #ffffff;
@@ -158,6 +158,12 @@
       align-items: center;
       gap: 20px;
       flex-wrap: wrap;
+    }
+
+    .free-note {
+      margin-top: 16px;
+      font-size: 14px;
+      color: var(--color-text-secondary);
     }
 
     .dmg-badge {
@@ -501,7 +507,7 @@
   <!-- Hero -->
   <section class="hero">
     <div class="hero-banner">
-      <img src="hero.png" alt="Clipnyx" data-alt-ja="夜空と月をまとう Clipnyx のイメージ" data-alt-en="Clipnyx hero artwork of a moonlit starry night">
+      <img src="hero.jpg" width="1536" height="1024" alt="Clipnyx" data-alt-ja="夜空と月をまとう Clipnyx のイメージ" data-alt-en="Clipnyx hero artwork of a moonlit starry night">
       <div class="hero-overlay">
         <div class="hero-overlay-lockup">
           <picture>
@@ -510,7 +516,7 @@
           </picture>
           <h1 class="hero-overlay-name">Clipnyx</h1>
         </div>
-        <p class="hero-overlay-tagline" data-ja="macOSメニューバーに常駐する、軽量クリップボード履歴マネージャー。" data-en="A lightweight clipboard history manager that lives in your macOS menu bar."></p>
+        <p class="hero-overlay-tagline" data-ja="macOSメニューバーに常駐する、軽量クリップボード履歴マネージャー。" data-en="A lightweight clipboard history manager that lives in your macOS menu bar.">macOSメニューバーに常駐する、軽量クリップボード履歴マネージャー。</p>
       </div>
     </div>
     <div class="download-buttons">
@@ -523,11 +529,12 @@
       <a class="dmg-badge" href="https://github.com/sawasige/clipnyx/releases/latest/download/Clipnyx.dmg">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
         <span class="dmg-badge-text">
-          <span class="dmg-badge-label" data-ja="ダウンロード" data-en="Download"></span>
+          <span class="dmg-badge-label" data-ja="ダウンロード" data-en="Download">ダウンロード</span>
           <span class="dmg-badge-title">Clipnyx.dmg</span>
         </span>
       </a>
     </div>
+    <p class="free-note" data-ja="すべての機能を無料で使えます" data-en="All features are free">すべての機能を無料で使えます</p>
   </section>
 
   <!-- Screenshot -->
@@ -538,53 +545,53 @@
   <!-- Features -->
   <section class="features">
     <div class="container">
-      <h2 class="features-heading" data-ja="できること" data-en="Features"></h2>
+      <h2 class="features-heading" data-ja="できること" data-en="Features">できること</h2>
       <div class="features-grid">
         <div class="feature-card">
           <span class="feature-icon" aria-hidden="true">🕐</span>
-          <h3 data-ja="クリップボード履歴" data-en="Clipboard History"></h3>
-          <p data-ja="コピーした内容を自動で保存。テキスト・画像・ファイルなど、あらゆる種類のデータに対応します。" data-en="Automatically saves everything you copy. Supports text, images, files, and more."></p>
+          <h3 data-ja="クリップボード履歴" data-en="Clipboard History">クリップボード履歴</h3>
+          <p data-ja="コピーした内容を自動で保存。テキスト・画像・ファイルなど、あらゆる種類のデータに対応します。" data-en="Automatically saves everything you copy. Supports text, images, files, and more.">コピーした内容を自動で保存。テキスト・画像・ファイルなど、あらゆる種類のデータに対応します。</p>
         </div>
         <div class="feature-card">
           <span class="feature-icon" aria-hidden="true">⌨️</span>
-          <h3 data-ja="ホットキーで瞬時アクセス" data-en="Instant Hotkey Access"></h3>
-          <p data-ja="グローバルホットキーで履歴パネルを即座に表示。どのアプリを使っていてもすぐにペーストできます。" data-en="Bring up the history panel instantly with a global hotkey. Paste from any app, anytime."></p>
+          <h3 data-ja="ホットキーで瞬時アクセス" data-en="Instant Hotkey Access">ホットキーで瞬時アクセス</h3>
+          <p data-ja="グローバルホットキーで履歴パネルを即座に表示。どのアプリを使っていてもすぐにペーストできます。" data-en="Bring up the history panel instantly with a global hotkey. Paste from any app, anytime.">グローバルホットキーで履歴パネルを即座に表示。どのアプリを使っていてもすぐにペーストできます。</p>
         </div>
         <div class="feature-card">
           <span class="feature-icon" aria-hidden="true">⭐</span>
-          <h3 data-ja="お気に入り＆フォルダ" data-en="Favorites &amp; Folders"></h3>
-          <p data-ja="よく使うアイテムをお気に入り登録し、ユーザー定義のフォルダで整理。Tab/Shift+Tabでフォルダを素早く切り替えられます。" data-en="Save frequently used items as favorites and organize them into custom folders. Switch folders quickly with Tab/Shift+Tab."></p>
+          <h3 data-ja="お気に入り＆フォルダ" data-en="Favorites &amp; Folders">お気に入り＆フォルダ</h3>
+          <p data-ja="よく使うアイテムをお気に入り登録し、ユーザー定義のフォルダで整理。Tab/Shift+Tabでフォルダを素早く切り替えられます。" data-en="Save frequently used items as favorites and organize them into custom folders. Switch folders quickly with Tab/Shift+Tab.">よく使うアイテムをお気に入り登録し、ユーザー定義のフォルダで整理。Tab/Shift+Tabでフォルダを素早く切り替えられます。</p>
         </div>
         <div class="feature-card">
           <span class="feature-icon" aria-hidden="true">📚</span>
-          <h3 data-ja="コレクション画面" data-en="Collection View"></h3>
-          <p data-ja="全データを一覧管理。サイドバーで全履歴・お気に入り・フォルダを切り替え、テキスト編集や新規追加もできます。" data-en="Manage all your data in one place. Browse history, favorites, and folders in the sidebar. Edit text or add new items directly."></p>
+          <h3 data-ja="コレクション画面" data-en="Collection View">コレクション画面</h3>
+          <p data-ja="全データを一覧管理。サイドバーで全履歴・お気に入り・フォルダを切り替え、テキスト編集や新規追加もできます。" data-en="Manage all your data in one place. Browse history, favorites, and folders in the sidebar. Edit text or add new items directly.">全データを一覧管理。サイドバーで全履歴・お気に入り・フォルダを切り替え、テキスト編集や新規追加もできます。</p>
         </div>
         <div class="feature-card">
           <span class="feature-icon" aria-hidden="true">🏷️</span>
-          <h3 data-ja="自動カテゴリ分類" data-en="Auto Categorization"></h3>
-          <p data-ja="URL、コード、カラーコード、電話番号など11カテゴリに自動分類。必要な情報をすぐに見つけられます。" data-en="Automatically categorizes into 11 types — URLs, code, color codes, phone numbers, and more."></p>
+          <h3 data-ja="自動カテゴリ分類" data-en="Auto Categorization">自動カテゴリ分類</h3>
+          <p data-ja="URL、コード、カラーコード、電話番号など11カテゴリに自動分類。必要な情報をすぐに見つけられます。" data-en="Automatically categorizes into 11 types — URLs, code, color codes, phone numbers, and more.">URL、コード、カラーコード、電話番号など11カテゴリに自動分類。必要な情報をすぐに見つけられます。</p>
         </div>
         <div class="feature-card">
           <span class="feature-icon" aria-hidden="true">🔒</span>
-          <h3 data-ja="プライバシー重視" data-en="Privacy First"></h3>
-          <p data-ja="クリップボードデータはすべてMac上にローカル保存。外部サーバーへの送信やトラッキングは一切ありません。" data-en="All clipboard data stays on your Mac. No data is sent to external servers, no tracking, no data collection."></p>
+          <h3 data-ja="プライバシー重視" data-en="Privacy First">プライバシー重視</h3>
+          <p data-ja="クリップボードデータはすべてMac上にローカル保存。外部サーバーへの送信やトラッキングは一切ありません。" data-en="All clipboard data stays on your Mac. No data is sent to external servers, no tracking, no data collection.">クリップボードデータはすべてMac上にローカル保存。外部サーバーへの送信やトラッキングは一切ありません。</p>
         </div>
       </div>
-      <p class="section-note" data-ja="※ ダイレクトペースト（ワンクリックで貼り付け）を使うには、システム設定 ▸ アクセシビリティで Clipnyx を許可してください。" data-en="* To use direct paste (one-click paste), allow Clipnyx in System Settings ▸ Accessibility."></p>
+      <p class="section-note" data-ja="※ アイテム選択と同時に自動で貼り付けたい場合は、システム設定 ▸ プライバシーとセキュリティ ▸ アクセシビリティで Clipnyx を許可してください。許可しなくても、選択したアイテムは ⌘V で貼り付けできます。" data-en="* If you want items to be pasted automatically when selected, allow Clipnyx in System Settings ▸ Privacy &amp; Security ▸ Accessibility. Without it, selected items can still be pasted with ⌘V.">※ アイテム選択と同時に自動で貼り付けたい場合は、システム設定 ▸ プライバシーとセキュリティ ▸ アクセシビリティで Clipnyx を許可してください。許可しなくても、選択したアイテムは ⌘V で貼り付けできます。</p>
     </div>
   </section>
 
   <!-- Download -->
   <section class="editions">
     <div class="container">
-      <h2 class="editions-heading" data-ja="ダウンロード" data-en="Download"></h2>
-      <p class="editions-sub" data-ja="App Store からでも、直接ダウンロードでも。お好みの方法でどうぞ。" data-en="From the App Store or a direct download — whichever you prefer."></p>
+      <h2 class="editions-heading" data-ja="ダウンロード" data-en="Download">ダウンロード</h2>
+      <p class="editions-sub" data-ja="どちらも無料。App Store からでも、直接ダウンロードでも。" data-en="Free either way — from the App Store or a direct download.">どちらも無料。App Store からでも、直接ダウンロードでも。</p>
       <div class="get-grid">
         <div class="get-card">
           <span class="get-icon" aria-hidden="true">🛍️</span>
-          <h3 data-ja="App Store" data-en="App Store"></h3>
-          <p data-ja="ワンタップでインストール。アップデートは App Store にお任せ。" data-en="Install in one tap. Updates are handled by the App Store."></p>
+          <h3 data-ja="App Store" data-en="App Store">App Store</h3>
+          <p data-ja="ワンタップでインストール。アップデートは App Store にお任せ。" data-en="Install in one tap. Updates are handled by the App Store.">ワンタップでインストール。アップデートは App Store にお任せ。</p>
           <div class="get-card-cta">
             <a class="app-store-badge" href="https://apps.apple.com/jp/app/clipnyx/id6759652985" aria-label="Download on the App Store">
               <picture>
@@ -596,13 +603,13 @@
         </div>
         <div class="get-card">
           <span class="get-icon" aria-hidden="true">⬇️</span>
-          <h3 data-ja="ダウンロード / Homebrew" data-en="Download / Homebrew"></h3>
-          <p data-ja="アプリ自身が自動でアップデート。Homebrew からも導入できます。" data-en="The app keeps itself up to date automatically. Also available via Homebrew."></p>
+          <h3 data-ja="ダウンロード / Homebrew" data-en="Download / Homebrew">ダウンロード / Homebrew</h3>
+          <p data-ja="アプリ自身が自動でアップデート。Homebrew からも導入できます。" data-en="The app keeps itself up to date automatically. Also available via Homebrew.">アプリ自身が自動でアップデート。Homebrew からも導入できます。</p>
           <div class="get-card-cta">
             <a class="dmg-badge" href="https://github.com/sawasige/clipnyx/releases/latest/download/Clipnyx.dmg">
               <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
               <span class="dmg-badge-text">
-                <span class="dmg-badge-label" data-ja="ダウンロード" data-en="Download"></span>
+                <span class="dmg-badge-label" data-ja="ダウンロード" data-en="Download">ダウンロード</span>
                 <span class="dmg-badge-title">Clipnyx.dmg</span>
               </span>
             </a>
@@ -623,9 +630,9 @@
     <div class="container">
       <div class="footer-inner">
         <div class="footer-links">
-          <a href="support.html" data-ja="サポート" data-en="Support"></a>
-          <a href="privacy-policy.html" data-ja="プライバシーポリシー" data-en="Privacy Policy"></a>
-          <a href="changelog.html" data-ja="更新履歴" data-en="Changelog"></a>
+          <a href="support.html" data-ja="サポート" data-en="Support">サポート</a>
+          <a href="privacy-policy.html" data-ja="プライバシーポリシー" data-en="Privacy Policy">プライバシーポリシー</a>
+          <a href="changelog.html" data-ja="更新履歴" data-en="Changelog">更新履歴</a>
           <a href="https://github.com/sawasige/clipnyx" data-ja="GitHub" data-en="GitHub">GitHub</a>
           <button class="lang-toggle" onclick="toggleLang()" aria-label="Switch language">EN / 日本語</button>
         </div>
