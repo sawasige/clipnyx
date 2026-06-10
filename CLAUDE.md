@@ -73,5 +73,6 @@ Clipnyx/Clipnyx/
 ## コミット規約
 - コミットメッセージは日本語
 - Co-Authored-By は付けない
+- コミット・PR 本文に AI が作成した旨の表記を入れない（「Generated with Claude Code」等のフッター禁止）
 - main ブランチに直接コミットしない。必ずブランチを切って PR を作成する
 - PR マージ時は `gh pr merge --delete-branch` を使う
