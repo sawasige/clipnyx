@@ -28,7 +28,7 @@ Clipnyx/Clipnyx/
 │   ├── PopupContentView.swift    # ペーストパネル（フォルダチップ切り替え対応）
 │   ├── MenuBarView.swift         # メニューバー（.menu スタイル）
 │   ├── FavoriteManagerView.swift # コレクション画面（NavigationSplitView）
-│   ├── FavoriteEditorWindow.swift # お気に入り編集・新規テキスト追加ウィンドウ
+│   ├── FavoriteEditorView.swift  # お気に入り編集・新規テキスト追加ウィンドウ
 │   ├── FavoriteRegistrationView.swift # お気に入り登録ポップオーバー
 │   ├── SettingsView.swift        # 設定画面
 │   ├── ItemDetailView.swift      # アイテム詳細ポップオーバー
