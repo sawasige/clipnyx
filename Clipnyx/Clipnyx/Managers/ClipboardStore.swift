@@ -44,6 +44,9 @@ final class ClipboardStore: Sendable {
         let favoriteFolderId: UUID?
 
         // Legacy fallback keys
+        // 旧バージョンが書き出した index を読むための互換フィールド（読み取り専用）。
+        // 初回保存時に新キーへ書き換わる。旧版からの直接アップデートを
+        // サポートしなくなるまで削除しないこと。
         let snippetName: String?
         let snippetCategoryId: UUID?
 
