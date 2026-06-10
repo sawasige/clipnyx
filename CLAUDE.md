@@ -40,6 +40,7 @@ Clipnyx/Clipnyx/
 ## アーキテクチャ
 - **@Observable** パターン（Observation framework）を使用
 - ClipboardManager が中心。0.5秒間隔で NSPasteboard をポーリング
+- 機密・一時データ（`org.nspasteboard.ConcealedType` / `TransientType` 等）は履歴に記録しない
 - ホットキーは Carbon `RegisterEventHotKey` で登録（イベント消費のため）
 - ペースト: `CGEvent.post` で ⌘V を送信（PostEvent 権限、サンドボックス互換）
 - 権限チェック: `CGRequestPostEventAccess()` / `CGPreflightPostEventAccess()`
