@@ -1,23 +1,34 @@
 #if DEBUG
 import AppKit
+import ScreenCaptureKit
 import SwiftUI
 
-/// マーケティング用スクリーンショットをオフスクリーン描画で生成する（Debug ビルド限定）。
+/// マーケティング用スクリーンショットを生成する（Debug ビルド限定）。
 ///
 /// `Clipnyx --render-screenshots -AppleLanguages '(ja)'` のように起動すると、
-/// 実データに触れずデモデータでペーストパネルとコレクション画面を描画し、
+/// 実データに触れずデモデータでペーストパネルとコレクション画面を一瞬だけ
+/// 実画面に表示し、ScreenCaptureKit で撮影（Liquid Glass 込みの本物の見た目）して、
 /// ヘッドライン付きの 2560×1600（App Store 用）画像などの PNG を書き出して終了する。
-/// サンドボックスのため出力先はコンテナ内の一時ディレクトリ（stdout にパスを出力）。
-/// 通常は scripts/generate_screenshots.sh から使う。
+///
+/// - 初回は「画面収録」権限（システム設定 ▸ プライバシーとセキュリティ）の許可が必要。
+/// - サンドボックスのため出力先はコンテナ内の一時ディレクトリ（stdout にパスを出力）。
+/// - 通常は scripts/generate_screenshots.sh から使う。
 @MainActor
 enum ScreenshotRenderer {
     /// `--render-screenshots` 付きで起動されたときだけ実行し、true を返す
     static func runIfRequested() -> Bool {
         guard CommandLine.arguments.contains("--render-screenshots") else { return false }
 
-        // サイドバー等の vibrancy をアクティブ状態で描画させるため accessory + activate にする
         NSApplication.shared.setActivationPolicy(.accessory)
         NSApplication.shared.activate(ignoringOtherApps: true)
+        NSRunningApplication.current.activate(options: [.activateIgnoringOtherApps])
+
+        guard CGPreflightScreenCaptureAccess() else {
+            CGRequestScreenCaptureAccess()
+            print("SCREENSHOTS_ERROR: 画面収録の権限が必要です。")
+            print("システム設定 ▸ プライバシーとセキュリティ ▸ 画面収録とシステムオーディオ録音 で Clipnyx を許可してから再実行してください。")
+            exit(1)
+        }
 
         let outDir = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
             .appendingPathComponent("clipnyx-screenshots", isDirectory: true)
@@ -28,6 +39,9 @@ enum ScreenshotRenderer {
 
         for dark in [false, true] {
             let style = dark ? "dark" : "light"
+            // Liquid Glass が背後の画面を透かすため、無地のバッキングウィンドウを敷いて
+            // 撮影結果のトーンを安定させる
+            let backing = makeBackingWindow(dark: dark)
 
             let panel = renderPanel(japanese: isJapanese, dark: dark)
             write(panel, to: outDir.appendingPathComponent("panel-\(lang)-\(style).png"))
@@ -57,6 +71,8 @@ enum ScreenshotRenderer {
                 ),
                 to: outDir.appendingPathComponent("marketing-collection-\(lang)-\(style).png")
             )
+
+            backing.orderOut(nil)
         }
 
         print("SCREENSHOTS_DIR: \(outDir.path)")
@@ -73,11 +89,30 @@ enum ScreenshotRenderer {
             onDismiss: {},
             onPaste: {}
         ))
-        return capture(hosting, size: NSSize(width: 420, height: 560), dark: dark, settle: 0.8) { window in
-            // PreferenceKey ベースで確定した内容高さにウィンドウを合わせる
-            let height = min(max(hosting.fittingSize.height, 200), 560)
-            window.setContentSize(NSSize(width: 420, height: height))
-        }
+
+        let window = KeyableWindow(
+            contentRect: NSRect(origin: .zero, size: NSSize(width: 420, height: 560)),
+            styleMask: [.borderless],
+            backing: .buffered,
+            defer: false
+        )
+        window.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
+        window.backgroundColor = .clear
+        window.isOpaque = false
+        window.hasShadow = false
+        window.contentView = hosting
+        centerOnScreen(window)
+        window.makeKeyAndOrderFront(nil)
+
+        pumpRunLoop(seconds: 0.8)
+        // PreferenceKey ベースで確定した内容高さにウィンドウを合わせる
+        let height = min(max(hosting.fittingSize.height, 200), 560)
+        window.setContentSize(NSSize(width: 420, height: height))
+        pumpRunLoop(seconds: 0.4)
+
+        let image = captureWindow(window)
+        window.orderOut(nil)
+        return image
     }
 
     // MARK: - Collection Rendering
@@ -85,11 +120,8 @@ enum ScreenshotRenderer {
     private static func renderCollection(japanese: Bool, dark: Bool) -> NSImage {
         let demo = demoData(japanese: japanese)
         let manager = ClipboardManager(previewItems: demo.items, previewFolders: demo.folders)
-        let size = NSSize(width: 1040, height: 640)
 
-        // NavigationSplitView はビューコントローラ階層がないとサイドバーが
-        // オーバーレイモードに張り付くため、実アプリと同じく
-        // NSWindow(contentViewController: NSHostingController(...)) で構築する
+        // 実アプリと同じく NSWindow(contentViewController:) で構築する
         let controller = NSHostingController(rootView: FavoriteManagerView(
             clipboardManager: manager,
             initialItemId: demo.collectionItemId
@@ -98,102 +130,95 @@ enum ScreenshotRenderer {
         window.styleMask = [.titled, .closable, .resizable]
         window.title = japanese ? "コレクション" : "Collection"
         window.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
-        window.setContentSize(size)
-        window.setFrameOrigin(NSPoint(x: -10000, y: -10000))
+        window.setContentSize(NSSize(width: 1040, height: 640))
+        centerOnScreen(window)
         window.makeKeyAndOrderFront(nil)
+        // 信号機ボタンをアクティブ色で撮るため、アプリのアクティブ化を粘る
+        NSApplication.shared.activate(ignoringOtherApps: true)
+        window.makeMain()
 
         // initialItemId の選択反映（onAppear → 0.05 秒遅延）を待ってから撮る
         pumpRunLoop(seconds: 1.5)
-        let frameView = window.contentView?.superview ?? controller.view
-        convertVisualEffectsToWithinWindow(in: frameView)
-        pumpRunLoop(seconds: 0.3)
 
-        if ProcessInfo.processInfo.environment["CLIPNYX_DUMP_HIERARCHY"] != nil {
-            var dump = ""
-            dumpHierarchy(frameView, into: &dump)
-            try? dump.write(
-                to: URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("clipnyx-hierarchy.txt"),
-                atomically: true, encoding: .utf8
-            )
-        }
-
-        let bounds = frameView.bounds
-        guard let rep = frameView.bitmapImageRepForCachingDisplay(in: bounds) else {
-            fatalError("Failed to create bitmap rep for collection")
-        }
-        frameView.cacheDisplay(in: bounds, to: rep)
+        let image = captureWindow(window)
         window.orderOut(nil)
-
-        let image = NSImage(size: bounds.size)
-        image.addRepresentation(rep)
         return image
     }
 
-    // MARK: - Offscreen Capture
+    // MARK: - On-screen Capture (ScreenCaptureKit)
 
     private final class KeyableWindow: NSWindow {
         override var canBecomeKey: Bool { true }
         override var canBecomeMain: Bool { true }
     }
 
-    private static func capture(
-        _ hosting: NSView,
-        size: NSSize,
-        dark: Bool,
-        settle: TimeInterval,
-        adjust: ((NSWindow) -> Void)? = nil
-    ) -> NSImage {
-        let window = KeyableWindow(
-            contentRect: NSRect(origin: .zero, size: size),
-            styleMask: [.borderless],
-            backing: .buffered,
-            defer: false
-        )
-        window.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
-        window.backgroundColor = .clear
-        window.isOpaque = false
-        window.contentView = hosting
-        window.setFrameOrigin(NSPoint(x: -10000, y: -10000))
-        window.makeKeyAndOrderFront(nil)
+    private static func centerOnScreen(_ window: NSWindow) {
+        guard let screen = NSScreen.main else { return }
+        let frame = window.frame
+        window.setFrameOrigin(NSPoint(
+            x: screen.visibleFrame.midX - frame.width / 2,
+            y: screen.visibleFrame.midY - frame.height / 2
+        ))
+    }
 
-        pumpRunLoop(seconds: settle)
-        if let adjust {
-            adjust(window)
-            pumpRunLoop(seconds: 0.4)
+    /// 撮影トーン安定用の無地ウィンドウ（対象ウィンドウの背後に敷く）
+    private static func makeBackingWindow(dark: Bool) -> NSWindow {
+        let screen = NSScreen.main?.frame ?? NSRect(x: 0, y: 0, width: 1920, height: 1200)
+        let window = NSWindow(contentRect: screen, styleMask: [.borderless], backing: .buffered, defer: false)
+        window.backgroundColor = dark
+            ? NSColor(calibratedRed: 0.11, green: 0.11, blue: 0.12, alpha: 1)
+            : NSColor(calibratedWhite: 0.93, alpha: 1)
+        window.level = .normal
+        window.ignoresMouseEvents = true
+        window.orderFront(nil)
+        return window
+    }
+
+    /// 画面上のウィンドウを ScreenCaptureKit で撮影する（Liquid Glass 込み）
+    private static func captureWindow(_ window: NSWindow) -> NSImage {
+        let windowID = CGWindowID(window.windowNumber)
+        let scale = window.backingScaleFactor
+        let size = window.frame.size
+
+        var captured: CGImage?
+        var failure: String?
+        var done = false
+
+        Task {
+            do {
+                let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
+                guard let scWindow = content.windows.first(where: { $0.windowID == windowID }) else {
+                    failure = "window \(windowID) not found in shareable content"
+                    done = true
+                    return
+                }
+                let filter = SCContentFilter(desktopIndependentWindow: scWindow)
+                let config = SCStreamConfiguration()
+                config.width = Int(size.width * scale)
+                config.height = Int(size.height * scale)
+                config.backgroundColor = .clear
+                config.ignoreShadowsSingleWindow = true
+                config.showsCursor = false
+                config.captureResolution = .best
+                captured = try await SCScreenshotManager.captureImage(contentFilter: filter, configuration: config)
+            } catch {
+                failure = String(describing: error)
+            }
+            done = true
+        }
+        while !done {
+            pumpRunLoop(seconds: 0.05)
         }
 
-        let bounds = hosting.bounds
-        guard let rep = hosting.bitmapImageRepForCachingDisplay(in: bounds) else {
-            fatalError("Failed to create bitmap rep")
+        guard let cgImage = captured else {
+            fatalError("Failed to capture window: \(failure ?? "unknown")")
         }
-        hosting.cacheDisplay(in: bounds, to: rep)
-        window.orderOut(nil)
-
-        let image = NSImage(size: bounds.size)
-        image.addRepresentation(rep)
-        return image
+        // ポイントサイズを維持した 2x 画像として包む
+        return NSImage(cgImage: cgImage, size: size)
     }
 
     private static func pumpRunLoop(seconds: TimeInterval) {
         RunLoop.main.run(until: Date().addingTimeInterval(seconds))
-    }
-
-    private static func dumpHierarchy(_ view: NSView, indent: String = "", into out: inout String) {
-        let f = view.frame
-        out += "\(indent)\(type(of: view)) frame=(\(Int(f.origin.x)),\(Int(f.origin.y)),\(Int(f.width)),\(Int(f.height))) hidden=\(view.isHidden)\n"
-        for sub in view.subviews {
-            dumpHierarchy(sub, indent: indent + "  ", into: &out)
-        }
-    }
-
-    private static func convertVisualEffectsToWithinWindow(in view: NSView) {
-        if let effectView = view as? NSVisualEffectView {
-            effectView.blendingMode = .withinWindow
-            effectView.state = .active
-        }
-        for subview in view.subviews {
-            convertVisualEffectsToWithinWindow(in: subview)
-        }
     }
 
     // MARK: - Marketing Composition (2560×1600 = 1280×800 @2x)
@@ -239,7 +264,6 @@ enum ScreenshotRenderer {
                     .resizable()
                     .scaledToFit()
                     .frame(width: contentWidth)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
                     .shadow(color: .black.opacity(dark ? 0.6 : 0.22), radius: 28, y: 14)
                     .padding(.top, 24)
             }

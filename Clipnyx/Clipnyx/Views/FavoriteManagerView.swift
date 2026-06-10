@@ -5,7 +5,6 @@ struct FavoriteManagerView: View {
     var initialItemId: UUID? = nil
     @State var selectedFolderFilter: FavoriteFilter = .allHistory
     @State var selectedItemId: UUID?
-    @State private var columnVisibility: NavigationSplitViewVisibility = .all
     @State private var newFolderName = ""
     @State private var renamingFolderId: UUID?
     @State private var renamingText = ""
@@ -31,26 +30,12 @@ struct FavoriteManagerView: View {
     }
 
     var body: some View {
-        Group {
-            if isScreenshotMode {
-                // Liquid Glass のサイドバーはオフスクリーン描画に写らないため、
-                // スクリーンショット生成時は同じ部品を素の HSplit 風に並べる
-                HStack(spacing: 0) {
-                    sidebar.frame(width: 200)
-                    Divider()
-                    itemList.frame(width: 300)
-                    Divider()
-                    detailArea
-                }
-            } else {
-                NavigationSplitView(columnVisibility: $columnVisibility) {
-                    sidebar
-                } content: {
-                    itemList
-                } detail: {
-                    detailArea
-                }
-            }
+        NavigationSplitView {
+            sidebar
+        } content: {
+            itemList
+        } detail: {
+            detailArea
         }
         .frame(minWidth: 800, minHeight: 500)
         .onAppear {
@@ -87,19 +72,10 @@ struct FavoriteManagerView: View {
 
     // MARK: - Sidebar
 
-    /// スクリーンショット生成時はオフスクリーン描画で vibrancy が黒く写るため、
-    /// サイドバーを不透明スタイルに切り替える（通常起動では常に false）
-    private var isScreenshotMode: Bool {
-        #if DEBUG
-        ProcessInfo.processInfo.arguments.contains("--render-screenshots")
-        #else
-        false
-        #endif
-    }
-
     private var sidebar: some View {
-        styledSidebarList
-            .focusable(!isScreenshotMode)
+        sidebarList
+            .listStyle(.sidebar)
+            .focusable()
             .focused($focusedArea, equals: .sidebar)
             .onDeleteCommand {
                 if case .folder(let id) = selectedFolderFilter {
@@ -133,18 +109,6 @@ struct FavoriteManagerView: View {
                 .padding(8)
             }
             .navigationSplitViewColumnWidth(min: 160, ideal: 180)
-    }
-
-    @ViewBuilder
-    private var styledSidebarList: some View {
-        if isScreenshotMode {
-            sidebarList
-                .listStyle(.inset)
-                .scrollContentBackground(.hidden)
-                .background(Color(nsColor: .underPageBackgroundColor))
-        } else {
-            sidebarList.listStyle(.sidebar)
-        }
     }
 
     private var sidebarList: some View {
