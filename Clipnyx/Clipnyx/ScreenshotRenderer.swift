@@ -5,9 +5,9 @@ import SwiftUI
 /// マーケティング用スクリーンショットをオフスクリーン描画で生成する（Debug ビルド限定）。
 ///
 /// `Clipnyx --render-screenshots -AppleLanguages '(ja)'` のように起動すると、
-/// 実データに触れずデモデータでペーストパネルを描画し、ヘッドライン付きの
-/// 2560×1600（App Store 用）画像とパネル単体の PNG を書き出して終了する。
-/// サンドックスのため出力先はコンテナ内の一時ディレクトリ（stdout にパスを出力）。
+/// 実データに触れずデモデータでペーストパネルとコレクション画面を描画し、
+/// ヘッドライン付きの 2560×1600（App Store 用）画像などの PNG を書き出して終了する。
+/// サンドボックスのため出力先はコンテナ内の一時ディレクトリ（stdout にパスを出力）。
 /// 通常は scripts/generate_screenshots.sh から使う。
 @MainActor
 enum ScreenshotRenderer {
@@ -15,7 +15,9 @@ enum ScreenshotRenderer {
     static func runIfRequested() -> Bool {
         guard CommandLine.arguments.contains("--render-screenshots") else { return false }
 
-        NSApplication.shared.setActivationPolicy(.prohibited)
+        // サイドバー等の vibrancy をアクティブ状態で描画させるため accessory + activate にする
+        NSApplication.shared.setActivationPolicy(.accessory)
+        NSApplication.shared.activate(ignoringOtherApps: true)
 
         let outDir = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
             .appendingPathComponent("clipnyx-screenshots", isDirectory: true)
@@ -26,10 +28,35 @@ enum ScreenshotRenderer {
 
         for dark in [false, true] {
             let style = dark ? "dark" : "light"
+
             let panel = renderPanel(japanese: isJapanese, dark: dark)
             write(panel, to: outDir.appendingPathComponent("panel-\(lang)-\(style).png"))
-            let marketing = renderMarketing(panel: panel, japanese: isJapanese, dark: dark)
-            write(marketing, to: outDir.appendingPathComponent("marketing-\(lang)-\(style).png"))
+            write(
+                composeMarketing(
+                    content: panel,
+                    contentWidth: 440,
+                    headline: isJapanese ? "クリップボード履歴を自動保存。" : "Automatically save clipboard history.",
+                    subtitle: isJapanese
+                        ? "テキスト、画像、コードなど、いつでも呼び出せます。"
+                        : "Text, images, code, and more—you can access them anytime.",
+                    dark: dark
+                ),
+                to: outDir.appendingPathComponent("marketing-history-\(lang)-\(style).png")
+            )
+
+            let collection = renderCollection(japanese: isJapanese, dark: dark)
+            write(
+                composeMarketing(
+                    content: collection,
+                    contentWidth: 860,
+                    headline: isJapanese ? "お気に入りをフォルダで整理。" : "Organize favorites into folders.",
+                    subtitle: isJapanese
+                        ? "定型文やよく使うテキストを、コレクションでまとめて管理。"
+                        : "Keep templates and frequently used text together in your collection.",
+                    dark: dark
+                ),
+                to: outDir.appendingPathComponent("marketing-collection-\(lang)-\(style).png")
+            )
         }
 
         print("SCREENSHOTS_DIR: \(outDir.path)")
@@ -39,18 +66,85 @@ enum ScreenshotRenderer {
     // MARK: - Panel Rendering
 
     private static func renderPanel(japanese: Bool, dark: Bool) -> NSImage {
-        let manager = ClipboardManager(
-            previewItems: demoItems(japanese: japanese),
-            previewFolders: demoFolders(japanese: japanese)
-        )
+        let demo = demoData(japanese: japanese)
+        let manager = ClipboardManager(previewItems: demo.items, previewFolders: demo.folders)
         let hosting = NSHostingView(rootView: PopupContentView(
             clipboardManager: manager,
             onDismiss: {},
             onPaste: {}
         ))
+        return capture(hosting, size: NSSize(width: 420, height: 560), dark: dark, settle: 0.8) { window in
+            // PreferenceKey ベースで確定した内容高さにウィンドウを合わせる
+            let height = min(max(hosting.fittingSize.height, 200), 560)
+            window.setContentSize(NSSize(width: 420, height: height))
+        }
+    }
 
-        let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 420, height: 560),
+    // MARK: - Collection Rendering
+
+    private static func renderCollection(japanese: Bool, dark: Bool) -> NSImage {
+        let demo = demoData(japanese: japanese)
+        let manager = ClipboardManager(previewItems: demo.items, previewFolders: demo.folders)
+        let size = NSSize(width: 1040, height: 640)
+
+        // NavigationSplitView はビューコントローラ階層がないとサイドバーが
+        // オーバーレイモードに張り付くため、実アプリと同じく
+        // NSWindow(contentViewController: NSHostingController(...)) で構築する
+        let controller = NSHostingController(rootView: FavoriteManagerView(
+            clipboardManager: manager,
+            initialItemId: demo.collectionItemId
+        ))
+        let window = NSWindow(contentViewController: controller)
+        window.styleMask = [.titled, .closable, .resizable]
+        window.title = japanese ? "コレクション" : "Collection"
+        window.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
+        window.setContentSize(size)
+        window.setFrameOrigin(NSPoint(x: -10000, y: -10000))
+        window.makeKeyAndOrderFront(nil)
+
+        // initialItemId の選択反映（onAppear → 0.05 秒遅延）を待ってから撮る
+        pumpRunLoop(seconds: 1.5)
+        let frameView = window.contentView?.superview ?? controller.view
+        convertVisualEffectsToWithinWindow(in: frameView)
+        pumpRunLoop(seconds: 0.3)
+
+        if ProcessInfo.processInfo.environment["CLIPNYX_DUMP_HIERARCHY"] != nil {
+            var dump = ""
+            dumpHierarchy(frameView, into: &dump)
+            try? dump.write(
+                to: URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("clipnyx-hierarchy.txt"),
+                atomically: true, encoding: .utf8
+            )
+        }
+
+        let bounds = frameView.bounds
+        guard let rep = frameView.bitmapImageRepForCachingDisplay(in: bounds) else {
+            fatalError("Failed to create bitmap rep for collection")
+        }
+        frameView.cacheDisplay(in: bounds, to: rep)
+        window.orderOut(nil)
+
+        let image = NSImage(size: bounds.size)
+        image.addRepresentation(rep)
+        return image
+    }
+
+    // MARK: - Offscreen Capture
+
+    private final class KeyableWindow: NSWindow {
+        override var canBecomeKey: Bool { true }
+        override var canBecomeMain: Bool { true }
+    }
+
+    private static func capture(
+        _ hosting: NSView,
+        size: NSSize,
+        dark: Bool,
+        settle: TimeInterval,
+        adjust: ((NSWindow) -> Void)? = nil
+    ) -> NSImage {
+        let window = KeyableWindow(
+            contentRect: NSRect(origin: .zero, size: size),
             styleMask: [.borderless],
             backing: .buffered,
             defer: false
@@ -60,17 +154,17 @@ enum ScreenshotRenderer {
         window.isOpaque = false
         window.contentView = hosting
         window.setFrameOrigin(NSPoint(x: -10000, y: -10000))
-        window.orderFront(nil)
+        window.makeKeyAndOrderFront(nil)
 
-        // LazyVStack の materialize と PreferenceKey ベースの高さ確定を待つ
-        pumpRunLoop(seconds: 0.8)
-        let height = min(max(hosting.fittingSize.height, 200), 560)
-        window.setContentSize(NSSize(width: 420, height: height))
-        pumpRunLoop(seconds: 0.4)
+        pumpRunLoop(seconds: settle)
+        if let adjust {
+            adjust(window)
+            pumpRunLoop(seconds: 0.4)
+        }
 
         let bounds = hosting.bounds
         guard let rep = hosting.bitmapImageRepForCachingDisplay(in: bounds) else {
-            fatalError("Failed to create bitmap rep for panel")
+            fatalError("Failed to create bitmap rep")
         }
         hosting.cacheDisplay(in: bounds, to: rep)
         window.orderOut(nil)
@@ -84,17 +178,40 @@ enum ScreenshotRenderer {
         RunLoop.main.run(until: Date().addingTimeInterval(seconds))
     }
 
+    private static func dumpHierarchy(_ view: NSView, indent: String = "", into out: inout String) {
+        let f = view.frame
+        out += "\(indent)\(type(of: view)) frame=(\(Int(f.origin.x)),\(Int(f.origin.y)),\(Int(f.width)),\(Int(f.height))) hidden=\(view.isHidden)\n"
+        for sub in view.subviews {
+            dumpHierarchy(sub, indent: indent + "  ", into: &out)
+        }
+    }
+
+    private static func convertVisualEffectsToWithinWindow(in view: NSView) {
+        if let effectView = view as? NSVisualEffectView {
+            effectView.blendingMode = .withinWindow
+            effectView.state = .active
+        }
+        for subview in view.subviews {
+            convertVisualEffectsToWithinWindow(in: subview)
+        }
+    }
+
     // MARK: - Marketing Composition (2560×1600 = 1280×800 @2x)
 
-    private static func renderMarketing(panel: NSImage, japanese: Bool, dark: Bool) -> NSImage {
-        let headline = japanese
-            ? "クリップボード履歴を自動保存。"
-            : "Automatically save clipboard history."
-        let subtitle = japanese
-            ? "テキスト、画像、コードなど、いつでも呼び出せます。"
-            : "Text, images, code, and more—you can access them anytime."
-
-        let view = MarketingShotView(panel: panel, headline: headline, subtitle: subtitle, dark: dark)
+    private static func composeMarketing(
+        content: NSImage,
+        contentWidth: CGFloat,
+        headline: String,
+        subtitle: String,
+        dark: Bool
+    ) -> NSImage {
+        let view = MarketingShotView(
+            content: content,
+            contentWidth: contentWidth,
+            headline: headline,
+            subtitle: subtitle,
+            dark: dark
+        )
         let renderer = ImageRenderer(content: view)
         renderer.scale = 2
         guard let image = renderer.nsImage else {
@@ -104,7 +221,8 @@ enum ScreenshotRenderer {
     }
 
     private struct MarketingShotView: View {
-        let panel: NSImage
+        let content: NSImage
+        let contentWidth: CGFloat
         let headline: String
         let subtitle: String
         let dark: Bool
@@ -117,10 +235,11 @@ enum ScreenshotRenderer {
                 Text(subtitle)
                     .font(.system(size: 20))
                     .foregroundStyle(dark ? Color.white.opacity(0.65) : Color(red: 0.11, green: 0.11, blue: 0.12).opacity(0.6))
-                Image(nsImage: panel)
+                Image(nsImage: content)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 440)
+                    .frame(width: contentWidth)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
                     .shadow(color: .black.opacity(dark ? 0.6 : 0.22), radius: 28, y: 14)
                     .padding(.top, 24)
             }
@@ -132,12 +251,17 @@ enum ScreenshotRenderer {
 
     // MARK: - Demo Data
 
-    private static func demoFolders(japanese: Bool) -> [FavoriteFolder] {
-        [FavoriteFolder(name: japanese ? "定型文" : "Templates", order: 0)]
+    private struct DemoData {
+        let items: [ClipboardItem]
+        let folders: [FavoriteFolder]
+        /// コレクション画面で選択状態にするアイテム
+        let collectionItemId: UUID
     }
 
-    private static func demoItems(japanese: Bool) -> [ClipboardItem] {
-        let folderId = demoFolders(japanese: japanese)[0].id
+    private static func demoData(japanese: Bool) -> DemoData {
+        let templates = FavoriteFolder(name: japanese ? "定型文" : "Templates", order: 0)
+        let work = FavoriteFolder(name: japanese ? "仕事" : "Work", order: 1)
+
         var order = 0
         func item(
             _ category: ClipboardContentCategory,
@@ -145,7 +269,7 @@ enum ScreenshotRenderer {
             size: Int? = nil,
             thumbnail: Data? = nil,
             favorite: String? = nil,
-            inFolder: Bool = false
+            folder: FavoriteFolder? = nil
         ) -> ClipboardItem {
             order += 1
             return ClipboardItem(
@@ -159,35 +283,60 @@ enum ScreenshotRenderer {
                 representationInfos: [RepresentationInfo(type: NSPasteboard.PasteboardType.string.rawValue, size: size ?? preview.utf8.count)],
                 isSaved: favorite != nil,
                 favoriteName: favorite,
-                favoriteFolderId: inFolder ? folderId : nil
+                favoriteFolderId: folder?.id
             )
         }
 
+        let items: [ClipboardItem]
+        let emailTemplate: ClipboardItem
+
         if japanese {
-            return [
+            emailTemplate = item(
+                .plainText,
+                "お世話になっております。澤田です。\nご確認のほどよろしくお願いいたします。",
+                favorite: "メールの定型文", folder: templates
+            )
+            items = [
                 item(.url, "https://developer.apple.com/jp/macos/"),
                 item(.plainText, "明日の打ち合わせは 14:00 から、3F 会議室 B に変更になりました。"),
                 item(.image, "画像 1,024×640", size: 482_304, thumbnail: demoThumbnail()),
                 item(.sourceCode, "func greet(name: String) -> String {\n    \"こんにちは、\\(name)さん！\"\n}"),
-                item(.plainText, "お世話になっております。澤田です。\nご確認のほどよろしくお願いいたします。", favorite: "メールの定型文", inFolder: true),
+                emailTemplate,
                 item(.color, "#5E5CE6"),
                 item(.fileURL, "企画書_2026.pdf, ロゴ案.png", size: 2_412_544),
-                item(.plainText, "〒150-0002 東京都渋谷区渋谷 2-21-1"),
+                item(.plainText, "〒150-0002 東京都渋谷区渋谷 2-21-1", favorite: "会社の住所", folder: templates),
                 item(.csv, "日付,項目,金額\n2026-06-01,交通費,1280"),
+                item(.plainText, "いつもありがとうございます。\n本日もよろしくお願いいたします。", favorite: "朝の挨拶", folder: templates),
+                item(.plainText, "## 週報 YYYY-MM-DD\n- 今週やったこと\n- 来週やること\n- 課題", favorite: "週報テンプレート", folder: work),
+                item(.plainText, "日時:\n参加者:\n決定事項:\nTODO:", favorite: "議事録の雛形", folder: work),
             ]
         } else {
-            return [
+            emailTemplate = item(
+                .plainText,
+                "Thanks for reaching out!\nPlease let me know if you have any questions.",
+                favorite: "Email template", folder: templates
+            )
+            items = [
                 item(.url, "https://developer.apple.com/macos/"),
                 item(.plainText, "Tomorrow's meeting has been moved to 2:00 PM in Conference Room B."),
                 item(.image, "Image 1,024×640", size: 482_304, thumbnail: demoThumbnail()),
                 item(.sourceCode, "func greet(name: String) -> String {\n    \"Hello, \\(name)!\"\n}"),
-                item(.plainText, "Thanks for reaching out!\nPlease let me know if you have any questions.", favorite: "Email template", inFolder: true),
+                emailTemplate,
                 item(.color, "#5E5CE6"),
                 item(.fileURL, "Proposal_2026.pdf, Logo_draft.png", size: 2_412_544),
-                item(.plainText, "1 Apple Park Way, Cupertino, CA 95014"),
+                item(.plainText, "1 Apple Park Way, Cupertino, CA 95014", favorite: "Office address", folder: templates),
                 item(.csv, "date,item,amount\n2026-06-01,transit,12.80"),
+                item(.plainText, "Good morning team!\nHope you all have a great day.", favorite: "Morning greeting", folder: templates),
+                item(.plainText, "## Weekly report YYYY-MM-DD\n- Done this week\n- Next week\n- Issues", favorite: "Weekly report", folder: work),
+                item(.plainText, "Date:\nAttendees:\nDecisions:\nTODO:", favorite: "Meeting notes", folder: work),
             ]
         }
+
+        return DemoData(
+            items: items,
+            folders: [templates, work],
+            collectionItemId: emailTemplate.id
+        )
     }
 
     private static func demoThumbnail() -> Data? {

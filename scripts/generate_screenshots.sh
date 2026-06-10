@@ -30,13 +30,19 @@ OUT_EN=$("$BIN" --render-screenshots -AppleLanguages '(en)' | awk '/^SCREENSHOTS
 
 echo "==> Copying outputs..."
 # App Store 用は 2560×1600 のまま
-cp "$OUT_JA/marketing-ja-light.png" "fastlane/screenshots/ja/1_履歴パネル.png"
-cp "$OUT_EN/marketing-en-light.png" fastlane/screenshots/en-US/1_history_panel.png
+cp "$OUT_JA/marketing-history-ja-light.png" "fastlane/screenshots/ja/1_履歴パネル.png"
+cp "$OUT_JA/marketing-collection-ja-light.png" "fastlane/screenshots/ja/2_コレクション.png"
+cp "$OUT_EN/marketing-history-en-light.png" fastlane/screenshots/en-US/1_history_panel.png
+cp "$OUT_EN/marketing-collection-en-light.png" fastlane/screenshots/en-US/2_collection.png
 # LP 用は表示幅 720px（@2x = 1440px）に縮小してファイルサイズを抑える
-sips --resampleWidth 1440 "$OUT_JA/marketing-ja-light.png" --out docs/screenshot-ja.png >/dev/null
-sips --resampleWidth 1440 "$OUT_EN/marketing-en-light.png" --out docs/screenshot-en.png >/dev/null
-sips --resampleWidth 1440 "$OUT_JA/marketing-ja-dark.png" --out docs/screenshot-ja-dark.png >/dev/null
-sips --resampleWidth 1440 "$OUT_EN/marketing-en-dark.png" --out docs/screenshot-en-dark.png >/dev/null
+for lang in ja en; do
+  OUT_VAR="OUT_JA"; [ "$lang" = "en" ] && OUT_VAR="OUT_EN"
+  OUT="${!OUT_VAR}"
+  sips --resampleWidth 1440 "$OUT/marketing-history-$lang-light.png" --out "docs/screenshot-$lang.png" >/dev/null
+  sips --resampleWidth 1440 "$OUT/marketing-history-$lang-dark.png" --out "docs/screenshot-$lang-dark.png" >/dev/null
+  sips --resampleWidth 1440 "$OUT/marketing-collection-$lang-light.png" --out "docs/screenshot-collection-$lang.png" >/dev/null
+  sips --resampleWidth 1440 "$OUT/marketing-collection-$lang-dark.png" --out "docs/screenshot-collection-$lang-dark.png" >/dev/null
+done
 
 echo "==> Done. All variants (incl. dark) are in:"
 echo "    ja: $OUT_JA"
