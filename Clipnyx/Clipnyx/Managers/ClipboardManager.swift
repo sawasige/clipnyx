@@ -23,9 +23,10 @@ final class ClipboardManager {
     private(set) var isRestoringItem: Bool = false
     private var lastChangeCount: Int = 0
     private var pollingTimer: Timer?
-    let store = ClipboardStore()
+    let store: ClipboardStore
 
     init() {
+        store = ClipboardStore()
         maxHistoryCount = UserDefaults.standard.object(forKey: "maxHistoryCount") as? Int ?? 50
         maxTotalSizeMB = UserDefaults.standard.object(forKey: "maxTotalSizeMB") as? Int ?? 1024
         if let raw = UserDefaults.standard.stringArray(forKey: "excludedCategories") {
@@ -41,8 +42,11 @@ final class ClipboardManager {
     }
 
     #if DEBUG
-    /// スクリーンショット生成用: ストアの読み書きもポーリングもしない
+    /// スクリーンショット生成用: ポーリングせず、ストアは読み取り専用にして
+    /// 実データへの書き込みを構造的に遮断する（View からの自動保存等が
+    /// 発火しても実ファイルには一切触れない）
     init(previewItems: [ClipboardItem], previewFolders: [FavoriteFolder]) {
+        store = ClipboardStore(isReadOnly: true)
         maxHistoryCount = 50
         maxTotalSizeMB = 1024
         excludedCategories = []
