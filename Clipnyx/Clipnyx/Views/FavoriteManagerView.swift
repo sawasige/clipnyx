@@ -126,7 +126,7 @@ struct FavoriteManagerView: View {
             }
 
             Section("Folders") {
-                ForEach(clipboardManager.favoriteFolders.sorted(by: { $0.order < $1.order })) { folder in
+                ForEach(clipboardManager.sortedFavoriteFolders) { folder in
                     if renamingFolderId == folder.id {
                         TextField("", text: $renamingText, onCommit: {
                             if !renamingText.isEmpty {
@@ -157,7 +157,7 @@ struct FavoriteManagerView: View {
                     }
                 }
                 .onMove { from, to in
-                    var sorted = clipboardManager.favoriteFolders.sorted(by: { $0.order < $1.order })
+                    var sorted = clipboardManager.sortedFavoriteFolders
                     sorted.move(fromOffsets: from, toOffset: to)
                     for i in sorted.indices {
                         sorted[i].order = i
@@ -165,7 +165,7 @@ struct FavoriteManagerView: View {
                     clipboardManager.reorderFavoriteFolders(sorted)
                 }
                 .onDelete { offsets in
-                    let sorted = clipboardManager.favoriteFolders.sorted(by: { $0.order < $1.order })
+                    let sorted = clipboardManager.sortedFavoriteFolders
                     for index in offsets {
                         clipboardManager.deleteFavoriteFolder(id: sorted[index].id)
                     }
@@ -346,7 +346,7 @@ private struct ItemDetailEditor: View {
                         LabeledContent("Folder") {
                             Picker("", selection: $selectedFolderId) {
                                 Text("None").tag(UUID?.none)
-                                ForEach(clipboardManager.favoriteFolders.sorted(by: { $0.order < $1.order })) { folder in
+                                ForEach(clipboardManager.sortedFavoriteFolders) { folder in
                                     Text(folder.name).tag(UUID?.some(folder.id))
                                 }
                             }

@@ -3,7 +3,8 @@ import AppKit
 
 private let kHotKeyID = EventHotKeyID(signature: OSType(0x434C5058), id: 1) // "CLPX"
 
-final class HotKeyManager: @unchecked Sendable {
+@MainActor
+final class HotKeyManager {
     static let shared = HotKeyManager()
 
     private static let defaultKeyCode: UInt32 = 9 // V key
@@ -40,8 +41,11 @@ final class HotKeyManager: @unchecked Sendable {
 
         if eventHandlerRef == nil {
             var eventType = EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: UInt32(kEventHotKeyPressed))
-            InstallEventHandler(GetApplicationEventTarget(), { _, event, _ -> OSStatus in
-                HotKeyManager.shared.handleHotKey()
+            // Carbon のアプリケーションイベントターゲットはメインスレッドで配送される
+            InstallEventHandler(GetApplicationEventTarget(), { _, _, _ -> OSStatus in
+                MainActor.assumeIsolated {
+                    HotKeyManager.shared.handleHotKey()
+                }
                 return noErr
             }, 1, &eventType, nil, &eventHandlerRef)
         }
@@ -114,9 +118,9 @@ final class HotKeyManager: @unchecked Sendable {
     // MARK: - Handler
 
     func handleHotKey() {
-        DispatchQueue.main.async { [weak self] in
+        // Carbon のイベント処理中に直接 UI を触らないよう、次のランループへ遅延させる
+        Task { [weak self] in
             self?.onHotKey?()
         }
     }
-
 }

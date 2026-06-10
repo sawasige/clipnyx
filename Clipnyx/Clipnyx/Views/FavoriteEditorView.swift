@@ -55,7 +55,7 @@ struct FavoriteEditorView: View {
                         .frame(width: labelWidth, alignment: .trailing)
                     Picker("", selection: $selectedFolderId) {
                         Text("None").tag(UUID?.none)
-                        ForEach(clipboardManager.favoriteFolders.sorted(by: { $0.order < $1.order })) { folder in
+                        ForEach(clipboardManager.sortedFavoriteFolders) { folder in
                             Text(folder.name).tag(UUID?.some(folder.id))
                         }
                     }
