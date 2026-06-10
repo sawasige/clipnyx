@@ -22,14 +22,13 @@ Clipnyx/Clipnyx/
 ├── Models/
 │   ├── ClipboardItem.swift       # 履歴アイテムモデル（お気に入り・フォルダ情報含む）
 │   ├── ClipboardContentCategory.swift # 11カテゴリ分類
+│   ├── FavoriteFilter.swift      # 履歴絞り込み（パネルとコレクションで共有）
 │   ├── FavoriteFolder.swift      # お気に入りフォルダモデル
 │   └── PasteboardRepresentation.swift # ペーストボードデータ表現
 ├── Views/
 │   ├── PopupContentView.swift    # ペーストパネル（フォルダチップ切り替え対応）
 │   ├── MenuBarView.swift         # メニューバー（.menu スタイル）
-│   ├── FavoriteManagerView.swift # コレクション画面（NavigationSplitView）
-│   ├── FavoriteEditorView.swift  # お気に入り編集・新規テキスト追加ウィンドウ
-│   ├── FavoriteRegistrationView.swift # お気に入り登録ポップオーバー
+│   ├── FavoriteManagerView.swift # コレクション画面（NavigationSplitView、詳細編集含む）
 │   ├── SettingsView.swift        # 設定画面
 │   ├── ItemDetailView.swift      # アイテム詳細ポップオーバー
 │   └── ItemPreviewContent.swift  # アイテムプレビュー表示
