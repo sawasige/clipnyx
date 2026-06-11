@@ -10,6 +10,8 @@ platform :mac do
       app_version: options[:app_version],
       skip_binary_upload: true,
       skip_screenshots: false,
+      # 既存スクリーンショットを削除してから上げ直す（false だと追加になる）
+      overwrite_screenshots: true,
       force: true,
       platform: "osx",
       precheck_include_in_app_purchases: false
