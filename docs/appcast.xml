@@ -157,6 +157,23 @@
     <description xml:lang="ja"><![CDATA[- 安定性の向上と細かな改善を行いました]]></description>
     <enclosure url="https://github.com/sawasige/clipnyx/releases/download/v1.3.6/Clipnyx.dmg" length="4772345" type="application/octet-stream" sparkle:edSignature="M4v/h6xW+M9U4kUEmJQpCkbd9BTXcKG8Gvq5+439vws/eNSfuqe3LTh+P1y6A6+zxw3CBPLHey8utJrmuza6Bw==" />
   </item>
+        <item>
+    <title>1.4.0</title>
+    <pubDate>Thu, 11 Jun 2026 04:53:20 +0000</pubDate>
+    <sparkle:version>25</sparkle:version>
+    <sparkle:shortVersionString>1.4.0</sparkle:shortVersionString>
+    <description><![CDATA[- You can now select multiple items in the Collection window (⌘-click / ⇧-click) to move them to a folder, unfavorite, or delete them all at once
+- Items can now be moved to a folder by dragging them onto the sidebar
+- Sensitive data copied with a confidentiality mark (e.g. from password managers) is no longer recorded in history
+- Data sizes are now displayed in the standard macOS format (same as Finder)
+- Internal improvements: fewer disk writes while editing, and stability improvements from code modernization]]></description>
+    <description xml:lang="ja"><![CDATA[- コレクション画面でアイテムを複数選択できるようになりました（⌘クリック / ⇧クリック）。フォルダへの移動・お気に入り解除・削除をまとめて行えます
+- アイテムをサイドバーのフォルダへドラッグ&amp;ドロップで移動できるようになりました
+- パスワードマネージャー等が機密マークを付けてコピーしたデータを、履歴に記録しないようにしました
+- データサイズの表記を macOS 標準（Finder と同じ）に統一しました
+- 内部改善: 編集時のディスク書き込み削減、コード近代化による安定性向上]]></description>
+    <enclosure url="https://github.com/sawasige/clipnyx/releases/download/v1.4.0/Clipnyx.dmg" length="4847391" type="application/octet-stream" sparkle:edSignature="u0+sOsJtJgshrN6XwoN4Z5u888ssEZ+0kTXJeM151w7hrFXOKuzOJ7VKnHYr0enLVzPdMCrmfVEZ6YD+hChuBQ==" />
+  </item>
     <!-- Items are prepended by CI on each release -->
   </channel>
 </rss>
