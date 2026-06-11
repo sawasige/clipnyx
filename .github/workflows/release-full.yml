@@ -151,6 +151,26 @@ jobs:
           python3 -c "
           import sys, html
 
+          # Markdown の箇条書きを HTML に変換する
+          # （Sparkle は description を HTML として描画するため、プレーンテキストだと改行が潰れる）
+          def md_to_html(text):
+              out = []
+              items = []
+              for line in text.strip().splitlines():
+                  line = line.strip()
+                  if not line:
+                      continue
+                  if line.startswith('- '):
+                      items.append('<li>' + html.escape(line[2:]) + '</li>')
+                  else:
+                      if items:
+                          out.append('<ul>' + ''.join(items) + '</ul>')
+                          items = []
+                      out.append('<p>' + html.escape(line) + '</p>')
+              if items:
+                  out.append('<ul>' + ''.join(items) + '</ul>')
+              return ''.join(out)
+
           # Read release notes (ja / en split by <!-- en -->)
           notes_ja = ''
           notes_en = ''
@@ -158,10 +178,10 @@ jobs:
               raw = open('RELEASE_NOTES.md').read().strip()
               if '<!-- en -->' in raw:
                   parts = raw.split('<!-- en -->')
-                  notes_ja = html.escape(parts[0].strip())
-                  notes_en = html.escape(parts[1].strip())
+                  notes_ja = md_to_html(parts[0])
+                  notes_en = md_to_html(parts[1])
               else:
-                  notes_ja = html.escape(raw)
+                  notes_ja = md_to_html(raw)
                   notes_en = notes_ja
           except FileNotFoundError:
               pass
