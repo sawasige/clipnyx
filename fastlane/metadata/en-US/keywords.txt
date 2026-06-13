@@ -1,1 +1,1 @@
-clipboard,history,copy,paste,manager,menu bar,hotkey,text,image,productivity
+clipboard,history,copy,paste,manager,menu bar,hotkey,text,image,productivity,snippet,template
