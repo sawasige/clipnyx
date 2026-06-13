@@ -1,4 +1,5 @@
-- Added favorites, folders, and a Collection view
-- Convert rich text, URLs, and more to plain text
-- Choose which categories to record with per-category filters
-- Quickly open the history panel with a global hot key
+- Select multiple items in the Collection window (Cmd-click / Shift-click) to move them to a folder, unfavorite, or delete them all at once
+- Move items to a folder by dragging them onto the sidebar
+- Sensitive data copied with a confidentiality mark (e.g. from password managers) is no longer recorded in history
+- Data sizes are now displayed in the standard macOS format
+- Stability improvements and minor refinements

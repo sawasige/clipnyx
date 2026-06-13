@@ -22,14 +22,13 @@ Clipnyx/Clipnyx/
 ├── Models/
 │   ├── ClipboardItem.swift       # 履歴アイテムモデル（お気に入り・フォルダ情報含む）
 │   ├── ClipboardContentCategory.swift # 11カテゴリ分類
+│   ├── FavoriteFilter.swift      # 履歴絞り込み（パネルとコレクションで共有）
 │   ├── FavoriteFolder.swift      # お気に入りフォルダモデル
 │   └── PasteboardRepresentation.swift # ペーストボードデータ表現
 ├── Views/
 │   ├── PopupContentView.swift    # ペーストパネル（フォルダチップ切り替え対応）
 │   ├── MenuBarView.swift         # メニューバー（.menu スタイル）
-│   ├── FavoriteManagerView.swift # コレクション画面（NavigationSplitView）
-│   ├── FavoriteEditorWindow.swift # お気に入り編集・新規テキスト追加ウィンドウ
-│   ├── FavoriteRegistrationView.swift # お気に入り登録ポップオーバー
+│   ├── FavoriteManagerView.swift # コレクション画面（NavigationSplitView、詳細編集含む）
 │   ├── SettingsView.swift        # 設定画面
 │   ├── ItemDetailView.swift      # アイテム詳細ポップオーバー
 │   └── ItemPreviewContent.swift  # アイテムプレビュー表示
@@ -41,6 +40,7 @@ Clipnyx/Clipnyx/
 ## アーキテクチャ
 - **@Observable** パターン（Observation framework）を使用
 - ClipboardManager が中心。0.5秒間隔で NSPasteboard をポーリング
+- 機密・一時データ（`org.nspasteboard.ConcealedType` / `TransientType` 等）は履歴に記録しない
 - ホットキーは Carbon `RegisterEventHotKey` で登録（イベント消費のため）
 - ペースト: `CGEvent.post` で ⌘V を送信（PostEvent 権限、サンドボックス互換）
 - 権限チェック: `CGRequestPostEventAccess()` / `CGPreflightPostEventAccess()`
@@ -55,6 +55,13 @@ Clipnyx/Clipnyx/
 - **Debug / Release**: App Store 版（サンドボックス、Sparkle なし）
 - **Debug-Full / Release-Full**: Full 版（サンドボックス + Sparkle）
 - `ENABLE_SPARKLE` コンパイルフラグで Sparkle 関連コードを分岐
+
+## スクリーンショット生成
+- `scripts/generate_screenshots.sh` で LP 用（docs/screenshot-*.png）と App Store 用（fastlane/screenshots/）を自動生成
+- Debug ビルドの `ScreenshotRenderer`（`--render-screenshots` 起動引数、`#if DEBUG`）がデモデータでパネルとコレクション画面を一瞬実画面に表示し、ScreenCaptureKit で撮影（Liquid Glass 込みの本物の見た目）
+- プレビュー用 ClipboardManager は読み取り専用ストアを使うため**実データには一切触れない**
+- 初回は実行元（ターミナル）への「画面収録」権限の許可が必要。生成中は画面中央にウィンドウが数秒ずつ表示される
+- ライト/ダーク × 日英の全バリアントがコンテナ内 tmp に出力される（履歴パネル + コレクションの2画面）
 
 ## CI/CD
 - **リリース**: `gh workflow run "Release Full (Homebrew)" --ref main` を実行するだけで両エディションがデプロイされる
@@ -73,5 +80,6 @@ Clipnyx/Clipnyx/
 ## コミット規約
 - コミットメッセージは日本語
 - Co-Authored-By は付けない
+- コミット・PR 本文に AI が作成した旨の表記を入れない（「Generated with Claude Code」等のフッター禁止）
 - main ブランチに直接コミットしない。必ずブランチを切って PR を作成する
 - PR マージ時は `gh pr merge --delete-branch` を使う

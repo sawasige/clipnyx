@@ -10,48 +10,15 @@ struct PopupContentView: View {
     @State private var keyboardNavigation = true
     @State private var lastScreenPosition: CGPoint?
     @State private var selectedCategory: ClipboardContentCategory?
-    @State private var savedFilterIndex = 0  // 0=off, 1=all saved, 2=uncategorized, 3+=favorite folders
+    @State private var favoriteFilter: FavoriteFilter = .allHistory
     @State private var listContentHeight: CGFloat = 0
     @State private var detailItem: ClipboardItem?
     @FocusState private var isSearchFocused: Bool
 
-    private var showSavedOnly: Bool { savedFilterIndex > 0 }
-
-    /// Tab cycle: 0=off, 1=all saved, 2=uncategorized, 3,4,...=favorite folders
-    private var savedFilterCycleCount: Int {
-        3 + clipboardManager.favoriteFolders.count
-    }
-
-    private var selectedFavoriteFolderId: UUID? {
-        let sortedFolders = clipboardManager.favoriteFolders.sorted(by: { $0.order < $1.order })
-        let folderIndex = savedFilterIndex - 3
-        guard folderIndex >= 0, folderIndex < sortedFolders.count else { return nil }
-        return sortedFolders[folderIndex].id
-    }
-
-    private var savedFilterLabel: String? {
-        switch savedFilterIndex {
-        case 0: return nil
-        case 1: return String(localized: "All Favorites")
-        case 2: return String(localized: "Uncategorized")
-        default:
-            if let id = selectedFavoriteFolderId,
-               let folder = clipboardManager.favoriteFolders.first(where: { $0.id == id }) {
-                return folder.name
-            }
-            return nil
-        }
-    }
+    private var showSavedOnly: Bool { favoriteFilter != .allHistory }
 
     private var filteredItems: [ClipboardItem] {
-        var result = clipboardManager.items
-        if savedFilterIndex == 1 {
-            result = result.filter(\.isSaved)
-        } else if savedFilterIndex == 2 {
-            result = result.filter { $0.isSaved && $0.favoriteFolderId == nil }
-        } else if let folderId = selectedFavoriteFolderId {
-            result = result.filter { $0.favoriteFolderId == folderId }
-        }
+        var result = favoriteFilter.apply(to: clipboardManager.items)
         if let category = selectedCategory {
             result = result.filter { $0.category == category }
         }
@@ -91,11 +58,7 @@ struct PopupContentView: View {
                         icon: showSavedOnly ? "bookmark.fill" : "bookmark",
                         color: showSavedOnly ? .orange : .secondary
                     ) {
-                        if savedFilterIndex > 0 {
-                            savedFilterIndex = 0
-                        } else {
-                            savedFilterIndex = 1
-                        }
+                        favoriteFilter = showSavedOnly ? .allHistory : .allSaved
                         selectedIndex = 0
                     }
                     .help(showSavedOnly ? Text("Show All") : Text("Favorites Only"))
@@ -138,28 +101,16 @@ struct PopupContentView: View {
                 ScrollViewReader { proxy in
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 6) {
-                            folderChip(String(localized: "All Favorites"), isSelected: savedFilterIndex == 1) {
-                                savedFilterIndex = 1
-                                selectedIndex = 0
-                            }
-                            .id(1)
-                            folderChip(String(localized: "Uncategorized"), isSelected: savedFilterIndex == 2) {
-                                savedFilterIndex = 2
-                                selectedIndex = 0
-                            }
-                            .id(2)
-                            ForEach(Array(clipboardManager.favoriteFolders.sorted(by: { $0.order < $1.order }).enumerated()), id: \.element.id) { i, folder in
-                                folderChip(folder.name, isSelected: savedFilterIndex == 3 + i) {
-                                    savedFilterIndex = 3 + i
-                                    selectedIndex = 0
-                                }
-                                .id(3 + i)
+                            filterChip(String(localized: "All Favorites"), filter: .allSaved)
+                            filterChip(String(localized: "Uncategorized"), filter: .uncategorized)
+                            ForEach(clipboardManager.sortedFavoriteFolders) { folder in
+                                filterChip(folder.name, filter: .folder(folder.id))
                             }
                         }
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
                     }
-                    .onChange(of: savedFilterIndex) { _, newValue in
+                    .onChange(of: favoriteFilter) { _, newValue in
                         withAnimation {
                             proxy.scrollTo(newValue, anchor: .center)
                         }
@@ -207,9 +158,7 @@ struct PopupContentView: View {
             selectedIndex = 0
         }
         .onReceive(NotificationCenter.default.publisher(for: .shiftTabPressed)) { _ in
-            let count = savedFilterCycleCount
-            savedFilterIndex = (savedFilterIndex - 1 + count) % count
-            selectedIndex = 0
+            cycleFavoriteFilter(forward: false)
         }
         .popover(item: $detailItem) { item in
             ItemDetailView(item: item, clipboardManager: clipboardManager, onDismiss: { detailItem = nil })
@@ -291,8 +240,12 @@ struct PopupContentView: View {
         }
     }
 
-    private func folderChip(_ label: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
+    private func filterChip(_ label: String, filter: FavoriteFilter) -> some View {
+        let isSelected = favoriteFilter == filter
+        return Button {
+            favoriteFilter = filter
+            selectedIndex = 0
+        } label: {
             Text(label)
                 .font(.caption)
                 .padding(.horizontal, 8)
@@ -302,6 +255,7 @@ struct PopupContentView: View {
                 .clipShape(Capsule())
         }
         .buttonStyle(.plain)
+        .id(filter)
     }
 
     private var activeCategories: [ClipboardContentCategory] {
@@ -318,13 +272,7 @@ struct PopupContentView: View {
 
     private func handleKeyPress(_ press: KeyPress) -> KeyPress.Result {
         if press.key == .tab {
-            let count = savedFilterCycleCount
-            if press.modifiers.contains(.shift) {
-                savedFilterIndex = (savedFilterIndex - 1 + count) % count
-            } else {
-                savedFilterIndex = (savedFilterIndex + 1) % count
-            }
-            selectedIndex = 0
+            cycleFavoriteFilter(forward: !press.modifiers.contains(.shift))
             return .handled
         }
         if isIMEComposing { return .ignored }
@@ -392,6 +340,14 @@ struct PopupContentView: View {
             return .handled
         }
         return .ignored
+    }
+
+    private func cycleFavoriteFilter(forward: Bool) {
+        let order = FavoriteFilter.cycleOrder(folders: clipboardManager.sortedFavoriteFolders)
+        let current = order.firstIndex(of: favoriteFilter) ?? 0
+        let offset = forward ? 1 : order.count - 1
+        favoriteFilter = order[(current + offset) % order.count]
+        selectedIndex = 0
     }
 
     private func selectAndPaste(item: ClipboardItem, asPlainText: Bool = false) {

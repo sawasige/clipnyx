@@ -1,6 +1,18 @@
 import SwiftUI
 
 @main
+enum ClipnyxMain {
+    static func main() {
+        MainActor.assumeIsolated {
+            #if DEBUG
+            // スクリーンショット生成モードのときは通常起動せずに終了する
+            if ScreenshotRenderer.runIfRequested() { return }
+            #endif
+            ClipnyxApp.main()
+        }
+    }
+}
+
 struct ClipnyxApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 

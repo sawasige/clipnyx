@@ -1,7 +1,17 @@
 import AppKit
+import os
 
 final class ClipboardStore: Sendable {
     private let writeQueue = DispatchQueue(label: "com.clipnyx.store.write", qos: .utility)
+    private static let logger = Logger(subsystem: "com.himatsubu.Clipnyx", category: "ClipboardStore")
+
+    /// true のとき書き込み・削除を一切行わない（スクリーンショット生成などの
+    /// プレビュー用途で実データを保護する）。読み取りは許可される。
+    private let isReadOnly: Bool
+
+    init(isReadOnly: Bool = false) {
+        self.isReadOnly = isReadOnly
+    }
 
     private static let baseURL: URL = {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
@@ -44,6 +54,9 @@ final class ClipboardStore: Sendable {
         let favoriteFolderId: UUID?
 
         // Legacy fallback keys
+        // 旧バージョンが書き出した index を読むための互換フィールド（読み取り専用）。
+        // 初回保存時に新キーへ書き換わる。旧版からの直接アップデートを
+        // サポートしなくなるまで削除しないこと。
         let snippetName: String?
         let snippetCategoryId: UUID?
 
@@ -68,6 +81,7 @@ final class ClipboardStore: Sendable {
     // MARK: - Save Index
 
     func saveIndex(_ items: [ClipboardItem]) {
+        guard !isReadOnly else { return }
         let entries = items.map { item in
             IndexEntry(
                 id: item.id,
@@ -92,7 +106,7 @@ final class ClipboardStore: Sendable {
                 let data = try JSONEncoder().encode(entries)
                 try data.write(to: Self.indexURL, options: .atomic)
             } catch {
-                print("Failed to save index: \(error)")
+                Self.logger.error("Failed to save index: \(error)")
             }
         }
     }
@@ -100,6 +114,7 @@ final class ClipboardStore: Sendable {
     // MARK: - Save Blobs
 
     func saveBlobs(for itemID: UUID, representations: [PasteboardRepresentation], thumbnail: Data?) {
+        guard !isReadOnly else { return }
         writeQueue.async {
             do {
                 let blobDir = Self.blobsURL.appendingPathComponent(itemID.uuidString, isDirectory: true)
@@ -125,7 +140,7 @@ final class ClipboardStore: Sendable {
                 let metaData = try JSONEncoder().encode(meta)
                 try metaData.write(to: blobDir.appendingPathComponent("meta.json"))
             } catch {
-                print("Failed to save blobs for \(itemID): \(error)")
+                Self.logger.error("Failed to save blobs for \(itemID): \(error)")
             }
         }
     }
@@ -162,7 +177,7 @@ final class ClipboardStore: Sendable {
                 )
             }
         } catch {
-            print("Failed to load index: \(error)")
+            Self.logger.error("Failed to load index: \(error)")
             return []
         }
     }
@@ -192,6 +207,7 @@ final class ClipboardStore: Sendable {
     // MARK: - Delete
 
     func deleteBlobs(for itemIDs: [UUID]) {
+        guard !isReadOnly else { return }
         writeQueue.async {
             let fm = FileManager.default
             for id in itemIDs {
@@ -202,6 +218,7 @@ final class ClipboardStore: Sendable {
     }
 
     func deleteAll() {
+        guard !isReadOnly else { return }
         writeQueue.async {
             let fm = FileManager.default
             try? fm.removeItem(at: Self.indexURL)
@@ -212,13 +229,14 @@ final class ClipboardStore: Sendable {
     // MARK: - Favorite Folders
 
     func saveFavoriteFolders(_ folders: [FavoriteFolder]) {
+        guard !isReadOnly else { return }
         writeQueue.async {
             do {
                 try FileManager.default.createDirectory(at: Self.baseURL, withIntermediateDirectories: true)
                 let data = try JSONEncoder().encode(folders)
                 try data.write(to: Self.favoriteFoldersURL, options: .atomic)
             } catch {
-                print("Failed to save favorite folders: \(error)")
+                Self.logger.error("Failed to save favorite folders: \(error)")
             }
         }
     }
@@ -230,7 +248,7 @@ final class ClipboardStore: Sendable {
                 let data = try Data(contentsOf: Self.favoriteFoldersURL)
                 return try JSONDecoder().decode([FavoriteFolder].self, from: data)
             } catch {
-                print("Failed to load favorite folders: \(error)")
+                Self.logger.error("Failed to load favorite folders: \(error)")
                 return []
             }
         }
@@ -240,7 +258,7 @@ final class ClipboardStore: Sendable {
                 let data = try Data(contentsOf: Self.legacySnippetCategoriesURL)
                 return try JSONDecoder().decode([FavoriteFolder].self, from: data)
             } catch {
-                print("Failed to load legacy snippet categories: \(error)")
+                Self.logger.error("Failed to load legacy snippet categories: \(error)")
                 return []
             }
         }
@@ -250,6 +268,7 @@ final class ClipboardStore: Sendable {
     // MARK: - Cleanup Orphans
 
     func cleanupOrphans(validIDs: Set<UUID>) {
+        guard !isReadOnly else { return }
         writeQueue.async {
             let fm = FileManager.default
             guard let contents = try? fm.contentsOfDirectory(
