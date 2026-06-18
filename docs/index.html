@@ -3,15 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Clipnyx — クリップボード履歴マネージャー for macOS</title>
+  <meta name="color-scheme" content="dark">
+  <title>Clipnyx — コピーした全部を、夜が覚えている。Mac のクリップボード履歴マネージャー</title>
   <link rel="icon" type="image/png" href="favicon.png">
-  <meta name="description" content="Clipnyx はmacOSメニューバーに常駐するクリップボード履歴マネージャーです。コピー履歴を自動保存し、ホットキーで瞬時にアクセス。">
+  <meta name="description" content="Clipnyx は Mac のメニューバーに棲むクリップボード履歴マネージャー。テキストも画像もコードも、コピーした瞬間から呼び出せます。定型文の整理、自動分類、ローカル保存。すべて無料。">
 
   <!-- Open Graph / Twitter -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Clipnyx">
-  <meta property="og:title" content="Clipnyx — クリップボード履歴マネージャー for macOS">
-  <meta property="og:description" content="Clipnyx はmacOSメニューバーに常駐するクリップボード履歴マネージャーです。コピー履歴を自動保存し、ホットキーで瞬時にアクセス。">
+  <meta property="og:title" content="Clipnyx — コピーした全部を、夜が覚えている。">
+  <meta property="og:description" content="Mac のメニューバーに棲むクリップボード履歴マネージャー。テキストも画像もコードも、コピーした瞬間から呼び出せます。すべて無料。">
   <meta property="og:url" content="https://sawasige.github.io/clipnyx/">
   <meta property="og:image" content="https://sawasige.github.io/clipnyx/hero.jpg">
   <meta property="og:image:width" content="1536">
@@ -19,636 +20,731 @@
   <meta property="og:locale" content="ja_JP">
   <meta property="og:locale:alternate" content="en_US">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Clipnyx — クリップボード履歴マネージャー for macOS">
-  <meta name="twitter:description" content="Clipnyx はmacOSメニューバーに常駐するクリップボード履歴マネージャーです。コピー履歴を自動保存し、ホットキーで瞬時にアクセス。">
+  <meta name="twitter:title" content="Clipnyx — コピーした全部を、夜が覚えている。">
+  <meta name="twitter:description" content="Mac のメニューバーに棲むクリップボード履歴マネージャー。コピーした瞬間から呼び出せます。すべて無料。">
   <meta name="twitter:image" content="https://sawasige.github.io/clipnyx/hero.jpg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..560&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <script>document.documentElement.className += " js";</script>
   <style>
     :root {
-      --color-bg: #ffffff;
-      --color-surface: #f5f5f7;
-      --color-text: #1d1d1f;
-      --color-text-secondary: #86868b;
-      --color-accent: #0071e3;
-      --color-accent-hover: #0077ed;
-      --color-border: #d2d2d7;
-      --color-card-bg: #ffffff;
-      --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.06);
+      /* Palette — sampled from the hero art (deep indigo night) and the app icon (royal blue),
+         with the gold of the stars in Nyx's hair as the single warm accent. */
+      --night:   #05060f;
+      --abyss:   #0a0e22;
+      --veil:    #131938;
+      --moon:    #e9e7f2;
+      --haze:    #8b90b8;
+      --haze-dim:#5c618a;
+      --gold:    #e9b665;
+      --gold-soft: rgba(233, 182, 101, 0.5);
+      --azure:   #6b9bf2;
+      --line:    rgba(139, 144, 184, 0.16);
+
+      --font-display: "Fraunces", "Hiragino Mincho ProN", "YuMincho", serif;
+      --font-body: "Hanken Grotesk", "Hiragino Sans", "Hiragino Kaku Gothic ProN", system-ui, sans-serif;
+      --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+
+      --maxw: 1080px;
     }
 
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --color-bg: #000000;
-        --color-surface: #1c1c1e;
-        --color-text: #f5f5f7;
-        --color-text-secondary: #86868b;
-        --color-accent: #2997ff;
-        --color-accent-hover: #40a9ff;
-        --color-border: #38383a;
-        --color-card-bg: #1c1c1e;
-        --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.3);
-      }
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    html { scroll-behavior: smooth; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
-      background: var(--color-bg);
-      color: var(--color-text);
+      font-family: var(--font-body);
+      color: var(--moon);
       line-height: 1.5;
+      background:
+        radial-gradient(125% 70% at 50% -8%, #0e1336 0%, rgba(14, 19, 54, 0) 55%),
+        var(--night);
+      background-attachment: fixed;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
     }
 
-    .container {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 0 24px;
+    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+
+    a { color: var(--azure); text-decoration: none; }
+
+    /* ─────────────────────────── Eyebrow + headings ─────────────────────────── */
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 22px;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 8px 1px var(--gold-soft);
     }
 
-    /* Hero */
+    .section-title {
+      font-family: var(--font-display);
+      font-weight: 380;
+      font-size: clamp(1.9rem, 4.2vw, 3rem);
+      line-height: 1.14;
+      letter-spacing: -0.01em;
+      color: var(--moon);
+      text-wrap: balance;
+    }
+
+    /* ─────────────────────────── Hero ─────────────────────────── */
     .hero {
-      text-align: center;
-      padding: 64px 24px 80px;
-    }
-
-    .hero-banner {
       position: relative;
-      max-width: 980px;
-      margin: 0 auto 40px;
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.25);
-    }
-
-    .hero-banner > img {
-      display: block;
-      width: 100%;
-      height: auto;
-    }
-
-    .hero-overlay {
-      position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      width: 56%;
+      min-height: 92vh;
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: center;
-      gap: clamp(10px, 1.6vw, 20px);
-      padding: 4% 5%;
+      align-items: center;
       text-align: center;
-      background: linear-gradient(90deg, rgba(2, 6, 28, 0) 0%, rgba(2, 6, 28, 0.35) 60%);
+      padding: 120px 24px 80px;
+      overflow: hidden;
     }
 
-    .hero-overlay-lockup {
-      display: flex;
-      align-items: center;
-      gap: clamp(10px, 1.6vw, 20px);
+    /* faint goddess artwork, melting into the night on the right */
+    .hero-art {
+      position: absolute;
+      inset: 0;
+      background: url("hero.jpg") 70% center / cover no-repeat;
+      opacity: 0.28;
+      -webkit-mask-image: radial-gradient(125% 115% at 82% 38%, #000 0%, rgba(0,0,0,0.55) 42%, transparent 72%);
+      mask-image: radial-gradient(125% 115% at 82% 38%, #000 0%, rgba(0,0,0,0.55) 42%, transparent 72%);
+      z-index: 0;
+      pointer-events: none;
+    }
+    /* vignette so the hero dissolves into the page above and below */
+    .hero::after {
+      content: "";
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, var(--night) 0%, transparent 22% 72%, var(--night) 100%);
+      z-index: 1;
+      pointer-events: none;
     }
 
-    .hero-overlay-icon {
-      width: clamp(48px, 8vw, 96px);
-      height: clamp(48px, 8vw, 96px);
-      border-radius: clamp(10px, 1.6vw, 22px);
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+    .starfield { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+    .dust {
+      position: absolute;
+      border-radius: 50%;
+      background: #d4d9f5;
+      opacity: 0;
+      box-shadow: 0 0 4px rgba(208, 216, 255, 0.7);
+      animation: dust-in 1.3s ease forwards;
+      animation-delay: var(--d, 0s);
+    }
+    .dust.twinkle { animation: dust-in 1.3s ease forwards, twinkle var(--tw, 7s) ease-in-out infinite; animation-delay: var(--d, 0s), calc(var(--d, 0s) + 1.3s); }
+    @keyframes dust-in { to { opacity: var(--o, 0.6); } }
+    @keyframes twinkle { 0%, 100% { opacity: var(--o, 0.6); } 50% { opacity: calc(var(--o, 0.6) * 0.35); } }
+
+    /* the constellation: gold hairlines drawn between the named stars */
+    .constellation {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .constellation line {
+      stroke: var(--gold);
+      stroke-width: 0.9;
+      opacity: 0.42;
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      animation: draw 1.9s ease 0.5s forwards;
+      vector-effect: non-scaling-stroke;
+    }
+    @keyframes draw { to { stroke-dashoffset: 0; } }
+
+    /* named stars — hover/focus reveals a real "copied fragment" */
+    .stars { position: absolute; inset: 0; z-index: 4; }
+    .star {
+      position: absolute;
+      left: var(--x); top: var(--y);
+      transform: translate(-50%, -50%);
+      width: 26px; height: 26px;
+      display: grid; place-items: center;
+      background: none; border: 0; padding: 0;
+      cursor: pointer;
+      border-radius: 50%;
+    }
+    .star::before {
+      content: "";
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 10px 2px var(--gold-soft);
+      transition: transform 0.35s ease, box-shadow 0.35s ease;
+    }
+    .star:hover::before, .star:focus-visible::before {
+      transform: scale(1.55);
+      box-shadow: 0 0 16px 4px var(--gold-soft);
+    }
+    .star:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
+    .star-label {
+      position: absolute;
+      bottom: calc(100% + 12px);
+      left: 50%;
+      transform: translate(-50%, 6px);
+      white-space: nowrap;
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      color: var(--moon);
+      background: rgba(10, 14, 34, 0.82);
+      border: 1px solid var(--line);
+      border-left: 2px solid var(--gold);
+      padding: 7px 11px;
+      border-radius: 7px;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    .star.below .star-label { bottom: auto; top: calc(100% + 12px); transform: translate(-50%, -6px); }
+    .star:hover .star-label, .star:focus-visible .star-label { opacity: 1; transform: translate(-50%, 0); }
+    .star-label small {
+      display: block;
+      color: var(--gold);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 2px;
     }
 
-    .hero-overlay-name {
-      font-size: clamp(2.2rem, 6vw, 4.5rem);
-      font-weight: 700;
-      letter-spacing: -0.025em;
-      line-height: 1;
-      color: #ffffff;
-      text-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
+    .hero-content { position: relative; z-index: 3; width: 100%; max-width: 760px; }
+    .hero-content > * { opacity: 0; animation: rise 0.85s cubic-bezier(0.2, 0.7, 0.2, 1) forwards; }
+    .hero-content > *:nth-child(1) { animation-delay: 0.15s; }
+    .hero-content > *:nth-child(2) { animation-delay: 0.30s; }
+    .hero-content > *:nth-child(3) { animation-delay: 0.45s; }
+    .hero-content > *:nth-child(4) { animation-delay: 0.60s; }
+    @keyframes rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+
+    .wordmark {
+      font-family: var(--font-display);
+      font-weight: 360;
+      font-size: clamp(3.4rem, 11vw, 7.2rem);
+      line-height: 0.95;
+      letter-spacing: -0.02em;
+      color: var(--moon);
+      text-shadow: 0 4px 40px rgba(8, 12, 40, 0.8);
+    }
+    .wordmark .y { font-style: italic; color: var(--gold); font-weight: 340; }
+
+    .thesis {
+      font-family: var(--font-display);
+      font-weight: 360;
+      font-size: clamp(1.35rem, 3.4vw, 2.2rem);
+      line-height: 1.35;
+      letter-spacing: 0.005em;
+      color: var(--moon);
+      margin: 26px auto 0;
+      max-width: 20em;
+      text-wrap: balance;
+    }
+    .subline {
+      font-size: clamp(0.98rem, 1.5vw, 1.12rem);
+      line-height: 1.7;
+      color: var(--haze);
+      margin: 20px auto 0;
+      max-width: 30em;
     }
 
-    .hero-overlay-tagline {
-      font-size: clamp(0.85rem, 1.5vw, 1.25rem);
-      font-weight: 400;
-      line-height: 1.5;
-      max-width: 22em;
-      color: rgba(255, 255, 255, 0.92);
-      text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
-    }
-
-    .app-store-badge {
-      display: inline-block;
-      transition: opacity 0.2s;
-    }
-
-    .app-store-badge:hover {
-      opacity: 0.8;
-    }
-
-    .app-store-badge img {
-      height: 40px;
-      vertical-align: middle;
-    }
-
-    .download-buttons {
+    .cta-row {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 20px;
+      gap: 18px;
       flex-wrap: wrap;
+      margin-top: 38px;
     }
-
     .free-note {
       margin-top: 16px;
-      font-size: 14px;
-      color: var(--color-text-secondary);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      color: var(--haze-dim);
     }
+
+    /* ─────────────────────────── Badges / buttons ─────────────────────────── */
+    .app-store-badge { display: inline-block; transition: opacity 0.2s; }
+    .app-store-badge:hover { opacity: 0.82; }
+    .app-store-badge img { height: 44px; vertical-align: middle; }
 
     .dmg-badge {
       display: inline-flex;
       align-items: center;
-      gap: 3px;
-      height: 40px;
-      padding: 0 13px 0 8px;
-      background: #000;
-      color: #fff;
-      text-decoration: none;
-      border-radius: 7px;
-      border: 0.5px solid #a6a6a6;
-      transition: opacity 0.2s;
+      gap: 4px;
+      height: 44px;
+      padding: 0 16px 0 11px;
+      background: var(--moon);
+      color: #0a0a14;
+      border-radius: 9px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
     }
-
-    @media (prefers-color-scheme: dark) {
-      .dmg-badge {
-        background: #fff;
-        color: #000;
-        border-color: #fff;
-      }
-    }
-
-    .dmg-badge:hover {
-      opacity: 0.8;
-    }
-
-    .dmg-badge svg {
-      width: 24px;
-      height: 24px;
-      flex-shrink: 0;
-      fill: currentColor;
-    }
-
-    .dmg-badge-text {
-      display: flex;
-      flex-direction: column;
-      line-height: 1.1;
-    }
-
-    .dmg-badge-label {
-      font-size: 8.5px;
-      font-weight: 500;
-    }
-
-    .dmg-badge-title {
-      font-size: 15px;
-      font-weight: 600;
-      letter-spacing: -0.01em;
-    }
+    .dmg-badge:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45); }
+    .dmg-badge svg { width: 24px; height: 24px; flex-shrink: 0; fill: currentColor; }
+    .dmg-badge-text { display: flex; flex-direction: column; line-height: 1.12; text-align: left; }
+    .dmg-badge-label { font-size: 9px; font-weight: 600; letter-spacing: 0.02em; }
+    .dmg-badge-title { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
 
     .brew-cmd {
-      display: flex;
+      display: inline-flex;
       align-items: stretch;
       width: 100%;
-      max-width: 280px;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 8px;
+      max-width: 320px;
+      background: rgba(10, 14, 34, 0.6);
+      border: 1px solid var(--line);
+      border-radius: 9px;
       overflow: hidden;
     }
-
     .brew-cmd code {
       flex: 1;
       min-width: 0;
-      padding: 8px 10px;
-      font-family: "SF Mono", SFMono-Regular, Menlo, monospace;
-      font-size: 11.5px;
-      color: var(--color-text);
+      padding: 10px 12px;
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      color: var(--moon);
       white-space: nowrap;
       overflow-x: auto;
       text-align: left;
       user-select: all;
       cursor: text;
     }
-
     .copy-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 100%;
-      padding: 8px 0;
-      background: none;
-      border: none;
-      border-left: 1px solid var(--color-border);
+      display: grid; place-items: center;
+      width: 40px;
+      background: none; border: 0;
+      border-left: 1px solid var(--line);
       cursor: pointer;
-      color: var(--color-text-secondary);
-      transition: color 0.2s;
+      color: var(--haze);
+      transition: color 0.2s, background 0.2s;
+    }
+    .copy-btn:hover { color: var(--gold); background: rgba(233, 182, 101, 0.08); }
+    .copy-btn svg { width: 15px; height: 15px; fill: currentColor; }
+
+    /* ─────────────────────────── Section scaffolding ─────────────────────────── */
+    .section { padding: clamp(72px, 11vw, 130px) 0; position: relative; }
+    .section-head { max-width: 38em; margin-bottom: 56px; }
+
+    /* reveal on scroll — only hidden when JS is active, so content is visible without JS */
+    .reveal { transition: opacity 0.7s ease, transform 0.7s ease; }
+    .js .reveal { opacity: 0; transform: translateY(20px); }
+    .js .reveal.in { opacity: 1; transform: none; }
+
+    /* ─────────────── Features: a single constellation thread ─────────────── */
+    .keeps { position: relative; }
+    .thread {
+      position: absolute;
+      left: 9px; top: 12px; bottom: 12px;
+      width: 1px;
+      background: linear-gradient(180deg, transparent, var(--gold-soft) 8%, var(--gold-soft) 92%, transparent);
+      opacity: 0.5;
+    }
+    .feat {
+      position: relative;
+      padding: 0 0 clamp(40px, 6vw, 64px) 48px;
+    }
+    .feat:last-child { padding-bottom: 0; }
+    .feat::before {
+      content: "";
+      position: absolute;
+      left: 4px; top: 6px;
+      width: 11px; height: 11px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 0 4px rgba(233, 182, 101, 0.12), 0 0 12px 2px var(--gold-soft);
+    }
+    .feat h3 {
+      font-family: var(--font-display);
+      font-weight: 420;
+      font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+      letter-spacing: -0.005em;
+      color: var(--moon);
+      margin-bottom: 10px;
+    }
+    .feat p {
+      font-size: clamp(0.96rem, 1.4vw, 1.06rem);
+      line-height: 1.72;
+      color: var(--haze);
+      max-width: 38em;
+    }
+    /* the 11 category stars */
+    .cats { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 16px; }
+    .cat {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      color: var(--haze);
+      background: rgba(139, 144, 184, 0.07);
+      border: 1px solid var(--line);
+      padding: 4px 9px 4px 7px;
+      border-radius: 20px;
+    }
+    .cat i { width: 6px; height: 6px; border-radius: 50%; background: var(--c, var(--gold)); box-shadow: 0 0 6px 0 var(--c, var(--gold)); }
+
+    .section-note {
+      max-width: 44em;
+      margin-top: 40px;
+      padding-left: 48px;
+      font-size: 13px;
+      line-height: 1.65;
+      color: var(--haze-dim);
     }
 
-    .copy-btn:hover {
-      color: var(--color-text);
-    }
-
-    .copy-btn svg {
-      width: 14px;
-      height: 14px;
-      fill: currentColor;
-    }
-
-    /* Screenshot */
-    .screenshot {
-      text-align: center;
-      padding: 0 24px 80px;
-    }
-
-    .screenshot picture {
-      display: block;
-    }
-
-    .screenshot picture + picture {
-      margin-top: 48px;
-    }
-
-    .screenshot img {
-      max-width: 720px;
+    /* ─────────────────────────── Screenshots ─────────────────────────── */
+    .shots { display: flex; flex-direction: column; gap: clamp(40px, 6vw, 72px); align-items: center; }
+    .shot-fig { width: 100%; max-width: 860px; text-align: center; }
+    .shot {
       width: 100%;
       height: auto;
       border-radius: 16px;
-      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+      border: 1px solid var(--line);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(0,0,0,0.3);
+    }
+    .shot-cap {
+      margin-top: 16px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      color: var(--haze-dim);
     }
 
-    @media (prefers-color-scheme: dark) {
-      .screenshot img {
-        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
-      }
+    /* ─────────────────────────── Why ─────────────────────────── */
+    .why-statement {
+      font-family: var(--font-display);
+      font-weight: 360;
+      font-size: clamp(1.5rem, 3.6vw, 2.4rem);
+      line-height: 1.4;
+      color: var(--moon);
+      max-width: 24em;
+      text-wrap: balance;
     }
-
-    /* Features */
-    .features {
-      padding: 80px 0;
-    }
-
-    .features-heading {
-      text-align: center;
-      font-size: 40px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      margin-bottom: 56px;
-    }
-
-    .features-grid {
+    .why-statement b { font-weight: 360; font-style: italic; color: var(--gold); }
+    .why-grid {
+      margin-top: 56px;
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 24px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
     }
-
-    .feature-card {
-      background: var(--color-card-bg);
-      border: 1px solid var(--color-border);
-      border-radius: 20px;
-      padding: 40px 32px;
-      transition: transform 0.2s, box-shadow 0.2s;
+    .why-cell { background: var(--abyss); padding: 30px 26px; }
+    .why-cell h4 {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 14px;
     }
+    .why-cell p { font-size: 0.98rem; line-height: 1.65; color: var(--haze); }
 
-    .feature-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-card);
-    }
-
-    .feature-icon {
-      font-size: 40px;
-      margin-bottom: 16px;
-      display: block;
-    }
-
-    .feature-card h3 {
-      font-size: 22px;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-
-    .feature-card p {
-      font-size: 16px;
-      color: var(--color-text-secondary);
-      line-height: 1.6;
-    }
-
-    /* Editions */
-    .editions {
-      padding: 80px 0;
-    }
-
-    .editions-heading {
-      text-align: center;
-      font-size: 40px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      margin-bottom: 16px;
-    }
-
-    .editions-sub {
-      text-align: center;
-      font-size: 18px;
-      color: var(--color-text-secondary);
-      margin-bottom: 48px;
-    }
-
+    /* ─────────────────────────── Download ─────────────────────────── */
     .get-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 24px;
-      max-width: 720px;
-      margin: 0 auto;
+      gap: 20px;
+      margin-top: 8px;
     }
-
     .get-card {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background: var(--color-card-bg);
-      border: 1px solid var(--color-border);
-      border-radius: 20px;
+      background: linear-gradient(180deg, var(--veil) 0%, var(--abyss) 100%);
+      border: 1px solid var(--line);
+      border-radius: 18px;
       padding: 36px 32px;
-      text-align: center;
-    }
-
-    .get-icon {
-      font-size: 36px;
-      margin-bottom: 14px;
-      display: block;
-    }
-
-    .get-card h3 {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-
-    .get-card p {
-      font-size: 15px;
-      color: var(--color-text-secondary);
-      line-height: 1.6;
-    }
-
-    .get-card-cta {
-      padding-top: 24px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 14px;
-      width: 100%;
+      align-items: flex-start;
+      gap: 12px;
+      transition: border-color 0.25s ease, transform 0.25s ease;
     }
-
-    .section-note {
-      max-width: 720px;
-      margin: 32px auto 0;
-      text-align: center;
-      font-size: 13px;
-      color: var(--color-text-secondary);
-      line-height: 1.5;
+    .get-card:hover { border-color: var(--gold-soft); transform: translateY(-3px); }
+    .get-card h3 {
+      font-family: var(--font-display);
+      font-weight: 440;
+      font-size: 1.5rem;
+      color: var(--moon);
     }
+    .get-card p { font-size: 0.98rem; line-height: 1.65; color: var(--haze); flex: 1; }
+    .get-card-cta { width: 100%; padding-top: 12px; display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
 
-    /* Footer */
-    footer {
-      border-top: 1px solid var(--color-border);
-      padding: 32px 0;
-      margin-top: 40px;
-    }
-
-    .footer-inner {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-
-    .footer-links {
-      display: flex;
-      gap: 24px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .footer-links a,
-    .lang-toggle {
-      color: var(--color-text-secondary);
-      text-decoration: none;
+    /* ─────────────────────────── Footer ─────────────────────────── */
+    footer { border-top: 1px solid var(--line); padding: 40px 0; }
+    .footer-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 18px; }
+    .footer-brand { display: flex; align-items: center; gap: 11px; }
+    .footer-brand img { width: 30px; height: 30px; border-radius: 8px; }
+    .footer-brand span { font-family: var(--font-display); font-size: 1.15rem; color: var(--moon); }
+    .footer-links { display: flex; gap: 22px; align-items: center; flex-wrap: wrap; }
+    .footer-links a, .lang-toggle {
+      color: var(--haze);
       font-size: 14px;
+      font-family: var(--font-body);
       transition: color 0.2s;
     }
+    .footer-links a:hover, .lang-toggle:hover { color: var(--gold); }
+    .lang-toggle { background: none; border: 0; cursor: pointer; }
+    .copyright { font-size: 13px; color: var(--haze-dim); width: 100%; }
 
-    .footer-links a:hover,
-    .lang-toggle:hover {
-      color: var(--color-accent);
+    /* ─────────────────────────── Responsive ─────────────────────────── */
+    @media (max-width: 860px) {
+      .why-grid { grid-template-columns: 1fr; }
+      .get-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 680px) {
+      .hero { min-height: 88vh; padding: 100px 22px 70px; }
+      .stars { display: none; } /* keep mobile hero calm; ambient dust + art remain */
+      .constellation { display: none; }
+      .cta-row { flex-direction: column; gap: 14px; }
+      .footer-inner { flex-direction: column; align-items: flex-start; }
     }
 
-    .lang-toggle {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-family: inherit;
-    }
-
-    .copyright {
-      font-size: 14px;
-      color: var(--color-text-secondary);
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .hero {
-        padding: 40px 16px 60px;
-      }
-
-      .hero-overlay {
-        width: 64%;
-        background: linear-gradient(90deg, rgba(2, 6, 28, 0) 0%, rgba(2, 6, 28, 0.45) 55%);
-      }
-
-      .features-heading {
-        font-size: 32px;
-      }
-
-      .features-grid,
-      .get-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .editions-heading {
-        font-size: 32px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .hero-overlay {
-        width: 100%;
-        justify-content: flex-end;
-        padding-bottom: 8%;
-        background: linear-gradient(180deg, rgba(2, 6, 28, 0) 35%, rgba(2, 6, 28, 0.55) 100%);
-      }
-
-      .feature-card {
-        padding: 32px 24px;
-      }
-
-      .footer-inner {
-        flex-direction: column;
-        text-align: center;
-      }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .dust { animation: none !important; opacity: var(--o, 0.6) !important; }
+      .constellation line { animation: none !important; stroke-dashoffset: 0 !important; }
+      .hero-content > * { animation: none !important; opacity: 1 !important; transform: none !important; }
+      .reveal, .js .reveal { transition: none !important; opacity: 1 !important; transform: none !important; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Hero -->
-  <section class="hero">
-    <div class="hero-banner">
-      <img src="hero.jpg" width="1536" height="1024" alt="Clipnyx" data-alt-ja="夜空と月をまとう Clipnyx のイメージ" data-alt-en="Clipnyx hero artwork of a moonlit starry night">
-      <div class="hero-overlay">
-        <div class="hero-overlay-lockup">
-          <picture>
-            <source srcset="icon-dark.png" media="(prefers-color-scheme: dark)">
-            <img src="icon-light.png" alt="" class="hero-overlay-icon">
-          </picture>
-          <h1 class="hero-overlay-name">Clipnyx</h1>
-        </div>
-        <p class="hero-overlay-tagline" data-ja="macOSメニューバーに常駐する、軽量クリップボード履歴マネージャー。" data-en="A lightweight clipboard history manager that lives in your macOS menu bar.">macOSメニューバーに常駐する、軽量クリップボード履歴マネージャー。</p>
-      </div>
-    </div>
-    <div class="download-buttons">
-      <a class="app-store-badge" href="https://apps.apple.com/jp/app/clipnyx/id6759652985" aria-label="Download on the App Store">
-        <picture>
-          <source srcset="https://tools.applemediaservices.com/api/badges/download-on-the-mac-app-store/white/ja-jp" media="(prefers-color-scheme: dark)">
-          <img src="https://tools.applemediaservices.com/api/badges/download-on-the-mac-app-store/black/ja-jp" alt="Download on the App Store">
-        </picture>
-      </a>
-      <a class="dmg-badge" href="https://github.com/sawasige/clipnyx/releases/latest/download/Clipnyx.dmg">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-        <span class="dmg-badge-text">
-          <span class="dmg-badge-label" data-ja="ダウンロード" data-en="Download">ダウンロード</span>
-          <span class="dmg-badge-title">Clipnyx.dmg</span>
-        </span>
-      </a>
-    </div>
-    <p class="free-note" data-ja="すべての機能を無料で使えます" data-en="All features are free">すべての機能を無料で使えます</p>
-  </section>
+  <!-- ───────────────────────── Hero ───────────────────────── -->
+  <header class="hero">
+    <div class="hero-art" aria-hidden="true"></div>
+    <div class="starfield" aria-hidden="true"></div>
+    <svg class="constellation" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <!-- lines connect the named stars below (same % coordinates) -->
+      <line x1="15" y1="24" x2="31" y2="13" pathLength="1" />
+      <line x1="15" y1="24" x2="19" y2="63" pathLength="1" />
+      <line x1="31" y1="13" x2="79" y2="17" pathLength="1" />
+      <line x1="79" y1="17" x2="88" y2="42" pathLength="1" />
+      <line x1="88" y1="42" x2="71" y2="72" pathLength="1" />
+      <line x1="19" y1="63" x2="71" y2="72" pathLength="1" />
+    </svg>
 
-  <!-- Screenshot -->
-  <section class="screenshot">
-    <picture>
-      <source srcset="screenshot-ja-dark.png" media="(prefers-color-scheme: dark)" data-srcset-ja="screenshot-ja-dark.png" data-srcset-en="screenshot-en-dark.png">
-      <img src="screenshot-ja.png" loading="lazy" width="1440" height="900" alt="Clipnyx の履歴パネル" data-src-ja="screenshot-ja.png" data-src-en="screenshot-en.png" data-alt-ja="Clipnyx の履歴パネル" data-alt-en="Clipnyx history panel">
-    </picture>
-    <picture>
-      <source srcset="screenshot-collection-ja-dark.png" media="(prefers-color-scheme: dark)" data-srcset-ja="screenshot-collection-ja-dark.png" data-srcset-en="screenshot-collection-en-dark.png">
-      <img src="screenshot-collection-ja.png" loading="lazy" width="1440" height="900" alt="Clipnyx のコレクション画面" data-src-ja="screenshot-collection-ja.png" data-src-en="screenshot-collection-en.png" data-alt-ja="Clipnyx のコレクション画面" data-alt-en="Clipnyx collection window">
-    </picture>
-  </section>
-
-  <!-- Features -->
-  <section class="features">
-    <div class="container">
-      <h2 class="features-heading" data-ja="できること" data-en="Features">できること</h2>
-      <div class="features-grid">
-        <div class="feature-card">
-          <span class="feature-icon" aria-hidden="true">🕐</span>
-          <h3 data-ja="クリップボード履歴" data-en="Clipboard History">クリップボード履歴</h3>
-          <p data-ja="コピーした内容を自動で保存。テキスト・画像・ファイルなど、あらゆる種類のデータに対応します。" data-en="Automatically saves everything you copy. Supports text, images, files, and more.">コピーした内容を自動で保存。テキスト・画像・ファイルなど、あらゆる種類のデータに対応します。</p>
-        </div>
-        <div class="feature-card">
-          <span class="feature-icon" aria-hidden="true">⌨️</span>
-          <h3 data-ja="ホットキーで瞬時アクセス" data-en="Instant Hotkey Access">ホットキーで瞬時アクセス</h3>
-          <p data-ja="グローバルホットキーで履歴パネルを即座に表示。どのアプリを使っていてもすぐにペーストできます。" data-en="Bring up the history panel instantly with a global hotkey. Paste from any app, anytime.">グローバルホットキーで履歴パネルを即座に表示。どのアプリを使っていてもすぐにペーストできます。</p>
-        </div>
-        <div class="feature-card">
-          <span class="feature-icon" aria-hidden="true">⭐</span>
-          <h3 data-ja="お気に入り＆フォルダ" data-en="Favorites &amp; Folders">お気に入り＆フォルダ</h3>
-          <p data-ja="よく使う定型文やコードをスニペットとして登録すれば、ホットキーから何度でも呼び出せます。ユーザー定義のフォルダで整理し、Tab/Shift+Tabで素早く切り替え。" data-en="Save frequently used text or code as reusable snippets and recall them anytime via hotkey. Organize them into custom folders and switch with Tab/Shift+Tab.">よく使う定型文やコードをスニペットとして登録すれば、ホットキーから何度でも呼び出せます。ユーザー定義のフォルダで整理し、Tab/Shift+Tabで素早く切り替え。</p>
-        </div>
-        <div class="feature-card">
-          <span class="feature-icon" aria-hidden="true">📚</span>
-          <h3 data-ja="コレクション画面" data-en="Collection View">コレクション画面</h3>
-          <p data-ja="全データを一覧管理。サイドバーで全履歴・お気に入り・フォルダを切り替え、テキストの編集や、コピーしていない定型文の新規作成もできます。" data-en="Manage all your data in one place. Browse history, favorites, and folders in the sidebar. Edit text, or write brand-new snippets you never copied.">全データを一覧管理。サイドバーで全履歴・お気に入り・フォルダを切り替え、テキストの編集や、コピーしていない定型文の新規作成もできます。</p>
-        </div>
-        <div class="feature-card">
-          <span class="feature-icon" aria-hidden="true">🏷️</span>
-          <h3 data-ja="自動カテゴリ分類" data-en="Auto Categorization">自動カテゴリ分類</h3>
-          <p data-ja="URL、コード、カラーコード、電話番号など11カテゴリに自動分類。必要な情報をすぐに見つけられます。" data-en="Automatically categorizes into 11 types — URLs, code, color codes, phone numbers, and more.">URL、コード、カラーコード、電話番号など11カテゴリに自動分類。必要な情報をすぐに見つけられます。</p>
-        </div>
-        <div class="feature-card">
-          <span class="feature-icon" aria-hidden="true">🔒</span>
-          <h3 data-ja="プライバシー重視" data-en="Privacy First">プライバシー重視</h3>
-          <p data-ja="クリップボードデータはすべてMac上にローカル保存。外部サーバーへの送信やトラッキングは一切ありません。" data-en="All clipboard data stays on your Mac. No data is sent to external servers, no tracking, no data collection.">クリップボードデータはすべてMac上にローカル保存。外部サーバーへの送信やトラッキングは一切ありません。</p>
-        </div>
-      </div>
-      <p class="section-note" data-ja="※ アイテム選択と同時に自動で貼り付けたい場合は、システム設定 ▸ プライバシーとセキュリティ ▸ アクセシビリティで Clipnyx を許可してください。許可しなくても、選択したアイテムは ⌘V で貼り付けできます。" data-en="* If you want items to be pasted automatically when selected, allow Clipnyx in System Settings ▸ Privacy &amp; Security ▸ Accessibility. Without it, selected items can still be pasted with ⌘V.">※ アイテム選択と同時に自動で貼り付けたい場合は、システム設定 ▸ プライバシーとセキュリティ ▸ アクセシビリティで Clipnyx を許可してください。許可しなくても、選択したアイテムは ⌘V で貼り付けできます。</p>
+    <div class="stars" aria-hidden="false">
+      <button class="star" style="--x:15%; --y:24%" aria-label="コピーした URL の例">
+        <span class="star-label"><small>URL</small><span data-ja="developer.apple.com/macos" data-en="developer.apple.com/macos">developer.apple.com/macos</span></span>
+      </button>
+      <button class="star below" style="--x:31%; --y:13%" aria-label="コピーしたカラーコードの例">
+        <span class="star-label"><small data-ja="カラー" data-en="Color">カラー</small><span>#E9B665</span></span>
+      </button>
+      <button class="star below" style="--x:79%; --y:17%" aria-label="コピーしたコードの例">
+        <span class="star-label"><small data-ja="コード" data-en="Code">コード</small><span>func recall() { … }</span></span>
+      </button>
+      <button class="star" style="--x:88%; --y:42%" aria-label="コピーした予定の例">
+        <span class="star-label"><small data-ja="テキスト" data-en="Text">テキスト</small><span data-ja="明日 14:00 会議室B" data-en="Tomorrow 2 PM, Room B">明日 14:00 会議室B</span></span>
+      </button>
+      <button class="star" style="--x:19%; --y:63%" aria-label="登録した定型文の例">
+        <span class="star-label"><small data-ja="定型文" data-en="Snippet">定型文</small><span data-ja="お世話になっております。" data-en="Thanks for reaching out.">お世話になっております。</span></span>
+      </button>
+      <button class="star" style="--x:71%; --y:72%" aria-label="コピーしたファイルの例">
+        <span class="star-label"><small data-ja="ファイル" data-en="File">ファイル</small><span>Proposal_2026.pdf</span></span>
+      </button>
     </div>
-  </section>
 
-  <!-- Download -->
-  <section class="editions">
-    <div class="container">
-      <h2 class="editions-heading" data-ja="ダウンロード" data-en="Download">ダウンロード</h2>
-      <p class="editions-sub" data-ja="どちらも無料。App Store からでも、直接ダウンロードでも。" data-en="Free either way — from the App Store or a direct download.">どちらも無料。App Store からでも、直接ダウンロードでも。</p>
-      <div class="get-grid">
-        <div class="get-card">
-          <span class="get-icon" aria-hidden="true">🛍️</span>
-          <h3 data-ja="App Store" data-en="App Store">App Store</h3>
-          <p data-ja="ワンタップでインストール。アップデートは App Store にお任せ。" data-en="Install in one tap. Updates are handled by the App Store.">ワンタップでインストール。アップデートは App Store にお任せ。</p>
-          <div class="get-card-cta">
-            <a class="app-store-badge" href="https://apps.apple.com/jp/app/clipnyx/id6759652985" aria-label="Download on the App Store">
-              <picture>
-                <source srcset="https://tools.applemediaservices.com/api/badges/download-on-the-mac-app-store/white/ja-jp" media="(prefers-color-scheme: dark)">
-                <img src="https://tools.applemediaservices.com/api/badges/download-on-the-mac-app-store/black/ja-jp" alt="Download on the App Store">
-              </picture>
-            </a>
-          </div>
-        </div>
-        <div class="get-card">
-          <span class="get-icon" aria-hidden="true">⬇️</span>
-          <h3 data-ja="ダウンロード / Homebrew" data-en="Download / Homebrew">ダウンロード / Homebrew</h3>
-          <p data-ja="アプリ自身が自動でアップデート。Homebrew からも導入できます。" data-en="The app keeps itself up to date automatically. Also available via Homebrew.">アプリ自身が自動でアップデート。Homebrew からも導入できます。</p>
-          <div class="get-card-cta">
-            <a class="dmg-badge" href="https://github.com/sawasige/clipnyx/releases/latest/download/Clipnyx.dmg">
-              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-              <span class="dmg-badge-text">
-                <span class="dmg-badge-label" data-ja="ダウンロード" data-en="Download">ダウンロード</span>
-                <span class="dmg-badge-title">Clipnyx.dmg</span>
-              </span>
-            </a>
-            <span class="brew-cmd">
-              <code>brew install sawasige/clipnyx/clipnyx</code>
-              <button class="copy-btn" onclick="copyBrewCmd(this)" aria-label="Copy">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-              </button>
+    <div class="hero-content">
+      <h1 class="wordmark">Clip<span class="y">nyx</span></h1>
+      <p class="thesis" data-ja="コピーした全部を、夜が覚えている。" data-en="The night remembers everything you copy.">コピーした全部を、夜が覚えている。</p>
+      <p class="subline" data-ja="Mac のメニューバーに棲むクリップボード履歴マネージャー。テキストも画像もコードも、コピーした瞬間から呼び出せます。" data-en="A clipboard history manager that lives in your Mac's menu bar. Text, images, code — recall anything from the moment you copy it.">Mac のメニューバーに棲むクリップボード履歴マネージャー。テキストも画像もコードも、コピーした瞬間から呼び出せます。</p>
+      <div>
+        <div class="cta-row">
+          <a class="app-store-badge" href="https://apps.apple.com/jp/app/clipnyx/id6759652985" aria-label="Download on the Mac App Store">
+            <img src="https://tools.applemediaservices.com/api/badges/download-on-the-mac-app-store/white/ja-jp" alt="Download on the Mac App Store">
+          </a>
+          <a class="dmg-badge" href="https://github.com/sawasige/clipnyx/releases/latest/download/Clipnyx.dmg">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            <span class="dmg-badge-text">
+              <span class="dmg-badge-label" data-ja="ダウンロード" data-en="Download">ダウンロード</span>
+              <span class="dmg-badge-title">Clipnyx.dmg</span>
             </span>
+          </a>
+        </div>
+        <p class="free-note" data-ja="すべての機能を無料で" data-en="All features, free">すべての機能を無料で</p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ───────────────────────── What the night keeps ───────────────────────── -->
+    <section class="section">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <span class="eyebrow" data-ja="夜が保管するもの" data-en="What the night keeps">夜が保管するもの</span>
+          <h2 class="section-title" data-ja="コピーは消えない。整えて、また呼び出す。" data-en="Nothing you copy is lost. Organize it, recall it.">コピーは消えない。整えて、また呼び出す。</h2>
+        </div>
+
+        <div class="keeps">
+          <div class="thread" aria-hidden="true"></div>
+
+          <div class="feat reveal">
+            <h3 data-ja="クリップボード履歴" data-en="Clipboard history">クリップボード履歴</h3>
+            <p data-ja="コピーした内容を自動で保存。テキスト・画像・ファイル・カラーまで、あらゆる種類のデータに対応します。" data-en="Everything you copy is saved automatically — text, images, files, colors, and more.">コピーした内容を自動で保存。テキスト・画像・ファイル・カラーまで、あらゆる種類のデータに対応します。</p>
+          </div>
+
+          <div class="feat reveal">
+            <h3 data-ja="ホットキーで瞬時に" data-en="Instant, from anywhere">ホットキーで瞬時に</h3>
+            <p data-ja="グローバルホットキーで履歴パネルを即座に表示。どのアプリを使っていても、選んでそのまま貼り付けられます。" data-en="A global hotkey brings up the history panel instantly. Pick an item and paste it, right where you are.">グローバルホットキーで履歴パネルを即座に表示。どのアプリを使っていても、選んでそのまま貼り付けられます。</p>
+          </div>
+
+          <div class="feat reveal">
+            <h3 data-ja="お気に入りと定型文" data-en="Favorites & snippets">お気に入りと定型文</h3>
+            <p data-ja="よく使う定型文やコードを登録すれば、ホットキーから何度でも呼び出せます。自分で作ったフォルダに整理して、Tab / Shift+Tab で素早く切り替え。" data-en="Save the text and code you reuse, then recall it any time by hotkey. Sort it into folders you name, and switch between them with Tab / Shift+Tab.">よく使う定型文やコードを登録すれば、ホットキーから何度でも呼び出せます。自分で作ったフォルダに整理して、Tab / Shift+Tab で素早く切り替え。</p>
+          </div>
+
+          <div class="feat reveal">
+            <h3 data-ja="コレクション画面" data-en="The Collection window">コレクション画面</h3>
+            <p data-ja="全データを一覧で管理。サイドバーで履歴・お気に入り・フォルダを切り替え、複数選択してまとめて移動・削除。コピーしていない定型文を新しく書き起こすこともできます。" data-en="Manage everything in one window. Switch between history, favorites, and folders; select many at once to move or delete them; or write brand-new snippets you never copied.">全データを一覧で管理。サイドバーで履歴・お気に入り・フォルダを切り替え、複数選択してまとめて移動・削除。コピーしていない定型文を新しく書き起こすこともできます。</p>
+          </div>
+
+          <div class="feat reveal">
+            <h3 data-ja="11種類に自動で仕分け" data-en="Sorted into 11 kinds, automatically">11種類に自動で仕分け</h3>
+            <p data-ja="コピーした瞬間に種類を判別。フィルターで目的のものだけを絞り込めます。" data-en="Each item is recognized the moment you copy it, so you can filter down to just what you need.">コピーした瞬間に種類を判別。フィルターで目的のものだけを絞り込めます。</p>
+            <div class="cats" aria-hidden="true">
+              <span class="cat" style="--c:#9aa3c8"><i></i>テキスト</span>
+              <span class="cat" style="--c:#6b9bf2"><i></i>URL</span>
+              <span class="cat" style="--c:#e9b665"><i></i>コード</span>
+              <span class="cat" style="--c:#e6779a"><i></i>カラー</span>
+              <span class="cat" style="--c:#7ec9a2"><i></i>画像</span>
+              <span class="cat" style="--c:#c98b6b"><i></i>ファイル</span>
+              <span class="cat" style="--c:#b58be6"><i></i>リッチテキスト</span>
+              <span class="cat" style="--c:#6bc9c9"><i></i>HTML</span>
+              <span class="cat" style="--c:#8b95e6"><i></i>CSV</span>
+              <span class="cat" style="--c:#e6b06b"><i></i>PDF</span>
+              <span class="cat" style="--c:#9aa3c8"><i></i>+more</span>
+            </div>
+          </div>
+
+          <div class="feat reveal">
+            <h3 data-ja="あなたの Mac から出ない" data-en="It never leaves your Mac">あなたの Mac から出ない</h3>
+            <p data-ja="履歴はすべてローカル保存。外部サーバーへの送信もトラッキングもありません。パスワードマネージャーなどが機密マークを付けてコピーしたものは、最初から記録しません。" data-en="Your history is stored locally — no servers, no tracking. And anything copied with a confidentiality mark, like from a password manager, is never recorded in the first place.">履歴はすべてローカル保存。外部サーバーへの送信もトラッキングもありません。パスワードマネージャーなどが機密マークを付けてコピーしたものは、最初から記録しません。</p>
+          </div>
+        </div>
+
+        <p class="section-note reveal" data-ja="※ アイテムを選ぶと同時に自動で貼り付けたい場合は、システム設定 ▸ プライバシーとセキュリティ ▸ アクセシビリティで Clipnyx を許可してください。許可しなくても、選んだアイテムは ⌘V で貼り付けられます。" data-en="* To paste an item automatically the moment you pick it, allow Clipnyx in System Settings ▸ Privacy & Security ▸ Accessibility. Without it, picked items can still be pasted with ⌘V.">※ アイテムを選ぶと同時に自動で貼り付けたい場合は、システム設定 ▸ プライバシーとセキュリティ ▸ アクセシビリティで Clipnyx を許可してください。許可しなくても、選んだアイテムは ⌘V で貼り付けられます。</p>
+      </div>
+    </section>
+
+    <!-- ───────────────────────── See it in the dark ───────────────────────── -->
+    <section class="section">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <span class="eyebrow" data-ja="実物を、暗がりで" data-en="See it in the dark">実物を、暗がりで</span>
+          <h2 class="section-title" data-ja="メニューバーから、ひと呼吸で。" data-en="One keystroke from the menu bar.">メニューバーから、ひと呼吸で。</h2>
+        </div>
+        <div class="shots">
+          <figure class="shot-fig reveal">
+            <img class="shot" src="screenshot-ja-dark.png" loading="lazy" width="1440" height="900"
+                 data-src-ja="screenshot-ja-dark.png" data-src-en="screenshot-en-dark.png"
+                 alt="Clipnyx の履歴パネル" data-alt-ja="Clipnyx の履歴パネル" data-alt-en="Clipnyx history panel">
+            <figcaption class="shot-cap" data-ja="ホットキーで開く履歴パネル" data-en="The history panel, opened by hotkey">ホットキーで開く履歴パネル</figcaption>
+          </figure>
+          <figure class="shot-fig reveal">
+            <img class="shot" src="screenshot-collection-ja-dark.png" loading="lazy" width="1440" height="900"
+                 data-src-ja="screenshot-collection-ja-dark.png" data-src-en="screenshot-collection-en-dark.png"
+                 alt="Clipnyx のコレクション画面" data-alt-ja="Clipnyx のコレクション画面" data-alt-en="Clipnyx collection window">
+            <figcaption class="shot-cap" data-ja="定型文を整理するコレクション画面" data-en="The Collection window, where snippets live">定型文を整理するコレクション画面</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────────────────── Why ───────────────────────── -->
+    <section class="section">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <span class="eyebrow" data-ja="なぜ Clipnyx か" data-en="Why Clipnyx">なぜ Clipnyx か</span>
+          <p class="why-statement" data-ja="OS のクリップボードは、短期記憶。Clipnyx は、長期記憶。" data-en="The system clipboard is short-term memory. Clipnyx is the long-term kind.">OS のクリップボードは、短期記憶。Clipnyx は、<b>長期記憶。</b></p>
+        </div>
+        <div class="why-grid reveal">
+          <div class="why-cell">
+            <h4 data-ja="ずっと残る" data-en="It stays">ずっと残る</h4>
+            <p data-ja="直近の数件で消えてしまう標準機能と違い、件数も期間も気にせず遡れます。お気に入りは件数制限の外。" data-en="Unlike the built-in feature that forgets after a few items, you can scroll back as far as you like. Favorites sit outside the limit entirely.">直近の数件で消えてしまう標準機能と違い、件数も期間も気にせず遡れます。お気に入りは件数制限の外。</p>
+          </div>
+          <div class="why-cell">
+            <h4 data-ja="自分の手で整う" data-en="You arrange it">自分の手で整う</h4>
+            <p data-ja="フォルダで分け、名前を付け、ドラッグで動かす。よく使う定型文を、自分の星座のように並べておけます。" data-en="Group it into folders, give them names, drag items where they belong. Lay out your snippets like a constellation of your own.">フォルダで分け、名前を付け、ドラッグで動かす。よく使う定型文を、自分の星座のように並べておけます。</p>
+          </div>
+          <div class="why-cell">
+            <h4 data-ja="日本語のために" data-en="Built for Japanese">日本語のために</h4>
+            <p data-ja="日本語 UI と日本語入力での検索を、はじめから丁寧に。日本語で使うことを前提に作られています。" data-en="A Japanese interface and search that handles Japanese input properly — considered from the start, not bolted on.">日本語 UI と日本語入力での検索を、はじめから丁寧に。日本語で使うことを前提に作られています。</p>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Footer -->
+    <!-- ───────────────────────── Get Clipnyx ───────────────────────── -->
+    <section class="section">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <span class="eyebrow" data-ja="迎え入れる" data-en="Get Clipnyx">迎え入れる</span>
+          <h2 class="section-title" data-ja="どちらも無料。好きな方法でどうぞ。" data-en="Free either way. Take your pick.">どちらも無料。好きな方法でどうぞ。</h2>
+        </div>
+        <div class="get-grid">
+          <div class="get-card reveal">
+            <h3 data-ja="App Store" data-en="App Store">App Store</h3>
+            <p data-ja="ワンタップでインストール。アップデートは App Store にお任せ。" data-en="Install in one tap. Updates are handled by the App Store.">ワンタップでインストール。アップデートは App Store にお任せ。</p>
+            <div class="get-card-cta">
+              <a class="app-store-badge" href="https://apps.apple.com/jp/app/clipnyx/id6759652985" aria-label="Download on the Mac App Store">
+                <img src="https://tools.applemediaservices.com/api/badges/download-on-the-mac-app-store/white/ja-jp" alt="Download on the Mac App Store">
+              </a>
+            </div>
+          </div>
+          <div class="get-card reveal">
+            <h3 data-ja="ダウンロード / Homebrew" data-en="Download / Homebrew">ダウンロード / Homebrew</h3>
+            <p data-ja="アプリ自身が自動でアップデート。Homebrew からも導入できます。" data-en="The app keeps itself up to date. Also available through Homebrew.">アプリ自身が自動でアップデート。Homebrew からも導入できます。</p>
+            <div class="get-card-cta">
+              <a class="dmg-badge" href="https://github.com/sawasige/clipnyx/releases/latest/download/Clipnyx.dmg">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                <span class="dmg-badge-text">
+                  <span class="dmg-badge-label" data-ja="ダウンロード" data-en="Download">ダウンロード</span>
+                  <span class="dmg-badge-title">Clipnyx.dmg</span>
+                </span>
+              </a>
+              <span class="brew-cmd">
+                <code>brew install sawasige/clipnyx/clipnyx</code>
+                <button class="copy-btn" onclick="copyBrewCmd(this)" aria-label="コマンドをコピー">
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                </button>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ───────────────────────── Footer ───────────────────────── -->
   <footer>
-    <div class="container">
+    <div class="wrap">
       <div class="footer-inner">
+        <div class="footer-brand">
+          <img src="icon-dark.png" alt="" width="30" height="30">
+          <span>Clipnyx</span>
+        </div>
         <div class="footer-links">
           <a href="support.html" data-ja="サポート" data-en="Support">サポート</a>
           <a href="privacy-policy.html" data-ja="プライバシーポリシー" data-en="Privacy Policy">プライバシーポリシー</a>
           <a href="changelog.html" data-ja="更新履歴" data-en="Changelog">更新履歴</a>
-          <a href="https://github.com/sawasige/clipnyx" data-ja="GitHub" data-en="GitHub">GitHub</a>
+          <a href="https://github.com/sawasige/clipnyx">GitHub</a>
           <button class="lang-toggle" onclick="toggleLang()" aria-label="Switch language">EN / 日本語</button>
         </div>
         <span class="copyright">&copy; 2026 Shigeru Sawada</span>
@@ -657,14 +753,53 @@
   </footer>
 
   <script>
+    // ── Ambient starfield (generated; honors reduced-motion via CSS) ──
+    (function () {
+      var sky = document.querySelector('.starfield');
+      if (!sky) return;
+      var n = window.innerWidth < 680 ? 70 : 130;
+      var frag = document.createDocumentFragment();
+      for (var i = 0; i < n; i++) {
+        var s = document.createElement('span');
+        s.className = 'dust';
+        var size = Math.random() < 0.86 ? 1 : 2;
+        s.style.left = (Math.random() * 100).toFixed(2) + '%';
+        s.style.top = (Math.random() * 100).toFixed(2) + '%';
+        s.style.width = s.style.height = size + 'px';
+        s.style.setProperty('--o', (0.22 + Math.random() * 0.55).toFixed(2));
+        s.style.setProperty('--d', (Math.random() * 2.2).toFixed(2) + 's');
+        s.style.setProperty('--tw', (6 + Math.random() * 5).toFixed(2) + 's');
+        if (Math.random() < 0.28) s.classList.add('twinkle');
+        frag.appendChild(s);
+      }
+      sky.appendChild(frag);
+    })();
+
+    // ── Reveal on scroll ──
+    (function () {
+      var els = document.querySelectorAll('.reveal');
+      if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        els.forEach(function (el) { el.classList.add('in'); });
+        return;
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+        });
+      }, { rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
+      els.forEach(function (el) { io.observe(el); });
+    })();
+
+    // ── Language toggle (ja / en) ──
     (function () {
       var lang = 'ja';
-      var elements = document.querySelectorAll('[data-ja]');
+      var nodes = document.querySelectorAll('[data-ja]');
 
       function applyLang(l) {
         lang = l;
-        elements.forEach(function (el) {
-          el.textContent = el.getAttribute('data-' + lang);
+        nodes.forEach(function (el) {
+          var v = el.getAttribute('data-' + lang);
+          if (v !== null) el.textContent = v;
         });
         document.querySelectorAll('[data-alt-' + lang + ']').forEach(function (el) {
           el.alt = el.getAttribute('data-alt-' + lang);
@@ -672,37 +807,26 @@
         document.querySelectorAll('[data-src-' + lang + ']').forEach(function (el) {
           el.src = el.getAttribute('data-src-' + lang);
         });
-        document.querySelectorAll('[data-srcset-' + lang + ']').forEach(function (el) {
-          el.srcset = el.getAttribute('data-srcset-' + lang);
-        });
         document.documentElement.lang = lang;
-        // Update App Store badge language (all instances)
         var locale = lang === 'ja' ? 'ja-jp' : 'en-us';
-        document.querySelectorAll('.app-store-badge').forEach(function (badge) {
-          var img = badge.querySelector('img');
-          var source = badge.querySelector('source');
-          if (img && source) {
-            img.src = 'https://tools.applemediaservices.com/api/badges/download-on-the-mac-app-store/black/' + locale;
-            source.srcset = 'https://tools.applemediaservices.com/api/badges/download-on-the-mac-app-store/white/' + locale;
-          }
+        document.querySelectorAll('.app-store-badge img').forEach(function (img) {
+          img.src = 'https://tools.applemediaservices.com/api/badges/download-on-the-mac-app-store/white/' + locale;
         });
       }
 
-      window.toggleLang = function () {
-        applyLang(lang === 'ja' ? 'en' : 'ja');
-      };
+      window.toggleLang = function () { applyLang(lang === 'ja' ? 'en' : 'ja'); };
 
-      var initialLang = (navigator.language || '').startsWith('ja') ? 'ja' : 'en';
-      applyLang(initialLang);
+      var initial = (navigator.language || '').startsWith('ja') ? 'ja' : 'en';
+      applyLang(initial);
     })();
 
+    // ── Copy the Homebrew command ──
     function copyBrewCmd(btn) {
       navigator.clipboard.writeText('brew install sawasige/clipnyx/clipnyx');
-      btn = btn || document.querySelector('.copy-btn');
-      btn.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/></svg>';
-      setTimeout(function () {
-        btn.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" fill="currentColor"/></svg>';
-      }, 1500);
+      var done = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/></svg>';
+      var copy = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" fill="currentColor"/></svg>';
+      btn.innerHTML = done;
+      setTimeout(function () { btn.innerHTML = copy; }, 1500);
     }
   </script>
 
