@@ -1,12 +1,8 @@
-- コレクション画面でアイテムを複数選択できるようになりました（⌘クリック / ⇧クリック）。フォルダへの移動・お気に入り解除・削除をまとめて行えます
-- アイテムをサイドバーのフォルダへドラッグ&ドロップで移動できるようになりました
-- パスワードマネージャー等が機密マークを付けてコピーしたデータを、履歴に記録しないようにしました
-- データサイズの表記を macOS 標準（Finder と同じ）に統一しました
-- 内部改善: 編集時のディスク書き込み削減、コード近代化による安定性向上
+- メニューバーアイコンを非表示にできるようになりました（設定 ▸ 一般）。常駐させたまま見た目をすっきりさせたい方向けです
+- 非表示中も、ホットキーでパネルを開き、パネルの「…」メニューから設定・一時停止・終了を行えます。Finder から Clipnyx を開き直してもパネルが表示されます
+- 内部改善: 安定性の向上
 
 <!-- en -->
-- You can now select multiple items in the Collection window (⌘-click / ⇧-click) to move them to a folder, unfavorite, or delete them all at once
-- Items can now be moved to a folder by dragging them onto the sidebar
-- Sensitive data copied with a confidentiality mark (e.g. from password managers) is no longer recorded in history
-- Data sizes are now displayed in the standard macOS format (same as Finder)
-- Internal improvements: fewer disk writes while editing, and stability improvements from code modernization
+- You can now hide the menu bar icon (Settings ▸ General) — for keeping Clipnyx running while tidying up your menu bar
+- Even while hidden, open the panel with your hotkey and use its “…” menu to reach Settings, pause, or quit. Reopening Clipnyx from Finder also brings up the panel
+- Internal improvements: better stability
