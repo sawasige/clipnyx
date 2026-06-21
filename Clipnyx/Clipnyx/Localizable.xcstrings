@@ -653,6 +653,26 @@
         }
       }
     },
+    "Menu Bar" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メニューバー"
+          }
+        }
+      }
+    },
+    "More" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "その他"
+          }
+        }
+      }
+    },
     "Move to Folder" : {
       "localizations" : {
         "ja" : {
@@ -943,6 +963,16 @@
         }
       }
     },
+    "Show Menu Bar Icon" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メニューバーアイコンを表示"
+          }
+        }
+      }
+    },
     "Software Update" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1050,6 +1080,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "有効にすると、項目を選択すると同時にアクティブなアプリへ直接貼り付けます。無効の場合は項目をコピーするので、⌘V で手動で貼り付けてください。"
+          }
+        }
+      }
+    },
+    "When hidden, open the panel with your hotkey and use its menu to reach Settings or quit. Reopening Clipnyx from Finder also brings up the panel." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "非表示にすると、ホットキーでパネルを開き、そのメニューから設定や終了を行えます。Finder から Clipnyx を開き直してもパネルが表示されます。"
           }
         }
       }
