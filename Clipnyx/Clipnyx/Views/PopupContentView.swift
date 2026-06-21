@@ -401,7 +401,7 @@ private struct UnifiedItemRow: View {
                 Text("\(index + 1)")
                     .font(.caption.monospaced())
                     .foregroundStyle(.secondary)
-                    .frame(width: 14)
+                    .frame(width: 14, alignment: .trailing)
             } else {
                 Spacer().frame(width: 14)
             }
@@ -515,6 +515,7 @@ private struct ToolbarIconButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: icon)
+                .font(.system(size: 15))
                 .foregroundStyle(isHovered ? color : .secondary)
                 .frame(width: 28, height: 28)
                 .background(isHovered ? color.opacity(0.1) : .clear)
@@ -541,6 +542,7 @@ private struct ToolbarMenuButton<MenuContent: View>: View {
                 menuContent()
             } label: {
                 Image(systemName: icon)
+                    .font(.system(size: 15))
                     .foregroundStyle(isHovered ? color : .secondary)
             }
             .menuStyle(.borderlessButton)
