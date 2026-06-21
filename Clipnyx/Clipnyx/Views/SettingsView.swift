@@ -19,6 +19,14 @@ struct GeneralTab: View {
                 HotKeyRecorderRow()
             }
 
+            Section {
+                ShowMenuBarIconToggle()
+            } header: {
+                Text("Menu Bar")
+            } footer: {
+                Text("When hidden, open the panel with your hotkey and use its menu to reach Settings or quit. Reopening Clipnyx from Finder also brings up the panel.")
+            }
+
             #if ENABLE_SPARKLE
             // App Store 版では自動ペースト設定を UI に出さない（ガイドライン 2.4.5 対策）。
             // 機能自体は preflight が true のときだけ裏で動作する。
@@ -107,6 +115,16 @@ struct HistoryTab: View {
                 Text("Favorite items will not be deleted.")
             }
         }
+    }
+}
+
+// MARK: - Menu Bar
+
+private struct ShowMenuBarIconToggle: View {
+    @AppStorage(MenuBarSettings.showIconKey) private var showMenuBarIcon = true
+
+    var body: some View {
+        Toggle("Show Menu Bar Icon", isOn: $showMenuBarIcon)
     }
 }
 

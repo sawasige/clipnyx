@@ -15,9 +15,10 @@ enum ClipnyxMain {
 
 struct ClipnyxApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @AppStorage(MenuBarSettings.showIconKey) private var showMenuBarIcon = true
 
     var body: some Scene {
-        MenuBarExtra("Clipnyx", image: "MenuBarIcon") {
+        MenuBarExtra("Clipnyx", image: "MenuBarIcon", isInserted: $showMenuBarIcon) {
             MenuBarView()
                 .environment(appDelegate.clipboardManager)
         }
@@ -69,6 +70,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ notification: Notification) {
         HotKeyManager.shared.unregister()
         clipboardManager.stopPolling()
+    }
+
+    /// Finder / Launchpad からアプリを開き直したとき（reopen）はホットキーと同じく
+    /// ポップアップパネルを開く。メニューバーアイコンを非表示にしていても、ここから
+    /// パネルのメニュー経由で設定・終了に辿り着ける最終的な復帰手段になる。
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if !flag {
+            popupController.toggle(clipboardManager: clipboardManager)
+        }
+        return true
     }
 
     @objc private func handleOpenPopupPanel() {
@@ -181,6 +192,12 @@ extension AppDelegate: NSWindowDelegate {
             NSApp.setActivationPolicy(.accessory)
         }
     }
+}
+
+enum MenuBarSettings {
+    /// メニューバーアイコンの表示/非表示（既定 true）。
+    /// アプリ本体（MenuBarExtra）と設定画面で共有する。
+    static let showIconKey = "showMenuBarIcon"
 }
 
 extension Notification.Name {

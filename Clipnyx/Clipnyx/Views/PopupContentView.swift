@@ -89,6 +89,31 @@ struct PopupContentView: View {
                         NotificationCenter.default.post(name: .openFavoriteManager, object: nil)
                     }
                     .help("Collection")
+
+                    // Overflow（設定・一時停止・終了）。メニューバーアイコンを
+                    // 非表示にしていても、ここから確実に設定・終了へ辿り着ける。
+                    ToolbarMenuButton(icon: "ellipsis.circle", color: .secondary) {
+                        Button {
+                            NotificationCenter.default.post(name: .openSettingsRequest, object: nil)
+                        } label: {
+                            Label(String(localized: "Settings"), systemImage: "gearshape")
+                        }
+                        Button {
+                            clipboardManager.isPaused.toggle()
+                        } label: {
+                            Label(
+                                clipboardManager.isPaused ? String(localized: "Resume Monitoring") : String(localized: "Pause Monitoring"),
+                                systemImage: clipboardManager.isPaused ? "play.fill" : "pause.fill"
+                            )
+                        }
+                        Divider()
+                        Button {
+                            NSApplication.shared.terminate(nil)
+                        } label: {
+                            Label(String(localized: "Quit"), systemImage: "power")
+                        }
+                    }
+                    .help("More")
                 }
             }
             .padding(.horizontal, 12)
