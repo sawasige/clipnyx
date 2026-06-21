@@ -166,6 +166,15 @@
     <description xml:lang="ja"><![CDATA[<ul><li>コレクション画面でアイテムを複数選択できるようになりました（⌘クリック / ⇧クリック）。フォルダへの移動・お気に入り解除・削除をまとめて行えます</li><li>アイテムをサイドバーのフォルダへドラッグ&amp;ドロップで移動できるようになりました</li><li>パスワードマネージャー等が機密マークを付けてコピーしたデータを、履歴に記録しないようにしました</li><li>データサイズの表記を macOS 標準（Finder と同じ）に統一しました</li><li>内部改善: 編集時のディスク書き込み削減、コード近代化による安定性向上</li></ul>]]></description>
     <enclosure url="https://github.com/sawasige/clipnyx/releases/download/v1.4.0/Clipnyx.dmg" length="4847391" type="application/octet-stream" sparkle:edSignature="u0+sOsJtJgshrN6XwoN4Z5u888ssEZ+0kTXJeM151w7hrFXOKuzOJ7VKnHYr0enLVzPdMCrmfVEZ6YD+hChuBQ==" />
   </item>
+        <item>
+    <title>1.5.0</title>
+    <pubDate>Sun, 21 Jun 2026 10:29:30 +0000</pubDate>
+    <sparkle:version>26</sparkle:version>
+    <sparkle:shortVersionString>1.5.0</sparkle:shortVersionString>
+    <description><![CDATA[<ul><li>You can now hide the menu bar icon (Settings ▸ General) — for keeping Clipnyx running while tidying up your menu bar</li><li>Even while hidden, open the panel with your hotkey and use its “…” menu to reach Settings, pause, or quit. Reopening Clipnyx from Finder also brings up the panel</li><li>Internal improvements: better stability</li></ul>]]></description>
+    <description xml:lang="ja"><![CDATA[<ul><li>メニューバーアイコンを非表示にできるようになりました（設定 ▸ 一般）。常駐させたまま見た目をすっきりさせたい方向けです</li><li>非表示中も、ホットキーでパネルを開き、パネルの「…」メニューから設定・一時停止・終了を行えます。Finder から Clipnyx を開き直してもパネルが表示されます</li><li>内部改善: 安定性の向上</li></ul>]]></description>
+    <enclosure url="https://github.com/sawasige/clipnyx/releases/download/v1.5.0/Clipnyx.dmg" length="4852571" type="application/octet-stream" sparkle:edSignature="tqfhbbDGJHAeSDW8sGNDFhZNkiptOZf5PoXw8M/H6yqagvDJvcMWsc7dhWCV5/BqD5U0Or9PuEO0VBNTWTQ9Aw==" />
+  </item>
     <!-- Items are prepended by CI on each release -->
   </channel>
 </rss>
