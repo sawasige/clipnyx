@@ -10,12 +10,48 @@ platform :mac do
       app_version: options[:app_version],
       skip_binary_upload: true,
       skip_screenshots: false,
-      # 既存スクリーンショットを削除してから上げ直す（false だと追加になる）
+      # 毎回「全削除→全アップ」でクリーンに上げ直す。
+      # NOTE: deliver はアップ直後の存在確認が早すぎて毎回 missing と誤判定し、
+      # リトライで必ずスクショが二重化する（sync_screenshots は fastlane 2.236.1 時点で
+      # クラッシュし使えない）。そのため下の dedupe_screenshots で重複を掃除する。
       overwrite_screenshots: true,
       force: true,
       platform: "osx",
       precheck_include_in_app_purchases: false
     )
+    # deliver のバグで二重化したスクショを除去し、ローカルの内容（各1枚）に揃える
+    dedupe_screenshots(options)
+  end
+
+  desc "重複したスクリーンショットを削除する（同一ファイル名は1枚だけ残す）"
+  desc "deliver のアップ後検証バグで二重化したぶんを掃除する保険"
+  lane :dedupe_screenshots do |options|
+    require "spaceship"
+    # lane 実行時の CWD は fastlane/ なのでこのパスは fastlane/api_key.json を指す
+    Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from_json_file("api_key.json")
+
+    app = Spaceship::ConnectAPI::App.find("com.himatsubu.Clipnyx")
+    version = app.get_edit_app_store_version(platform: Spaceship::ConnectAPI::Platform::MAC_OS)
+    UI.user_error!("編集可能な MAC_OS バージョンが見つかりません") if version.nil?
+    UI.message("対象バージョン: #{version.version_string}")
+
+    removed = 0
+    version.get_app_store_version_localizations.each do |loc|
+      loc.get_app_screenshot_sets.each do |set|
+        shots = set.app_screenshots || []
+        # 同一ファイル名でグループ化し、正常処理済み(COMPLETE)を優先して1枚だけ残す
+        shots.group_by(&:file_name).each do |fname, group|
+          keeper = group.find(&:complete?) || group.first
+          group.each do |shot|
+            next if shot.id == keeper.id
+            UI.message("削除: #{loc.locale} / #{set.screenshot_display_type} / #{fname}")
+            shot.delete!
+            removed += 1
+          end
+        end
+      end
+    end
+    UI.success("重複スクリーンショットを #{removed} 枚削除しました")
   end
 
   desc "Upload metadata only (no screenshots)"
