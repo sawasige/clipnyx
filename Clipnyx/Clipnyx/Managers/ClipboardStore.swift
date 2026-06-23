@@ -7,7 +7,7 @@ final class ClipboardStore: Sendable {
 
     /// true のとき書き込み・削除を一切行わない（スクリーンショット生成などの
     /// プレビュー用途で実データを保護する）。読み取りは許可される。
-    private let isReadOnly: Bool
+    let isReadOnly: Bool
 
     init(isReadOnly: Bool = false) {
         self.isReadOnly = isReadOnly
@@ -52,6 +52,8 @@ final class ClipboardStore: Sendable {
         let isSaved: Bool?
         let favoriteName: String?
         let favoriteFolderId: UUID?
+        // OCR 認識テキスト（画像・PDF のみ。後方互換のため任意フィールド）
+        let recognizedText: String?
 
         // Legacy fallback keys
         // 旧バージョンが書き出した index を読むための互換フィールド（読み取り専用）。
@@ -64,6 +66,7 @@ final class ClipboardStore: Sendable {
             case id, timestamp, category, previewText, hasThumbnail, totalDataSize, contentHash
             case representationInfos, isPinned, isSaved
             case favoriteName, favoriteFolderId
+            case recognizedText
             case snippetName, snippetCategoryId
         }
     }
@@ -96,6 +99,7 @@ final class ClipboardStore: Sendable {
                 isSaved: item.isSaved,
                 favoriteName: item.favoriteName,
                 favoriteFolderId: item.favoriteFolderId,
+                recognizedText: item.recognizedText,
                 snippetName: nil,
                 snippetCategoryId: nil
             )
@@ -173,7 +177,8 @@ final class ClipboardStore: Sendable {
                     representationInfos: entry.representationInfos.map { RepresentationInfo(type: $0.type, size: $0.size) },
                     isSaved: entry.isSaved ?? entry.isPinned ?? false,
                     favoriteName: entry.favoriteName ?? entry.snippetName,
-                    favoriteFolderId: entry.favoriteFolderId ?? entry.snippetCategoryId
+                    favoriteFolderId: entry.favoriteFolderId ?? entry.snippetCategoryId,
+                    recognizedText: entry.recognizedText
                 )
             }
         } catch {

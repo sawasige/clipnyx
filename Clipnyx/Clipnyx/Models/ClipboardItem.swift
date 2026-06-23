@@ -19,8 +19,29 @@ struct ClipboardItem: Identifiable, Sendable {
     var isSaved: Bool
     var favoriteName: String?
     var favoriteFolderId: UUID?
+    /// 画像・PDF の OCR 認識テキスト。
+    /// nil = 未解析（または解析中）、"" = 解析済みだが文字なし、非空 = 認識テキストあり。
+    /// テキスト系カテゴリでは常に nil（OCR 対象外）。
+    var recognizedText: String? = nil
 
     var isFavoriteItem: Bool { favoriteFolderId != nil }
+
+    /// OCR 対象（画像・PDF）かどうか。
+    var isOCRCandidate: Bool {
+        category == .image || category == .pdf
+    }
+
+    /// プレーンテキスト化できるか。画像・PDF は OCR テキストがある場合のみ可。
+    var canConvertToPlainText: Bool {
+        switch category {
+        case .richText, .html, .url, .sourceCode, .csv:
+            return true
+        case .image, .pdf:
+            return !(recognizedText ?? "").isEmpty
+        default:
+            return false
+        }
+    }
 
     private static let maxCaptureSize: Int = 500 * 1024 * 1024 // 500MB safety cap
     private static let maxThumbnailDimension: CGFloat = 200.0

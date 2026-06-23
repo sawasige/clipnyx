@@ -71,6 +71,14 @@ struct ItemDetailView: View {
                 .background(Color(nsColor: .controlBackgroundColor))
                 .clipShape(RoundedRectangle(cornerRadius: 6))
 
+            if item.isOCRCandidate {
+                let recognizing = clipboardManager?.recognizingIds.contains(item.id) ?? false
+                if recognizing || item.recognizedText != nil {
+                    Divider()
+                    RecognizedTextSection(recognizedText: item.recognizedText, isRecognizing: recognizing)
+                }
+            }
+
             Divider()
 
             // Data types

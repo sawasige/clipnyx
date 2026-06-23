@@ -211,6 +211,16 @@
         }
       }
     },
+    "Analyzing text…" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "解析中…"
+          }
+        }
+      }
+    },
     "Automatically Check for Updates" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -459,6 +469,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ワンクリック貼り付けを有効にする…"
+          }
+        }
+      }
+    },
+    "Extracts text from copied images and PDFs so they can be searched and converted to plain text. Runs on-device; nothing is sent externally." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コピーした画像や PDF からテキストを抽出し、検索やプレーンテキスト化に使えるようにします。処理はすべて端末内で行われ、外部には送信されません。"
           }
         }
       }
@@ -743,6 +763,16 @@
         }
       }
     },
+    "No text detected." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "テキストは検出されませんでした"
+          }
+        }
+      }
+    },
     "None" : {
       "localizations" : {
         "ja" : {
@@ -879,6 +909,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "終了"
+          }
+        }
+      }
+    },
+    "Recognize Text in Images" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像内のテキストを認識"
+          }
+        }
+      }
+    },
+    "Recognized Text" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "認識テキスト"
           }
         }
       }
