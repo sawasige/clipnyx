@@ -569,18 +569,27 @@ private struct ItemDetailEditor: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 8))
                         }
 
-                        Text(item.previewText)
-                            .font(.system(size: 13))
-                            .foregroundStyle(.secondary)
-                            .textSelection(.enabled)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(8)
-                            .background(.quaternary)
-                            .clipShape(RoundedRectangle(cornerRadius: 6))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .stroke(Color(nsColor: .separatorColor))
-                            )
+                        if item.isOCRCandidate {
+                            // 画像・PDF の previewText は "画像 409×43" 等のプレースホルダなので
+                            // 大きな箱は出さず、寸法を小さなメタ行として表示する
+                            Text(item.previewText)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        } else {
+                            Text(item.previewText)
+                                .font(.system(size: 13))
+                                .foregroundStyle(.secondary)
+                                .textSelection(.enabled)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(8)
+                                .background(.quaternary)
+                                .clipShape(RoundedRectangle(cornerRadius: 6))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .stroke(Color(nsColor: .separatorColor))
+                                )
+                        }
 
                         if item.isOCRCandidate {
                             let recognizing = clipboardManager.recognizingIds.contains(item.id)
