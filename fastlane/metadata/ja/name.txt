@@ -1,1 +1,1 @@
-Clipnyx
+Clipnyx クリップボード管理
