@@ -175,6 +175,15 @@
     <description xml:lang="ja"><![CDATA[<ul><li>メニューバーアイコンを非表示にできるようになりました（設定 ▸ 一般）。常駐させたまま見た目をすっきりさせたい方向けです</li><li>非表示中も、ホットキーでパネルを開き、パネルの「…」メニューから設定・一時停止・終了を行えます。Finder から Clipnyx を開き直してもパネルが表示されます</li><li>内部改善: 安定性の向上</li></ul>]]></description>
     <enclosure url="https://github.com/sawasige/clipnyx/releases/download/v1.5.0/Clipnyx.dmg" length="4852571" type="application/octet-stream" sparkle:edSignature="tqfhbbDGJHAeSDW8sGNDFhZNkiptOZf5PoXw8M/H6yqagvDJvcMWsc7dhWCV5/BqD5U0Or9PuEO0VBNTWTQ9Aw==" />
   </item>
+        <item>
+    <title>1.6.0</title>
+    <pubDate>Tue, 23 Jun 2026 10:36:07 +0000</pubDate>
+    <sparkle:version>27</sparkle:version>
+    <sparkle:shortVersionString>1.6.0</sparkle:shortVersionString>
+    <description><![CDATA[<ul><li>Clipnyx can now recognize text inside images and PDFs (OCR). Search your copied images, and pull out the text via Shift+Enter or “Convert to Plain Text” in the Collection. Recognition runs entirely on-device — nothing is sent externally</li><li>You can now convert multiple selected items to plain text at once in the Collection</li><li>The Collection window now remembers its size, position, and column widths</li><li>Refined the detail view and typography across the app</li></ul>]]></description>
+    <description xml:lang="ja"><![CDATA[<ul><li>画像や PDF に含まれる文字を認識できるようになりました（OCR）。コピーした画像を検索でき、Shift+Enter やコレクションの「プレーンテキストに変換」でテキストとして取り出せます。認識はすべて端末内で行い、外部送信はしません</li><li>コレクション画面で、複数選択した項目をまとめてプレーンテキストに変換できるようになりました</li><li>コレクション画面のウィンドウサイズ・位置と、各列の幅を記憶するようになりました</li><li>詳細画面の表示とアプリ全体のフォントを見直し、見た目を整えました</li></ul>]]></description>
+    <enclosure url="https://github.com/sawasige/clipnyx/releases/download/v1.6.0/Clipnyx.dmg" length="4900866" type="application/octet-stream" sparkle:edSignature="VQXFXbN1qlW2eeIFXAlI4sMoZyrxJDuKbKz5WPOsISWsi4lt1GkSnCsU1zEPsJeJbR9Ctki2rhez1/tgQxlpBw==" />
+  </item>
     <!-- Items are prepended by CI on each release -->
   </channel>
 </rss>
