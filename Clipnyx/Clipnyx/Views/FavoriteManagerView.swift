@@ -601,24 +601,14 @@ private struct ItemDetailEditor: View {
                     Divider()
 
                     // Actions
-                    HStack(spacing: 12) {
-                        Button {
-                            clipboardManager.toggleSave(item)
-                        } label: {
-                            Label(item.isSaved ? "Unfavorite" : "Favorite",
-                                  systemImage: item.isSaved ? "bookmark.slash" : "bookmark")
+                    // 幅が足りないときはボタンが見切れないよう横→縦に折り返す
+                    ViewThatFits(in: .horizontal) {
+                        HStack(spacing: 12) {
+                            actionButtons(for: item)
                         }
-
-                        Button {
-                            clipboardManager.restoreToClipboard(item)
-                        } label: {
-                            Label("Copy to Clipboard", systemImage: "doc.on.clipboard")
-                        }
-
-                        Button(role: .destructive) {
-                            clipboardManager.removeItem(item)
-                        } label: {
-                            Label("Delete", systemImage: "trash")
+                        VStack(spacing: 8) {
+                            actionButtons(for: item)
+                                .frame(maxWidth: .infinity)
                         }
                     }
                 }
@@ -630,6 +620,28 @@ private struct ItemDetailEditor: View {
         // 編集テキストを読み直す。これをしないと変換直後に変換前の内容が残る。
         .onChange(of: itemId) { _, _ in loadItem() }
         .onChange(of: item?.category) { _, _ in loadItem() }
+    }
+
+    @ViewBuilder
+    private func actionButtons(for item: ClipboardItem) -> some View {
+        Button {
+            clipboardManager.toggleSave(item)
+        } label: {
+            Label(item.isSaved ? "Unfavorite" : "Favorite",
+                  systemImage: item.isSaved ? "bookmark.slash" : "bookmark")
+        }
+
+        Button {
+            clipboardManager.restoreToClipboard(item)
+        } label: {
+            Label("Copy to Clipboard", systemImage: "doc.on.clipboard")
+        }
+
+        Button(role: .destructive) {
+            clipboardManager.removeItem(item)
+        } label: {
+            Label("Delete", systemImage: "trash")
+        }
     }
 
     private func canConvertToPlainText(_ item: ClipboardItem) -> Bool {

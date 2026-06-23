@@ -117,10 +117,44 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         self.favoriteManagerWindow = window
 
         window.delegate = self
-        window.center()
+        // 位置・サイズを記憶する（macOS 純正の仕組み。復元時に AppKit が画面内へ補正する）。
+        window.setFrameUsingName("FavoriteManagerWindow")
+        window.setFrameAutosaveName("FavoriteManagerWindow")
         window.makeKeyAndOrderFront(nil)
         NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
+
+        // NavigationSplitView のカラム幅を記憶させる。SwiftUI は永続化 API を出して
+        // いないため、裏側の NSSplitView を探して autosaveName を設定する。
+        // SwiftUI 内部構造に依存するが、見つからなければ黙って何もしない（クラッシュしない）。
+        persistSplitViewWidths(in: window)
+    }
+
+    /// NavigationSplitView の裏側の NSSplitView に autosaveName を設定し、カラム幅を永続化する。
+    /// SwiftUI はビューを次のランループ以降に生成するため、見つかるまで数回だけ再試行する。
+    private func persistSplitViewWidths(in window: NSWindow, attempt: Int = 0) {
+        guard let contentView = window.contentView else { return }
+        let splitViews = Self.collectSplitViews(in: contentView)
+        if splitViews.isEmpty {
+            guard attempt < 5 else { return }
+            DispatchQueue.main.async { [weak self, weak window] in
+                guard let self, let window else { return }
+                self.persistSplitViewWidths(in: window, attempt: attempt + 1)
+            }
+            return
+        }
+        for (index, splitView) in splitViews.enumerated() where (splitView.autosaveName ?? "").isEmpty {
+            splitView.autosaveName = "FavoriteManagerSplit-\(index)"
+        }
+    }
+
+    private static func collectSplitViews(in view: NSView) -> [NSSplitView] {
+        var result: [NSSplitView] = []
+        if let split = view as? NSSplitView { result.append(split) }
+        for sub in view.subviews {
+            result.append(contentsOf: collectSplitViews(in: sub))
+        }
+        return result
     }
 
     // MARK: - Settings
