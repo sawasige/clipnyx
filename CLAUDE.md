@@ -56,6 +56,16 @@ Clipnyx/Clipnyx/
 - **Debug-Full / Release-Full**: Full 版（サンドボックス + Sparkle）
 - `ENABLE_SPARKLE` コンパイルフラグで Sparkle 関連コードを分岐
 
+## タイポグラフィ規約
+- **読むテキストは必ずセマンティックフォントを使う**。固定ピクセル（`.system(size:)`）はテキストに使わない
+  - アイテムタイトル・件数: `.headline`
+  - セクション見出し: `.subheadline.bold()`
+  - 本文・一覧テキスト・編集欄: `.body`（コード/等幅は `.body.monospaced()`）
+  - 二次テキスト・名前: `.callout`（強調は `.callout.bold()`）
+  - メタ情報（日時・サイズ・ヒント・フィルタチップ等）: `.caption`。**これより小さい「読む文字」は作らない**
+- `.system(size:)` の固定ピクセルは **SF Symbols アイコンのサイズ指定のみ**許可（例: ★バッジ `size 7`、ツールバーアイコン `13`/`15`）
+- 理由: macOS には iOS のような全体文字サイズ設定が無いが、セマンティック統一により内部の一貫性と macOS 標準サイズへの準拠が得られ、極小文字とバラつきを防げる
+
 ## スクリーンショット生成
 - `scripts/generate_screenshots.sh` で LP 用（docs/screenshot-*.png）と App Store 用（fastlane/screenshots/）を自動生成
 - Debug ビルドの `ScreenshotRenderer`（`--render-screenshots` 起動引数、`#if DEBUG`）がデモデータでパネルとコレクション画面を一瞬実画面に表示し、ScreenCaptureKit で撮影（Liquid Glass 込みの本物の見た目）

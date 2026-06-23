@@ -41,7 +41,7 @@ struct PopupContentView: View {
                     .foregroundStyle(.secondary)
                 TextField("Search...", text: $searchText)
                     .textFieldStyle(.plain)
-                    .font(.system(size: 14))
+                    .font(.body)
                     .focused($isSearchFocused)
                 if !searchText.isEmpty {
                     Button {

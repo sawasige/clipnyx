@@ -63,7 +63,7 @@ struct ItemDetailView: View {
             }
 
             Text(item.previewText)
-                .font(.system(size: 12))
+                .font(.body)
                 .lineLimit(10)
                 .textSelection(.enabled)
                 .padding(8)
@@ -88,7 +88,7 @@ struct ItemDetailView: View {
             ForEach(item.representationInfos, id: \.type) { info in
                 HStack {
                     Text(info.type)
-                        .font(.system(size: 11, design: .monospaced))
+                        .font(.caption.monospaced())
                         .textSelection(.enabled)
                     Spacer()
                     Text(info.size.formatted(.byteCount(style: .file)))
