@@ -18,7 +18,7 @@ struct RecognizedTextSection: View {
                     ProgressView()
                         .controlSize(.small)
                     Text("Analyzing text…")
-                        .font(.system(size: 12))
+                        .font(.callout)
                         .foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -26,7 +26,7 @@ struct RecognizedTextSection: View {
 
             case .empty:
                 Text("No text detected.")
-                    .font(.system(size: 12))
+                    .font(.callout)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(8)
@@ -34,7 +34,7 @@ struct RecognizedTextSection: View {
             case .text(let value):
                 ScrollView {
                     Text(value)
-                        .font(.system(size: 13, design: .monospaced))
+                        .font(.body.monospaced())
                         .textSelection(.enabled)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }

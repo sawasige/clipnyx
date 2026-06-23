@@ -536,7 +536,7 @@ private struct ItemDetailEditor: View {
                     // Content / Preview
                     if isTextEditable {
                         TextEditor(text: $text)
-                            .font(.system(size: 13, design: .monospaced))
+                            .font(.body.monospaced())
                             .frame(minHeight: 200)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 5)
@@ -578,7 +578,7 @@ private struct ItemDetailEditor: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         } else {
                             Text(item.previewText)
-                                .font(.system(size: 13))
+                                .font(.body)
                                 .foregroundStyle(.secondary)
                                 .textSelection(.enabled)
                                 .frame(maxWidth: .infinity, alignment: .leading)
