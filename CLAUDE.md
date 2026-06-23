@@ -74,11 +74,15 @@ Clipnyx/Clipnyx/
 - ライト/ダーク × 日英の全バリアントがコンテナ内 tmp に出力される（履歴パネル + コレクションの2画面）
 
 ## CI/CD
-- **リリース**: `gh workflow run "Release Full (Homebrew)" --ref main` を実行するだけで両エディションがデプロイされる
-  - Full 版: GitHub Actions でビルド → 署名 → 公証 → DMG → appcast.xml 更新 → Homebrew Cask 更新 → タグ `v*` 作成
+- **リリース手順**:
+  1. `pbxproj` の `MARKETING_VERSION` を上げ、`RELEASE_NOTES.md`・`fastlane/metadata/*/release_notes.txt` を更新（ブランチ→PR→マージ）
+  2. `gh workflow run "Release Full (Homebrew)" --ref main` で両エディションをデプロイ
+  3. **同時に** `fastlane metadata app_version:X.Y.Z` を実行して App Store のメタデータ・スクショを上げてよい（ビルド到着を待つ必要なし。app_version で ASC に当該バージョンを作成して適用）
+  4. Xcode Cloud 完了後、ASC でビルドを当該バージョンに割り当てて審査提出（手動）
+  - Full 版: GitHub Actions でビルド → 署名 → 公証 → DMG → appcast.xml 更新 → Homebrew Cask 更新 → タグ `v*` 作成（`MARKETING_VERSION` を読んでタグ名を決める）
   - App Store 版: 上記タグ作成が Xcode Cloud をトリガー → Archive → TestFlight アップロード
-- **ci_scripts/ci_post_clone.sh**: タグからバージョン抽出して pbxproj を更新
-- **Fastlane**: `fastlane metadata` でApp Storeメタデータ・スクリーンショットをアップロード
+- **ci_scripts/ci_post_clone.sh**: タグからバージョン抽出して pbxproj を更新（Xcode Cloud 側）
+- **Fastlane**: `fastlane metadata app_version:X.Y.Z` で App Store メタデータ・スクリーンショットをアップロード（`app_version` 明示でリリースと並行実行可）
 - **GitHub Pages**: `docs/` 配下を自動デプロイ（ランディングページ、プライバシーポリシー、appcast.xml、changelog）
 
 ## リリースノート運用
