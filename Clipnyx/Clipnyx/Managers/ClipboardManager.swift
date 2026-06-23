@@ -20,6 +20,15 @@ final class ClipboardManager {
         didSet { UserDefaults.standard.set(excludedCategories.map(\.rawValue), forKey: "excludedCategories") }
     }
 
+    /// 画像・PDF を OCR してテキスト認識するか（既定 true）。
+    var ocrEnabled: Bool {
+        didSet { UserDefaults.standard.set(ocrEnabled, forKey: "ocrEnabled") }
+    }
+
+    /// OCR 処理中のアイテム ID。起動時は空なので、中断されたOCRが「解析中…」のまま
+    /// 固まることはない（nil = 未解析、このセットに含まれる = 解析中、で区別する）。
+    private(set) var recognizingIds: Set<UUID> = []
+
     private(set) var isRestoringItem: Bool = false
     private var lastChangeCount: Int = 0
     private var pollingTimer: Timer?
@@ -34,6 +43,7 @@ final class ClipboardManager {
         } else {
             excludedCategories = []
         }
+        ocrEnabled = UserDefaults.standard.object(forKey: "ocrEnabled") as? Bool ?? true
         items = store.loadIndex()
         favoriteFolders = store.loadFavoriteFolders()
         store.cleanupOrphans(validIDs: Set(items.map(\.id)))
@@ -50,6 +60,7 @@ final class ClipboardManager {
         maxHistoryCount = 50
         maxTotalSizeMB = 1024
         excludedCategories = []
+        ocrEnabled = false
         items = previewItems
         favoriteFolders = previewFolders
     }
@@ -151,6 +162,48 @@ final class ClipboardManager {
         store.saveIndex(items)
         if !removedIDs.isEmpty {
             store.deleteBlobs(for: removedIDs)
+        }
+
+        // 画像・PDF は非同期で OCR をかけ、認識テキストを後追いで反映する
+        recognizeTextIfNeeded(for: newItem, representations: representations)
+    }
+
+    /// 画像・PDF クリップを Vision で OCR し、結果を recognizedText に反映する。
+    /// ポーリングをブロックしないようバックグラウンドで実行する。
+    private func recognizeTextIfNeeded(for item: ClipboardItem, representations: [PasteboardRepresentation]) {
+        guard ocrEnabled, item.isOCRCandidate else { return }
+        guard !store.isReadOnly else { return }
+
+        let category = item.category
+        let id = item.id
+        // 認識に使う元データを抽出（フル解像度。サムネイルは小さすぎるので使わない）
+        let imageData: Data? = representations.first(where: {
+            let t = $0.typeRawValue
+            return t == NSPasteboard.PasteboardType.tiff.rawValue
+                || t == NSPasteboard.PasteboardType.png.rawValue
+                || t == "public.jpeg" || t == "public.heic"
+        })?.data
+        let pdfData: Data? = representations.first(where: {
+            $0.typeRawValue == NSPasteboard.PasteboardType.pdf.rawValue || $0.typeRawValue == "com.adobe.pdf"
+        })?.data
+
+        // 解析中マーカーを立てる（UI が「解析中…」を表示できるように）
+        recognizingIds.insert(id)
+
+        Task.detached(priority: .utility) {
+            let text: String
+            if category == .pdf, let pdfData {
+                text = TextRecognizer.recognizeText(pdfData: pdfData)
+            } else if let imageData {
+                text = TextRecognizer.recognizeText(imageData: imageData)
+            } else {
+                text = ""
+            }
+            await MainActor.run { [weak self] in
+                guard let self else { return }
+                self.recognizingIds.remove(id)
+                self.updateItem(id: id) { $0.recognizedText = text }
+            }
         }
     }
 
@@ -275,12 +328,29 @@ final class ClipboardManager {
         )
     }
 
+    /// 複数アイテムをまとめてプレーンテキスト化する（変換可能なものだけ対象）。
+    func convertItemsToPlainText(itemIds: Set<UUID>) {
+        let targets = items.filter { itemIds.contains($0.id) && $0.canConvertToPlainText }
+        for item in targets {
+            convertToPlainText(item)
+        }
+    }
+
     func convertToPlainText(_ item: ClipboardItem) {
+        // 画像・PDF は OCR 認識テキストを本文にする（previewText は "画像 800×600" 等のため）。
+        // テキストが無い場合は変換しない（canConvertToPlainText でボタンも出ない）。
+        let text: String
+        if item.isOCRCandidate {
+            guard let ocr = item.recognizedText, !ocr.isEmpty else { return }
+            text = ocr
+        } else {
+            text = item.previewText
+        }
         replaceContentWithPlainText(
             id: item.id,
-            text: item.previewText,
+            text: text,
             category: .plainText,
-            previewText: item.previewText,
+            previewText: String(text.prefix(500)),
             thumbnailData: nil
         )
     }
@@ -371,6 +441,10 @@ final class ClipboardManager {
                 if let stringRep = reps.first(where: { $0.pasteboardType == .string }) {
                     pasteboard.declareTypes([.string], owner: nil)
                     pasteboard.setData(stringRep.data, forType: .string)
+                } else if let ocr = item.recognizedText, !ocr.isEmpty {
+                    // 画像など文字表現を持たないクリップは OCR 認識テキストを貼る
+                    pasteboard.declareTypes([.string], owner: nil)
+                    pasteboard.setData(Data(ocr.utf8), forType: .string)
                 }
             } else {
                 let types = reps.map(\.pasteboardType)

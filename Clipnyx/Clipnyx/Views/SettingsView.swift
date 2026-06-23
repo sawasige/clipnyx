@@ -102,6 +102,12 @@ struct HistoryTab: View {
             }
 
             Section {
+                Toggle("Recognize Text in Images", isOn: $clipboardManager.ocrEnabled)
+            } footer: {
+                Text("Extracts text from copied images and PDFs so they can be searched and converted to plain text. Runs on-device; nothing is sent externally.")
+            }
+
+            Section {
                 Button("Collection") {
                     NotificationCenter.default.post(name: .openFavoriteManager, object: nil)
                 }

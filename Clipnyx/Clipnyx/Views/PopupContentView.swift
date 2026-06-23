@@ -27,6 +27,7 @@ struct PopupContentView: View {
             result = result.filter {
                 $0.previewText.localizedCaseInsensitiveContains(trimmedSearch)
                 || ($0.favoriteName?.localizedCaseInsensitiveContains(trimmedSearch) ?? false)
+                || ($0.recognizedText?.localizedCaseInsensitiveContains(trimmedSearch) ?? false)
             }
         }
         return result

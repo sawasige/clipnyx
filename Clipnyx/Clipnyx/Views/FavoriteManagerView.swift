@@ -440,6 +440,15 @@ struct FavoriteManagerView: View {
                     }
                 }
 
+                if selectedItems.contains(where: \.canConvertToPlainText) {
+                    Button {
+                        clipboardManager.convertItemsToPlainText(itemIds: selectedItemIds)
+                    } label: {
+                        Label("Convert to Plain Text", systemImage: "doc.plaintext")
+                            .frame(maxWidth: .infinity)
+                    }
+                }
+
                 Button(role: .destructive) {
                     isConfirmingBulkDelete = true
                 } label: {
@@ -573,6 +582,13 @@ private struct ItemDetailEditor: View {
                                     .stroke(Color(nsColor: .separatorColor))
                             )
 
+                        if item.isOCRCandidate {
+                            let recognizing = clipboardManager.recognizingIds.contains(item.id)
+                            if recognizing || item.recognizedText != nil {
+                                RecognizedTextSection(recognizedText: item.recognizedText, isRecognizing: recognizing)
+                            }
+                        }
+
                         if canConvertToPlainText(item) {
                             Button {
                                 clipboardManager.convertToPlainText(item)
@@ -610,15 +626,14 @@ private struct ItemDetailEditor: View {
             }
         }
         .onAppear { loadItem() }
+        // 別アイテムへ切り替わったとき、また変換でカテゴリが変わったとき（画像→プレーンテキスト等）に
+        // 編集テキストを読み直す。これをしないと変換直後に変換前の内容が残る。
+        .onChange(of: itemId) { _, _ in loadItem() }
+        .onChange(of: item?.category) { _, _ in loadItem() }
     }
 
     private func canConvertToPlainText(_ item: ClipboardItem) -> Bool {
-        switch item.category {
-        case .richText, .html, .url, .sourceCode, .csv:
-            return true
-        default:
-            return false
-        }
+        item.canConvertToPlainText
     }
 
     private func loadItem() {
