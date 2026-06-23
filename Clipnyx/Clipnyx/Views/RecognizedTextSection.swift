@@ -11,7 +11,6 @@ struct RecognizedTextSection: View {
         VStack(alignment: .leading, spacing: 6) {
             Label("Recognized Text", systemImage: "text.viewfinder")
                 .font(.subheadline.bold())
-                .foregroundStyle(.secondary)
 
             switch state {
             case .analyzing:
@@ -35,7 +34,7 @@ struct RecognizedTextSection: View {
             case .text(let value):
                 ScrollView {
                     Text(value)
-                        .font(.system(size: 12))
+                        .font(.system(size: 13, design: .monospaced))
                         .textSelection(.enabled)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
