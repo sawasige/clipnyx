@@ -3,15 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Clipnyx — クリップボード履歴マネージャー for macOS</title>
+  <title>Clipnyx — クリップボードマネージャー / Clipboard Manager for macOS</title>
   <link rel="icon" type="image/png" href="favicon.png">
-  <meta name="description" content="Clipnyx はmacOSメニューバーに常駐するクリップボード履歴マネージャーです。コピー履歴を自動保存し、ホットキーで瞬時にアクセス。">
+  <meta name="description" content="Clipnyx は macOS メニューバーのクリップボードマネージャー（Clipboard Manager）。コピー履歴を自動保存、ホットキーで瞬時に呼び出し。スニペット整理、画像・PDF の文字を OCR でテキスト検索。完全ローカル・無料。">
+  <link rel="canonical" href="https://sawasige.github.io/clipnyx/">
 
   <!-- Open Graph / Twitter -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Clipnyx">
-  <meta property="og:title" content="Clipnyx — クリップボード履歴マネージャー for macOS">
-  <meta property="og:description" content="Clipnyx はmacOSメニューバーに常駐するクリップボード履歴マネージャーです。コピー履歴を自動保存し、ホットキーで瞬時にアクセス。">
+  <meta property="og:title" content="Clipnyx — クリップボードマネージャー / Clipboard Manager for macOS">
+  <meta property="og:description" content="macOS メニューバーのクリップボードマネージャー。履歴・スニペット整理・画像のOCRテキスト検索。完全ローカル・無料。A free, fully-local clipboard manager for macOS with on-device OCR.">
   <meta property="og:url" content="https://sawasige.github.io/clipnyx/">
   <meta property="og:image" content="https://sawasige.github.io/clipnyx/hero.jpg">
   <meta property="og:image:width" content="1536">
@@ -19,9 +20,30 @@
   <meta property="og:locale" content="ja_JP">
   <meta property="og:locale:alternate" content="en_US">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Clipnyx — クリップボード履歴マネージャー for macOS">
-  <meta name="twitter:description" content="Clipnyx はmacOSメニューバーに常駐するクリップボード履歴マネージャーです。コピー履歴を自動保存し、ホットキーで瞬時にアクセス。">
+  <meta name="twitter:title" content="Clipnyx — クリップボードマネージャー / Clipboard Manager for macOS">
+  <meta name="twitter:description" content="macOS メニューバーのクリップボードマネージャー。履歴・スニペット整理・画像のOCRテキスト検索。完全ローカル・無料。A free, fully-local clipboard manager for macOS with on-device OCR.">
   <meta name="twitter:image" content="https://sawasige.github.io/clipnyx/hero.jpg">
+
+  <!-- 構造化データ (SoftwareApplication) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Clipnyx",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "macOS 15.0+",
+    "url": "https://sawasige.github.io/clipnyx/",
+    "downloadUrl": "https://apps.apple.com/jp/app/clipnyx/id6759652985",
+    "softwareVersion": "1.6.0",
+    "image": "https://sawasige.github.io/clipnyx/hero.jpg",
+    "description": "A free, fully-local clipboard manager for macOS. Clipboard history, snippets and folders, and on-device OCR that recognizes text inside images and PDFs.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
   <style>
     :root {
       --color-bg: #ffffff;
@@ -524,7 +546,7 @@
           </picture>
           <h1 class="hero-overlay-name">Clipnyx</h1>
         </div>
-        <p class="hero-overlay-tagline" data-ja="macOSメニューバーに常駐する、軽量クリップボード履歴マネージャー。" data-en="A lightweight clipboard history manager that lives in your macOS menu bar.">macOSメニューバーに常駐する、軽量クリップボード履歴マネージャー。</p>
+        <p class="hero-overlay-tagline" data-ja="macOSメニューバーに常駐するクリップボードマネージャー。履歴・スニペット整理・画像のOCR検索。" data-en="A clipboard manager that lives in your macOS menu bar. History, snippets, and OCR search for images.">macOSメニューバーに常駐するクリップボードマネージャー。履歴・スニペット整理・画像のOCR検索。</p>
       </div>
     </div>
     <div class="download-buttons">
@@ -586,6 +608,11 @@
           <span class="feature-icon" aria-hidden="true">🏷️</span>
           <h3 data-ja="自動カテゴリ分類" data-en="Auto Categorization">自動カテゴリ分類</h3>
           <p data-ja="URL、コード、カラーコード、電話番号など11カテゴリに自動分類。必要な情報をすぐに見つけられます。" data-en="Automatically categorizes into 11 types — URLs, code, color codes, phone numbers, and more.">URL、コード、カラーコード、電話番号など11カテゴリに自動分類。必要な情報をすぐに見つけられます。</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon" aria-hidden="true">🔎</span>
+          <h3 data-ja="画像内テキストをOCR" data-en="OCR for Images &amp; PDFs">画像内テキストをOCR</h3>
+          <p data-ja="コピーした画像やPDFの文字を認識。スクリーンショットを内容で検索でき、テキストとして取り出せます。認識はすべて端末内で行い、外部送信はしません。" data-en="Recognizes text inside copied images and PDFs. Search your screenshots by their contents and pull the text out. Recognition runs entirely on-device — nothing leaves your Mac.">コピーした画像やPDFの文字を認識。スクリーンショットを内容で検索でき、テキストとして取り出せます。認識はすべて端末内で行い、外部送信はしません。</p>
         </div>
         <div class="feature-card">
           <span class="feature-icon" aria-hidden="true">🔒</span>
