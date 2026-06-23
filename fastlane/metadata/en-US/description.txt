@@ -1,4 +1,4 @@
-Clipnyx is a lightweight clipboard history manager that lives in your macOS menu bar.
+Clipnyx is a clipboard manager that lives in your macOS menu bar. It automatically records your copy history for instant recall via a hotkey, lets you organize frequently used text into snippets and folders, and even recognizes text inside images and PDFs with on-device OCR — so you can search and reuse it.
 
 It automatically records copied text, images, URLs, source code, colors, and more — ready to recall whenever you need them.
 
@@ -7,9 +7,10 @@ KEY FEATURES
 - Quickly pick items with number keys (1–9)
 - Auto-categorizes 11 content types: text, images, PDF, URLs, HTML, CSV, source code, and more
 - Category filters and text search to quickly find what you need
+- On-device OCR for images and PDFs — search your screenshots by their contents or pull the text out (runs locally, nothing sent externally)
 - Organize items with favorites, folders, and a Collection view
 - Save reusable snippets and templates to paste again and again
-- Convert rich text and URLs to plain text
+- Convert rich text, URLs, and recognized image text to plain text
 - Thumbnail previews for images and PDFs
 - Store up to 500 history items (choose from 20/50/100/200/500)
 - Customize which categories to record
