@@ -56,6 +56,11 @@ struct GeneralTab: View {
                     Text("App Store")
                     #endif
                 }
+                #if !ENABLE_SPARKLE
+                Button("Rate Clipnyx on the App Store") {
+                    ReviewRequest.openReviewPage()
+                }
+                #endif
             }
         }
     }

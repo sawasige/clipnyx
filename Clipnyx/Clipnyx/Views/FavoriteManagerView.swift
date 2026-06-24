@@ -1,8 +1,10 @@
 import SwiftUI
+import StoreKit
 
 struct FavoriteManagerView: View {
     var clipboardManager: ClipboardManager
     var initialItemId: UUID? = nil
+    @Environment(\.requestReview) private var requestReview
     @State var selectedFolderFilter: FavoriteFilter = .allHistory
     @State var selectedItemIds: Set<UUID> = []
     @State private var newFolderName = ""
@@ -51,6 +53,11 @@ struct FavoriteManagerView: View {
         .onAppear {
             if let initialItemId {
                 selectItem(id: initialItemId)
+            }
+            // コレクション画面は落ち着いた操作。条件を満たしていれば1回だけレビューを依頼する。
+            // ウィンドウの表示が落ち着いてから出す。
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                ReviewRequest.requestIfAppropriate { requestReview() }
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .selectLibraryItem)) { notification in

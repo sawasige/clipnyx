@@ -434,6 +434,9 @@ final class ClipboardManager {
     func restoreToClipboard(_ item: ClipboardItem, asPlainText: Bool = false) {
         isRestoringItem = true
 
+        // 履歴の再利用＝価値を感じたであろう操作。レビュー依頼の判断材料として記録する。
+        ReviewRequest.recordValueMoment()
+
         if let reps = store.loadRepresentations(for: item.id) {
             let pasteboard = NSPasteboard.general
             pasteboard.clearContents()
