@@ -56,6 +56,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        #if DEBUG
+        if CommandLine.arguments.contains("--demo-mode") {
+            // 録画用に自動ペースト権限を前もって要求する（DEBUG 限定・配布版には入らない）。
+            // 手動でのアクセシビリティ追加は dev 署名アプリでは不安定なため、アプリ自身に
+            // 要求させて正しい署名要件付きで確実に登録する。許可後は再起動なしで効く。
+            CGRequestPostEventAccess()
+        }
+        #endif
         // PostEvent 権限は起動時には要求しない。ユーザーが初めて直接ペーストした
         // タイミングでのみ要求する（App Store ガイドライン 2.4.5 対策。
         // 要求箇所は PopupPanelController.closeAndPaste を参照）

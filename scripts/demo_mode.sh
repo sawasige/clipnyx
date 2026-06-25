@@ -16,21 +16,33 @@ cd "$(dirname "$0")/.."
 
 LANG_ARG="${1:-}"
 
+# デモを「本番とは別アプリ」として macOS に認識させるため、3点をずらす:
+#   - バンドル ID … TCC（PostEvent 権限）はこれで識別。本番の権限登録を上書き・破壊
+#     しないよう別 ID にする（本番は自分から要求しない設計なので壊れると手で直せない）。
+#   - PRODUCT_NAME（.app ファイル名＝実行ファイル名）… アクセシビリティ一覧は .app の
+#     ファイル名で行を区別する。本番と同じ "Clipnyx.app" だと同一行に潰れてトグル
+#     できず権限が効かない。"ClipnyxDemo" にして独立した行として登録・トグル可能にする。
+#   - 表示名（CFBundleDisplayName）は "Clipnyx" のまま（プロジェクト既定）にして、
+#     アプリメニュー / ⌘Tab / 許可ダイアログの見た目を本番と同一に保つ＝録画用。
+DEMO_BUNDLE_ID="com.himatsubu.Clipnyx.demo"
+DEMO_PRODUCT_NAME="ClipnyxDemo"
 BUILD_DIR="$PWD/build/demo"
-APP="$BUILD_DIR/Clipnyx.app"
+APP="$BUILD_DIR/${DEMO_PRODUCT_NAME}.app"
 
-echo "==> Building (Debug) to $BUILD_DIR ..."
-rm -rf "$BUILD_DIR/Clipnyx.app"
+echo "==> Building (Debug, $DEMO_BUNDLE_ID / $DEMO_PRODUCT_NAME) to $BUILD_DIR ..."
+rm -rf "$BUILD_DIR/${DEMO_PRODUCT_NAME}.app"
 xcodebuild build \
   -project Clipnyx/Clipnyx.xcodeproj \
   -scheme Clipnyx \
   -configuration Debug \
   -destination 'platform=macOS,arch=arm64' \
   CONFIGURATION_BUILD_DIR="$BUILD_DIR" \
+  PRODUCT_BUNDLE_IDENTIFIER="$DEMO_BUNDLE_ID" \
+  PRODUCT_NAME="$DEMO_PRODUCT_NAME" \
   -quiet
 
-# 同じ Bundle ID の本番アプリと干渉しないよう、録画中だけ本番を終了して
-# 最後に復帰させる（本番とコンテナを共有するため）。
+# バンドル ID は別だが、グローバルホットキー（Carbon）は同じ組み合わせを奪い合う
+# ため、録画中だけ本番を終了して最後に復帰させる。
 PROD_WAS_RUNNING=0
 if pgrep -fx "/Applications/Clipnyx.app/Contents/MacOS/Clipnyx" >/dev/null; then
   PROD_WAS_RUNNING=1
