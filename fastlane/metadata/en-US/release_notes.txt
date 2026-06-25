@@ -1,4 +1,1 @@
-- Clipnyx can now recognize text inside images and PDFs (OCR). Search your copied images, and pull out the text via “Convert to Plain Text” in the Collection. Recognition runs entirely on-device — nothing is sent externally
-- You can now convert multiple selected items to plain text at once in the Collection
-- The Collection window now remembers its size, position, and column widths
-- Refined the detail view and typography across the app
+- Smoothed out a brief flicker when the paste panel first opens
