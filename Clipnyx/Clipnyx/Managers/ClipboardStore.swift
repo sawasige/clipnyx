@@ -9,8 +9,14 @@ final class ClipboardStore: Sendable {
     /// プレビュー用途で実データを保護する）。読み取りは許可される。
     let isReadOnly: Bool
 
-    init(isReadOnly: Bool = false) {
+    /// デモ録画モード用: アイテム ID → ペーストボード代表データのメモリ上マップ。
+    /// `loadRepresentations` はディスクより先にこちらを参照するため、デモアイテムでも
+    /// 実際にクリップボードへ復元・ペーストできる（ディスクには一切触れない）。
+    private let inMemoryRepresentations: [UUID: [PasteboardRepresentation]]
+
+    init(isReadOnly: Bool = false, inMemoryRepresentations: [UUID: [PasteboardRepresentation]] = [:]) {
         self.isReadOnly = isReadOnly
+        self.inMemoryRepresentations = inMemoryRepresentations
     }
 
     private static let baseURL: URL = {
@@ -190,6 +196,9 @@ final class ClipboardStore: Sendable {
     // MARK: - Load Representations
 
     func loadRepresentations(for itemID: UUID) -> [PasteboardRepresentation]? {
+        // デモ録画モード: メモリ上の代表データを優先（ディスクには触れない）
+        if let memory = inMemoryRepresentations[itemID] { return memory }
+
         let blobDir = Self.blobsURL.appendingPathComponent(itemID.uuidString, isDirectory: true)
         let metaFile = blobDir.appendingPathComponent("meta.json")
 
