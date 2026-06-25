@@ -46,19 +46,34 @@ final class PopupPanelController {
         }
     }
 
-    /// パネル初回表示時のチラつきを抑えるため、起動時に内容を裏で一度描画して
-    /// SwiftUI/レンダリングのパイプラインを温める（ウィンドウには載せない・表示しない）。
+    /// パネル初回表示時のチラつきを抑えるため、起動時に「透明パネル＋NSHostingView」の
+    /// 合成経路を実表示とまったく同じ形で画面外で一度だけ走らせ、SwiftUI/レンダリングの
+    /// コールドスタートを済ませておく。ビットマップ描画ではこの経路が温まらず効きが弱い。
     func prewarm(clipboardManager: ClipboardManager) {
-        let hosting = NSHostingView(rootView: PopupContentView(
+        let panel = KeyablePanel(
+            contentRect: NSRect(x: 0, y: 0, width: 420, height: 560),
+            styleMask: [.nonactivatingPanel, .fullSizeContentView],
+            backing: .buffered,
+            defer: false
+        )
+        panel.isFloatingPanel = true
+        panel.level = .floating
+        panel.backgroundColor = .clear
+        panel.isOpaque = false
+        panel.hasShadow = true
+        panel.alphaValue = 0 // 念のため不可視。さらに画面外へ置く
+        panel.contentView = NSHostingView(rootView: PopupContentView(
             clipboardManager: clipboardManager,
             onDismiss: {},
             onPaste: {}
         ))
-        hosting.frame = NSRect(x: 0, y: 0, width: 420, height: 560)
-        hosting.layoutSubtreeIfNeeded()
-        // ビットマップへ一度キャッシュ描画して、SwiftUI の初フレーム生成を確定させる。
-        if let rep = hosting.bitmapImageRepForCachingDisplay(in: hosting.bounds) {
-            hosting.cacheDisplay(in: hosting.bounds, to: rep)
+        panel.setFrameOrigin(NSPoint(x: -10_000, y: -10_000))
+        panel.orderFrontRegardless()
+        panel.contentView?.layoutSubtreeIfNeeded()
+        panel.displayIfNeeded()
+        // 1フレーム描画させてから片付ける。
+        DispatchQueue.main.async {
+            panel.orderOut(nil)
         }
     }
 
