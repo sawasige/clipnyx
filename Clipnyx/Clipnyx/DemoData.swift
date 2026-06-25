@@ -30,7 +30,8 @@ enum DemoData {
             size: Int? = nil,
             thumbnail: Data? = nil,
             favorite: String? = nil,
-            folder: FavoriteFolder? = nil
+            folder: FavoriteFolder? = nil,
+            recognized: String? = nil
         ) -> ClipboardItem {
             order += 1
             let id = UUID()
@@ -52,7 +53,8 @@ enum DemoData {
                 representationInfos: [RepresentationInfo(type: NSPasteboard.PasteboardType.string.rawValue, size: size ?? preview.utf8.count)],
                 isSaved: favorite != nil,
                 favoriteName: favorite,
-                favoriteFolderId: folder?.id
+                favoriteFolderId: folder?.id,
+                recognizedText: recognized
             )
         }
 
@@ -69,6 +71,8 @@ enum DemoData {
                 item(.url, "https://developer.apple.com/jp/macos/"),
                 item(.plainText, "明日の打ち合わせは 14:00 から、3F 会議室 B に変更になりました。"),
                 item(.image, "画像 1,024×640", size: 482_304, thumbnail: thumbnail()),
+                item(.image, "画像 1,280×800", size: 612_800, thumbnail: cardImage(japanese: true),
+                     recognized: "山田 太郎\nプロダクトデザイナー\nHimatsubu Inc.\nTEL 03-1234-5678\nyamada@example.com"),
                 item(.sourceCode, "func greet(name: String) -> String {\n    \"こんにちは、\\(name)さん！\"\n}"),
                 emailTemplate,
                 item(.color, "#5E5CE6"),
@@ -89,6 +93,8 @@ enum DemoData {
                 item(.url, "https://developer.apple.com/macos/"),
                 item(.plainText, "Tomorrow's meeting has been moved to 2:00 PM in Conference Room B."),
                 item(.image, "Image 1,024×640", size: 482_304, thumbnail: thumbnail()),
+                item(.image, "Image 1,280×800", size: 612_800, thumbnail: cardImage(japanese: false),
+                     recognized: "Taro Yamada\nProduct Designer\nHimatsubu Inc.\nTEL +81-3-1234-5678\nyamada@example.com"),
                 item(.sourceCode, "func greet(name: String) -> String {\n    \"Hello, \\(name)!\"\n}"),
                 emailTemplate,
                 item(.color, "#5E5CE6"),
@@ -120,6 +126,47 @@ enum DemoData {
             // 月っぽい円を添える
             NSColor(calibratedWhite: 0.95, alpha: 0.9).setFill()
             NSBezierPath(ovalIn: NSRect(x: rect.maxX - 130, y: rect.maxY - 120, width: 80, height: 80)).fill()
+            return true
+        }
+        guard let tiff = image.tiffRepresentation,
+              let rep = NSBitmapImageRep(data: tiff) else { return nil }
+        return rep.representation(using: .png, properties: [:])
+    }
+
+    /// OCR デモ用に、実際の文字が写った名刺風の画像を描く。認識テキスト（recognized）と
+    /// 対応した内容を実際にレンダリングしているので、OCR の見せ場として自然に使える。
+    private static func cardImage(japanese: Bool) -> Data? {
+        let size = NSSize(width: 640, height: 400)
+        let name = japanese ? "山田 太郎" : "Taro Yamada"
+        let title = japanese ? "プロダクトデザイナー" : "Product Designer"
+        let company = "Himatsubu Inc."
+        let tel = japanese ? "TEL 03-1234-5678" : "TEL +81-3-1234-5678"
+        let email = "yamada@example.com"
+
+        let image = NSImage(size: size, flipped: false) { rect in
+            // 背景（淡いグレー）＋ 白い角丸カード
+            NSColor(calibratedWhite: 0.90, alpha: 1).setFill()
+            rect.fill()
+            let card = rect.insetBy(dx: 28, dy: 28)
+            NSColor.white.setFill()
+            NSBezierPath(roundedRect: card, xRadius: 18, yRadius: 18).fill()
+            // 左のアクセントバー
+            NSColor(calibratedRed: 0.37, green: 0.36, blue: 0.90, alpha: 1).setFill()
+            NSBezierPath(rect: NSRect(x: card.minX, y: card.minY, width: 10, height: card.height)).fill()
+
+            let dark = NSColor(calibratedWhite: 0.13, alpha: 1)
+            let gray = NSColor(calibratedWhite: 0.40, alpha: 1)
+            func draw(_ s: String, _ font: NSFont, _ color: NSColor, y: CGFloat) {
+                (s as NSString).draw(at: NSPoint(x: card.minX + 44, y: y), withAttributes: [
+                    .font: font, .foregroundColor: color,
+                ])
+            }
+            // 非反転座標（原点は左下）。上の行ほど大きい y。
+            draw(name, .boldSystemFont(ofSize: 38), dark, y: card.maxY - 110)
+            draw(title, .systemFont(ofSize: 22), gray, y: card.maxY - 152)
+            draw(company, .systemFont(ofSize: 22), dark, y: card.maxY - 206)
+            draw(tel, .systemFont(ofSize: 20), gray, y: card.minY + 92)
+            draw(email, .systemFont(ofSize: 20), gray, y: card.minY + 56)
             return true
         }
         guard let tiff = image.tiffRepresentation,

@@ -46,6 +46,22 @@ final class PopupPanelController {
         }
     }
 
+    /// パネル初回表示時のチラつきを抑えるため、起動時に内容を裏で一度描画して
+    /// SwiftUI/レンダリングのパイプラインを温める（ウィンドウには載せない・表示しない）。
+    func prewarm(clipboardManager: ClipboardManager) {
+        let hosting = NSHostingView(rootView: PopupContentView(
+            clipboardManager: clipboardManager,
+            onDismiss: {},
+            onPaste: {}
+        ))
+        hosting.frame = NSRect(x: 0, y: 0, width: 420, height: 560)
+        hosting.layoutSubtreeIfNeeded()
+        // ビットマップへ一度キャッシュ描画して、SwiftUI の初フレーム生成を確定させる。
+        if let rep = hosting.bitmapImageRepForCachingDisplay(in: hosting.bounds) {
+            hosting.cacheDisplay(in: hosting.bounds, to: rep)
+        }
+    }
+
     func toggle(clipboardManager: ClipboardManager) {
         if isVisible {
             close()
