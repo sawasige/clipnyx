@@ -62,6 +62,11 @@ enum ReviewRequest {
     /// `requestReview` アクションなど、実際の依頼処理を渡す。
     static func requestIfAppropriate(_ perform: () -> Void) {
         #if !ENABLE_SPARKLE
+        #if DEBUG
+        // デモ録画モードではレビュー依頼を一切出さない（録画に写り込むのを防ぐ）。
+        // DEBUG は閾値を極小にしているため、これがないとコレクションを開くたびに発火する。
+        if CommandLine.arguments.contains("--demo-mode") { return }
+        #endif
         let defaults = UserDefaults.standard
         guard defaults.integer(forKey: activeDaysKey) >= minimumActiveDays else { return }
         let pasteCount = defaults.integer(forKey: pasteCountKey)
