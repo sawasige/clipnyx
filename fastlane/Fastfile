@@ -66,4 +66,88 @@ platform :mac do
       precheck_include_in_app_purchases: false
     )
   end
+
+  desc "App プレビュー動画を App Store Connect にアップロードする"
+  desc "fastlane/app_previews/<locale>/*.mp4（ファイル名に DESKTOP を含む）を Mac の DESKTOP プレビューに上げる"
+  desc "deliver の app_previews_path は本バージョンの spaceship で DESKTOP の解像度検証が欠落しており弾かれるため、Spaceship で直接アップロードする"
+  desc "例: fastlane preview"
+  lane :preview do |_options|
+    require "spaceship"
+    # lane 実行時の CWD は fastlane/ なのでこのパスは fastlane/api_key.json を指す
+    Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from_json_file("api_key.json")
+    desktop = Spaceship::ConnectAPI::AppPreviewSet::PreviewType::DESKTOP
+
+    app = Spaceship::ConnectAPI::App.find("com.himatsubu.Clipnyx")
+    version = app.get_edit_app_store_version(platform: Spaceship::ConnectAPI::Platform::MAC_OS)
+    UI.user_error!("編集可能な MAC_OS バージョンが見つかりません") if version.nil?
+    UI.message("対象バージョン: #{version.version_string}")
+
+    base = "app_previews"
+    UI.user_error!("#{base} ディレクトリが見つかりません") unless Dir.exist?(base)
+
+    localizations = version.get_app_store_version_localizations
+    uploaded = 0
+
+    Dir.children(base).sort.each do |locale|
+      dir = File.join(base, locale)
+      next unless File.directory?(dir)
+      videos = Dir.children(dir).select { |f| %w[.mp4 .mov .m4v].include?(File.extname(f).downcase) }.sort
+      next if videos.empty?
+
+      loc = localizations.find { |l| l.locale == locale }
+      unless loc
+        UI.important("ロケール #{locale} は ASC に存在しません。スキップ")
+        next
+      end
+
+      # DESKTOP プレビューセットを取得/作成し、既存を全削除してから上げ直す（上書き）
+      set = loc.get_app_preview_sets(includes: "appPreviews").find { |s| s.preview_type == desktop }
+      if set
+        (set.app_previews || []).each do |p|
+          UI.message("既存プレビュー削除: #{locale} / #{p.file_name}")
+          p.delete!
+        end
+      else
+        set = loc.create_app_preview_set(attributes: { previewType: desktop })
+      end
+      # 削除直後の状態で取り直す
+      set = loc.get_app_preview_sets(includes: "appPreviews").find { |s| s.preview_type == desktop }
+
+      videos.each do |f|
+        path = File.join(dir, f)
+        UI.message("アップロード: #{locale} / #{f} → DESKTOP")
+        # wait_for_processing: false にする。true だと spaceship が ASC の変換完了を
+        # タイムアウト無しの 30 秒間隔ポーリングで延々待ち続けてハングするため。
+        # 動画のバイト転送は完了し、変換は ASC 側で非同期に進む。
+        set.upload_preview(path: path, wait_for_processing: false)
+        uploaded += 1
+      end
+    end
+
+    UI.success("App プレビュー動画を #{uploaded} 本アップロードしました")
+  end
+
+  desc "App プレビュー動画の ASC 側処理状態を表示する（診断用）"
+  lane :preview_status do |_options|
+    require "spaceship"
+    Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from_json_file("api_key.json")
+    desktop = Spaceship::ConnectAPI::AppPreviewSet::PreviewType::DESKTOP
+
+    app = Spaceship::ConnectAPI::App.find("com.himatsubu.Clipnyx")
+    version = app.get_edit_app_store_version(platform: Spaceship::ConnectAPI::Platform::MAC_OS)
+    UI.user_error!("編集可能な MAC_OS バージョンが見つかりません") if version.nil?
+    UI.message("対象バージョン: #{version.version_string}")
+
+    found = false
+    version.get_app_store_version_localizations.each do |loc|
+      loc.get_app_preview_sets(includes: "appPreviews").select { |s| s.preview_type == desktop }.each do |set|
+        (set.app_previews || []).each do |p|
+          found = true
+          state = (p.asset_delivery_state || {})["state"]
+          UI.message("#{loc.locale} / #{p.file_name}: state=#{state} video_url=#{p.video_url ? 'あり' : 'なし'}")
+        end
+      end
+    end
+    UI.important("DESKTOP プレビューがまだ見つかりません") unless found
+  end
 end
