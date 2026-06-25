@@ -159,7 +159,14 @@ final class PopupPanelController {
         // Clipnyx を追加済みのとき（preflight が true）だけ自動ペーストする。未許可
         // なら何もせず元アプリへ戻し、手動 ⌘V で貼れるようにする。preflight は
         // プロセス内キャッシュのため、付与後は Clipnyx の再起動で有効になる。
-        guard PasteAccess.hasPermission() else {
+        #if DEBUG
+        // デモ録画モードでは preflight ガードを外し、投函（CGEvent.post＝ライブ判定）に
+        // 任せる。初回投函で macOS が許可ダイアログを出し、許可後は再起動なしで効く。
+        let canAutoPaste = PasteAccess.hasPermission() || CommandLine.arguments.contains("--demo-mode")
+        #else
+        let canAutoPaste = PasteAccess.hasPermission()
+        #endif
+        guard canAutoPaste else {
             targetApp.activate()
             return
         }
