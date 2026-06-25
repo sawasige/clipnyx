@@ -73,6 +73,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         HotKeyManager.shared.register()
 
+        // パネル初回表示時のチラつき（SwiftUI/レンダリングのコールドスタートで、標準の
+        // ウィンドウ表示アニメーション中に初フレームが間に合わず背景が透ける）を抑えるため、
+        // 起動直後に裏でパネル内容を一度描画してパイプラインを温める。表示はしない。
+        popupController.prewarm(clipboardManager: clipboardManager)
+
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(handleShowSettings),
