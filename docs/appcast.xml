@@ -184,6 +184,15 @@
     <description xml:lang="ja"><![CDATA[<ul><li>画像や PDF に含まれる文字を認識できるようになりました（OCR）。コピーした画像を検索でき、Shift+Enter やコレクションの「プレーンテキストに変換」でテキストとして取り出せます。認識はすべて端末内で行い、外部送信はしません</li><li>コレクション画面で、複数選択した項目をまとめてプレーンテキストに変換できるようになりました</li><li>コレクション画面のウィンドウサイズ・位置と、各列の幅を記憶するようになりました</li><li>詳細画面の表示とアプリ全体のフォントを見直し、見た目を整えました</li></ul>]]></description>
     <enclosure url="https://github.com/sawasige/clipnyx/releases/download/v1.6.0/Clipnyx.dmg" length="4900866" type="application/octet-stream" sparkle:edSignature="VQXFXbN1qlW2eeIFXAlI4sMoZyrxJDuKbKz5WPOsISWsi4lt1GkSnCsU1zEPsJeJbR9Ctki2rhez1/tgQxlpBw==" />
   </item>
+        <item>
+    <title>1.6.1</title>
+    <pubDate>Thu, 25 Jun 2026 11:00:11 +0000</pubDate>
+    <sparkle:version>28</sparkle:version>
+    <sparkle:shortVersionString>1.6.1</sparkle:shortVersionString>
+    <description><![CDATA[<ul><li>Smoothed out a brief flicker when the paste panel first opens</li></ul>]]></description>
+    <description xml:lang="ja"><![CDATA[<ul><li>ペーストパネルを開いた直後のちらつきを抑え、表示をなめらかにしました</li></ul>]]></description>
+    <enclosure url="https://github.com/sawasige/clipnyx/releases/download/v1.6.1/Clipnyx.dmg" length="4909357" type="application/octet-stream" sparkle:edSignature="sx3PM01TvsGdceWDYYmtTSqsoxOxYP7xDGdRAmPUOJsPheoilTs43bRWT8SpBRuaQgPEoUIYLZ+LHeIM1MXiDA==" />
+  </item>
     <!-- Items are prepended by CI on each release -->
   </channel>
 </rss>
