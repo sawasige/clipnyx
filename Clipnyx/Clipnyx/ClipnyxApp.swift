@@ -29,13 +29,31 @@ struct ClipnyxApp: App {
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    let clipboardManager = ClipboardManager()
+    let clipboardManager = AppDelegate.makeClipboardManager()
     private var popupController = PopupPanelController()
     private var settingsWindow: NSWindow?
     private var favoriteManagerWindow: NSWindow?
     #if ENABLE_SPARKLE
     let updateManager = UpdateManager()
     #endif
+
+    /// 通常は実データを扱う ClipboardManager を生成する。Debug ビルドを
+    /// `--demo-mode` で起動したときだけ、デモデータ＋読み取り専用ストアの
+    /// 録画用マネージャを返す（実データには一切触れない）。
+    static func makeClipboardManager() -> ClipboardManager {
+        #if DEBUG
+        if CommandLine.arguments.contains("--demo-mode") {
+            let isJapanese = Locale.preferredLanguages.first?.hasPrefix("ja") ?? false
+            let demo = DemoData.make(japanese: isJapanese)
+            return ClipboardManager(
+                demoItems: demo.items,
+                demoFolders: demo.folders,
+                demoRepresentations: demo.representations
+            )
+        }
+        #endif
+        return ClipboardManager()
+    }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // PostEvent 権限は起動時には要求しない。ユーザーが初めて直接ペーストした

@@ -64,6 +64,26 @@ final class ClipboardManager {
         items = previewItems
         favoriteFolders = previewFolders
     }
+
+    /// デモ録画モード（`--demo-mode`）用: デモデータを入れた状態でフル起動するが、
+    /// ストアは読み取り専用にして実データへの書き込みを構造的に遮断する。
+    /// ポーリングは動かすため録画中のライブのコピーも履歴に現れるが、read-only
+    /// なので永続化されず実データには一切触れない。
+    init(
+        demoItems: [ClipboardItem],
+        demoFolders: [FavoriteFolder],
+        demoRepresentations: [UUID: [PasteboardRepresentation]]
+    ) {
+        store = ClipboardStore(isReadOnly: true, inMemoryRepresentations: demoRepresentations)
+        maxHistoryCount = 50
+        maxTotalSizeMB = 1024
+        excludedCategories = []
+        ocrEnabled = false
+        items = demoItems
+        favoriteFolders = demoFolders
+        lastChangeCount = NSPasteboard.general.changeCount
+        startPolling()
+    }
     #endif
 
     // MARK: - Polling
