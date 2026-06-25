@@ -316,6 +316,26 @@
       }
     }
 
+    /* Demo video */
+    .demo {
+      text-align: center;
+      padding: 0 24px 72px;
+    }
+
+    .demo-video {
+      max-width: 760px;
+      width: 100%;
+      height: auto;
+      border-radius: 16px;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .demo-video {
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+      }
+    }
+
     /* Features */
     .features {
       padding: 80px 0;
@@ -567,6 +587,14 @@
     <p class="free-note" data-ja="すべての機能を無料で使えます" data-en="All features are free">すべての機能を無料で使えます</p>
   </section>
 
+  <!-- Demo video -->
+  <section class="demo">
+    <video class="demo-video" autoplay muted loop playsinline preload="metadata"
+           width="1280" height="720" src="demo-ja.mp4?v=2"
+           data-src-ja="demo-ja.mp4?v=2" data-src-en="demo-en.mp4?v=2"
+           aria-label="Clipnyx demo"></video>
+  </section>
+
   <!-- Screenshot -->
   <section class="screenshot">
     <picture>
@@ -703,6 +731,8 @@
         });
         document.querySelectorAll('[data-src-' + lang + ']').forEach(function (el) {
           el.src = el.getAttribute('data-src-' + lang);
+          // 動画は src 変更後に load() しないと差し替わらない（autoplay で再生再開）
+          if (el.tagName === 'VIDEO') { el.load(); }
         });
         document.querySelectorAll('[data-srcset-' + lang + ']').forEach(function (el) {
           el.srcset = el.getAttribute('data-srcset-' + lang);
