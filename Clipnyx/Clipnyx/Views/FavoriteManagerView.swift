@@ -500,6 +500,19 @@ private struct ItemDetailEditor: View {
                         Text(item.formattedDataSize)
                     }
 
+                    if let bundleId = item.sourceBundleId {
+                        LabeledContent("Copied From") {
+                            HStack(spacing: 6) {
+                                if let appIcon = SourceAppResolver.icon(for: bundleId) {
+                                    Image(nsImage: appIcon)
+                                        .resizable()
+                                        .frame(width: 16, height: 16)
+                                }
+                                Text(SourceAppResolver.name(for: bundleId))
+                            }
+                        }
+                    }
+
                     // Favorite fields (only when saved)
                     if item.isSaved {
                         Divider()
