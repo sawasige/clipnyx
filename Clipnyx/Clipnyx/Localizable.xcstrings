@@ -944,7 +944,7 @@
       }
     },
     "Rate Clipnyx on the App Store" : {
-      "extractionState" : "stale",
+      "extractionState" : "manual",
       "localizations" : {
         "ja" : {
           "stringUnit" : {
