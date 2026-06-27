@@ -31,7 +31,8 @@ enum DemoData {
             thumbnail: Data? = nil,
             favorite: String? = nil,
             folder: FavoriteFolder? = nil,
-            recognized: String? = nil
+            recognized: String? = nil,
+            source: String? = nil
         ) -> ClipboardItem {
             order += 1
             let id = UUID()
@@ -54,7 +55,8 @@ enum DemoData {
                 isSaved: favorite != nil,
                 favoriteName: favorite,
                 favoriteFolderId: folder?.id,
-                recognizedText: recognized
+                recognizedText: recognized,
+                sourceBundleId: source
             )
         }
 
@@ -65,18 +67,19 @@ enum DemoData {
             emailTemplate = item(
                 .plainText,
                 "お世話になっております。澤田です。\nご確認のほどよろしくお願いいたします。",
-                favorite: "メールの定型文", folder: templates
+                favorite: "メールの定型文", folder: templates, source: "com.apple.mail"
             )
             items = [
-                item(.url, "https://developer.apple.com/jp/macos/"),
-                item(.plainText, "明日の打ち合わせは 14:00 から、3F 会議室 B に変更になりました。"),
-                item(.image, "画像 1,024×640", size: 482_304, thumbnail: thumbnail()),
+                item(.url, "https://developer.apple.com/jp/macos/", source: "com.apple.Safari"),
+                item(.plainText, "明日の打ち合わせは 14:00 から、3F 会議室 B に変更になりました。", source: "com.apple.Notes"),
+                item(.image, "画像 1,024×640", size: 482_304, thumbnail: thumbnail(), source: "com.apple.Preview"),
                 item(.image, "画像 1,280×800", size: 612_800, thumbnail: cardImage(japanese: true),
-                     recognized: "山田 太郎\nプロダクトデザイナー\nHimatsubu Inc.\nTEL 03-1234-5678\nyamada@example.com"),
-                item(.sourceCode, "func greet(name: String) -> String {\n    \"こんにちは、\\(name)さん！\"\n}"),
+                     recognized: "山田 太郎\nプロダクトデザイナー\nHimatsubu Inc.\nTEL 03-1234-5678\nyamada@example.com",
+                     source: "com.apple.Photos"),
+                item(.sourceCode, "func greet(name: String) -> String {\n    \"こんにちは、\\(name)さん！\"\n}", source: "com.apple.dt.Xcode"),
                 emailTemplate,
-                item(.color, "#5E5CE6"),
-                item(.fileURL, "企画書_2026.pdf, ロゴ案.png", size: 2_412_544),
+                item(.color, "#5E5CE6", source: "com.apple.dt.Xcode"),
+                item(.fileURL, "企画書_2026.pdf, ロゴ案.png", size: 2_412_544, source: "com.apple.finder"),
                 item(.plainText, "〒150-0002 東京都渋谷区渋谷 2-21-1", favorite: "会社の住所", folder: templates),
                 item(.csv, "日付,項目,金額\n2026-06-01,交通費,1280"),
                 item(.plainText, "いつもありがとうございます。\n本日もよろしくお願いいたします。", favorite: "朝の挨拶", folder: templates),
@@ -87,18 +90,19 @@ enum DemoData {
             emailTemplate = item(
                 .plainText,
                 "Thanks for reaching out!\nPlease let me know if you have any questions.",
-                favorite: "Email template", folder: templates
+                favorite: "Email template", folder: templates, source: "com.apple.mail"
             )
             items = [
-                item(.url, "https://developer.apple.com/macos/"),
-                item(.plainText, "Tomorrow's meeting has been moved to 2:00 PM in Conference Room B."),
-                item(.image, "Image 1,024×640", size: 482_304, thumbnail: thumbnail()),
+                item(.url, "https://developer.apple.com/macos/", source: "com.apple.Safari"),
+                item(.plainText, "Tomorrow's meeting has been moved to 2:00 PM in Conference Room B.", source: "com.apple.Notes"),
+                item(.image, "Image 1,024×640", size: 482_304, thumbnail: thumbnail(), source: "com.apple.Preview"),
                 item(.image, "Image 1,280×800", size: 612_800, thumbnail: cardImage(japanese: false),
-                     recognized: "Taro Yamada\nProduct Designer\nHimatsubu Inc.\nTEL +81-3-1234-5678\nyamada@example.com"),
-                item(.sourceCode, "func greet(name: String) -> String {\n    \"Hello, \\(name)!\"\n}"),
+                     recognized: "Taro Yamada\nProduct Designer\nHimatsubu Inc.\nTEL +81-3-1234-5678\nyamada@example.com",
+                     source: "com.apple.Photos"),
+                item(.sourceCode, "func greet(name: String) -> String {\n    \"Hello, \\(name)!\"\n}", source: "com.apple.dt.Xcode"),
                 emailTemplate,
-                item(.color, "#5E5CE6"),
-                item(.fileURL, "Proposal_2026.pdf, Logo_draft.png", size: 2_412_544),
+                item(.color, "#5E5CE6", source: "com.apple.dt.Xcode"),
+                item(.fileURL, "Proposal_2026.pdf, Logo_draft.png", size: 2_412_544, source: "com.apple.finder"),
                 item(.plainText, "1 Apple Park Way, Cupertino, CA 95014", favorite: "Office address", folder: templates),
                 item(.csv, "date,item,amount\n2026-06-01,transit,12.80"),
                 item(.plainText, "Good morning team!\nHope you all have a great day.", favorite: "Morning greeting", folder: templates),
