@@ -60,6 +60,8 @@ final class ClipboardStore: Sendable {
         let favoriteFolderId: UUID?
         // OCR 認識テキスト（画像・PDF のみ。後方互換のため任意フィールド）
         let recognizedText: String?
+        // コピー元アプリの bundle ID（後方互換のため任意フィールド）
+        let sourceBundleId: String?
 
         // Legacy fallback keys
         // 旧バージョンが書き出した index を読むための互換フィールド（読み取り専用）。
@@ -73,6 +75,7 @@ final class ClipboardStore: Sendable {
             case representationInfos, isPinned, isSaved
             case favoriteName, favoriteFolderId
             case recognizedText
+            case sourceBundleId
             case snippetName, snippetCategoryId
         }
     }
@@ -106,6 +109,7 @@ final class ClipboardStore: Sendable {
                 favoriteName: item.favoriteName,
                 favoriteFolderId: item.favoriteFolderId,
                 recognizedText: item.recognizedText,
+                sourceBundleId: item.sourceBundleId,
                 snippetName: nil,
                 snippetCategoryId: nil
             )
@@ -184,7 +188,8 @@ final class ClipboardStore: Sendable {
                     isSaved: entry.isSaved ?? entry.isPinned ?? false,
                     favoriteName: entry.favoriteName ?? entry.snippetName,
                     favoriteFolderId: entry.favoriteFolderId ?? entry.snippetCategoryId,
-                    recognizedText: entry.recognizedText
+                    recognizedText: entry.recognizedText,
+                    sourceBundleId: entry.sourceBundleId
                 )
             }
         } catch {

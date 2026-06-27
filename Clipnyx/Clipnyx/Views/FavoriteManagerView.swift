@@ -255,19 +255,7 @@ struct FavoriteManagerView: View {
             } else {
                 List(filteredItems, selection: $selectedItemIds) { item in
                     HStack(spacing: 8) {
-                        ZStack(alignment: .bottomTrailing) {
-                            Image(systemName: item.category.icon)
-                                .font(.callout)
-                                .foregroundStyle(item.category.color)
-                                .frame(width: 18)
-
-                            if item.isSaved {
-                                Image(systemName: "bookmark.fill")
-                                    .font(.system(size: 7))
-                                    .foregroundStyle(item.isFavoriteItem ? Color.accentColor : .orange)
-                                    .offset(x: 4, y: 2)
-                            }
-                        }
+                        ItemCategoryBadge(item: item)
 
                         VStack(alignment: .leading, spacing: 3) {
                             if let name = item.favoriteName, !name.isEmpty {

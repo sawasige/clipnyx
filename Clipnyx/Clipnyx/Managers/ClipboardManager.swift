@@ -130,10 +130,17 @@ final class ClipboardManager {
             return
         }
 
-        guard let (newItem, representations) = ClipboardItem.capture(from: pasteboard) else { return }
+        guard let (capturedItem, representations) = ClipboardItem.capture(from: pasteboard) else { return }
+        var newItem = capturedItem
 
         // Check excluded categories
         guard !excludedCategories.contains(newItem.category) else { return }
+
+        // コピー元アプリを記録（自分自身のコピーは記録しない）
+        if let bundleId = NSWorkspace.shared.frontmostApplication?.bundleIdentifier,
+           bundleId != Bundle.main.bundleIdentifier {
+            newItem.sourceBundleId = bundleId
+        }
 
         addItem(newItem, representations: representations)
     }

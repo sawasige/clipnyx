@@ -1,5 +1,36 @@
 import SwiftUI
 
+/// アイテムのカテゴリアイコン。お気に入りブックマーク（右下）と
+/// コピー元アプリのアイコン（左下）をバッジ表示する。パネルとコレクションで共有。
+struct ItemCategoryBadge: View {
+    let item: ClipboardItem
+
+    var body: some View {
+        Image(systemName: item.category.icon)
+            .font(.callout)
+            .foregroundStyle(item.category.color)
+            .frame(width: 18)
+            .overlay(alignment: .bottomTrailing) {
+                if item.isSaved {
+                    Image(systemName: "bookmark.fill")
+                        .font(.system(size: 7))
+                        .foregroundStyle(item.isFavoriteItem ? Color.accentColor : .orange)
+                        .offset(x: 4, y: 2)
+                }
+            }
+            .overlay(alignment: .bottomLeading) {
+                if let bundleId = item.sourceBundleId,
+                   let appIcon = SourceAppResolver.icon(for: bundleId) {
+                    Image(nsImage: appIcon)
+                        .resizable()
+                        .frame(width: 11, height: 11)
+                        .offset(x: -4, y: 3)
+                        .help(SourceAppResolver.name(for: bundleId))
+                }
+            }
+    }
+}
+
 struct ItemPreviewContent: View {
     let item: ClipboardItem
     var maxThumbnailHeight: CGFloat = 40

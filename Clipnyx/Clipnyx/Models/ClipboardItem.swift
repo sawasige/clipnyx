@@ -23,6 +23,9 @@ struct ClipboardItem: Identifiable, Sendable {
     /// nil = 未解析（または解析中）、"" = 解析済みだが文字なし、非空 = 認識テキストあり。
     /// テキスト系カテゴリでは常に nil（OCR 対象外）。
     var recognizedText: String? = nil
+    /// コピー元アプリの bundle ID（例: "com.apple.Safari"）。
+    /// nil = 不明（旧データ・ユーザー作成テキスト・取得失敗）。アイコン/名前は実行時解決。
+    var sourceBundleId: String? = nil
 
     var isFavoriteItem: Bool { favoriteFolderId != nil }
 
@@ -391,7 +394,8 @@ struct ClipboardItem: Identifiable, Sendable {
             representationInfos: [RepresentationInfo(type: NSPasteboard.PasteboardType.string.rawValue, size: data.count)],
             isSaved: isSaved,
             favoriteName: favoriteName,
-            favoriteFolderId: favoriteFolderId
+            favoriteFolderId: favoriteFolderId,
+            sourceBundleId: sourceBundleId
         )
         return (item, PasteboardRepresentation(type: .string, data: data))
     }
