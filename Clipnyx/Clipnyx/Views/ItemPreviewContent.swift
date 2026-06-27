@@ -50,6 +50,22 @@ struct ItemCategoryBadge: View {
     }
 }
 
+/// サムネイル PNG のデコード結果をキャッシュする。body 再評価のたびに
+/// NSImage(data:) で再デコードするとスクロールが重くなるため、item.id 単位で1回だけ。
+@MainActor
+enum ThumbnailCache {
+    private static let cache = NSCache<NSUUID, NSImage>()
+
+    static func image(for item: ClipboardItem) -> NSImage? {
+        guard let data = item.thumbnailData else { return nil }
+        let key = item.id as NSUUID
+        if let cached = cache.object(forKey: key) { return cached }
+        guard let image = NSImage(data: data) else { return nil }
+        cache.setObject(image, forKey: key)
+        return image
+    }
+}
+
 struct ItemPreviewContent: View {
     let item: ClipboardItem
     var maxThumbnailHeight: CGFloat = 40
@@ -101,8 +117,7 @@ struct ItemPreviewContent: View {
 
     private var imagePreview: some View {
         HStack(spacing: 6) {
-            if let thumbnailData = item.thumbnailData,
-               let nsImage = NSImage(data: thumbnailData) {
+            if let nsImage = ThumbnailCache.image(for: item) {
                 Image(nsImage: nsImage)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
@@ -136,8 +151,7 @@ struct ItemPreviewContent: View {
 
     private var defaultPreview: some View {
         HStack(spacing: 6) {
-            if let thumbnailData = item.thumbnailData,
-               let nsImage = NSImage(data: thumbnailData) {
+            if let nsImage = ThumbnailCache.image(for: item) {
                 Image(nsImage: nsImage)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
