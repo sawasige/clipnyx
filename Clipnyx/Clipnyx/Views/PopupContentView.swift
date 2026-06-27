@@ -10,6 +10,7 @@ struct PopupContentView: View {
     @State private var keyboardNavigation = true
     @State private var lastScreenPosition: CGPoint?
     @State private var selectedCategory: ClipboardContentCategory?
+    @State private var selectedSourceApp: String?
     @State private var favoriteFilter: FavoriteFilter = .allHistory
     @State private var listContentHeight: CGFloat = 0
     @State private var detailItem: ClipboardItem?
@@ -21,6 +22,9 @@ struct PopupContentView: View {
         var result = favoriteFilter.apply(to: clipboardManager.items)
         if let category = selectedCategory {
             result = result.filter { $0.category == category }
+        }
+        if let sourceApp = selectedSourceApp {
+            result = result.filter { $0.sourceBundleId == sourceApp }
         }
         let trimmedSearch = searchText.trimmingCharacters(in: .whitespaces)
         if !trimmedSearch.isEmpty {
@@ -64,22 +68,45 @@ struct PopupContentView: View {
                     }
                     .help(showSavedOnly ? Text("Show All") : Text("Favorites Only"))
 
-                    // Category filter (content categories only)
+                    // Category / source app filter
                     ToolbarMenuButton(
-                        icon: selectedCategory != nil ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle",
-                        color: selectedCategory != nil ? Color.accentColor : .secondary
+                        icon: isFilterActive ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle",
+                        color: isFilterActive ? Color.accentColor : .secondary
                     ) {
-                        Button {
-                            selectedCategory = nil
-                        } label: {
-                            Label(String(localized: "All"), systemImage: "tray.full")
-                        }
-                        Divider()
-                        ForEach(activeCategories, id: \.self) { category in
+                        Section(String(localized: "Category")) {
                             Button {
-                                selectedCategory = selectedCategory == category ? nil : category
+                                selectedCategory = nil
                             } label: {
-                                Label(category.label, systemImage: category.icon)
+                                Label(String(localized: "All Categories"), systemImage: "tray.full")
+                            }
+                            ForEach(activeCategories, id: \.self) { category in
+                                Button {
+                                    selectedCategory = selectedCategory == category ? nil : category
+                                    selectedIndex = 0
+                                } label: {
+                                    Label(category.label, systemImage: selectedCategory == category ? "checkmark" : category.icon)
+                                }
+                            }
+                        }
+                        if !activeSourceApps.isEmpty {
+                            Section(String(localized: "Source App")) {
+                                Button {
+                                    selectedSourceApp = nil
+                                } label: {
+                                    Label(String(localized: "All Apps"), systemImage: "app.dashed")
+                                }
+                                ForEach(activeSourceApps, id: \.self) { bundleId in
+                                    Button {
+                                        selectedSourceApp = selectedSourceApp == bundleId ? nil : bundleId
+                                        selectedIndex = 0
+                                    } label: {
+                                        if selectedSourceApp == bundleId {
+                                            Label(SourceAppResolver.name(for: bundleId), systemImage: "checkmark")
+                                        } else {
+                                            Text(SourceAppResolver.name(for: bundleId))
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -289,6 +316,18 @@ struct PopupContentView: View {
         return ClipboardContentCategory.allCases.filter { present.contains($0) }
     }
 
+    private var isFilterActive: Bool {
+        selectedCategory != nil || selectedSourceApp != nil
+    }
+
+    /// 履歴に含まれるコピー元アプリ（bundle ID）を表示名順に列挙する。
+    private var activeSourceApps: [String] {
+        let present = Set(clipboardManager.items.compactMap(\.sourceBundleId))
+        return present.sorted {
+            SourceAppResolver.name(for: $0).localizedCaseInsensitiveCompare(SourceAppResolver.name(for: $1)) == .orderedAscending
+        }
+    }
+
     // MARK: - Key Handling
 
     private var isIMEComposing: Bool {
@@ -407,20 +446,8 @@ private struct UnifiedItemRow: View {
                 Spacer().frame(width: 14)
             }
 
-            // Category icon (with saved overlay)
-            ZStack(alignment: .bottomTrailing) {
-                Image(systemName: item.category.icon)
-                    .font(.callout)
-                    .foregroundStyle(item.category.color)
-                    .frame(width: 18)
-
-                if item.isSaved {
-                    Image(systemName: "bookmark.fill")
-                        .font(.system(size: 7))
-                        .foregroundStyle(item.isFavoriteItem ? Color.accentColor : .orange)
-                        .offset(x: 4, y: 2)
-                }
-            }
+            // Category icon (with saved + source app overlays)
+            ItemCategoryBadge(item: item)
 
             VStack(alignment: .leading, spacing: 2) {
                 if let favoriteName = item.favoriteName {

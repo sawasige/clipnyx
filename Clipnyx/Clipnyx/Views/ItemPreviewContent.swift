@@ -1,5 +1,55 @@
 import SwiftUI
 
+/// アイテムのアイコン表示（パネルとコレクションで共有）。
+/// コピー元アプリがあれば、そのアプリアイコンを主役に大きく表示し、種別を表す
+/// SF Symbol を左下に小バッジで重ねる（Mission Control 風）。シンボルは小さくても
+/// 潰れないが実アプリアイコンは小さいと読めないため、この役割分担にしている。
+/// 元アプリが不明なアイテムは従来どおり種別シンボル単体。お気に入りは右下バッジ。
+struct ItemCategoryBadge: View {
+    let item: ClipboardItem
+
+    private let iconSize: CGFloat = 20
+
+    var body: some View {
+        content
+            .frame(width: iconSize, height: iconSize)
+            .overlay(alignment: .bottomTrailing) {
+                if item.isSaved {
+                    Image(systemName: "bookmark.fill")
+                        .font(.system(size: 8))
+                        .foregroundStyle(item.isFavoriteItem ? Color.accentColor : .orange)
+                        .offset(x: 4, y: 3)
+                }
+            }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if let bundleId = item.sourceBundleId,
+           let appIcon = SourceAppResolver.icon(for: bundleId) {
+            Image(nsImage: appIcon)
+                .resizable()
+                .clipShape(RoundedRectangle(cornerRadius: 4.5))
+                .overlay(alignment: .bottomLeading) { categorySymbolBadge.offset(x: -4, y: 4) }
+                .help(SourceAppResolver.name(for: bundleId))
+        } else {
+            // 元アプリ不明: 種別シンボルのみ（中央寄せで幅を揃える）
+            Image(systemName: item.category.icon)
+                .font(.callout)
+                .foregroundStyle(item.category.color)
+        }
+    }
+
+    /// 種別を表す SF Symbol の小バッジ（アプリアイコンに重ねるため背景でくり抜く）
+    private var categorySymbolBadge: some View {
+        Image(systemName: item.category.icon)
+            .font(.system(size: 8, weight: .semibold))
+            .foregroundStyle(item.category.color)
+            .frame(width: 13, height: 13)
+            .background(Circle().fill(Color(nsColor: .windowBackgroundColor)))
+    }
+}
+
 struct ItemPreviewContent: View {
     let item: ClipboardItem
     var maxThumbnailHeight: CGFloat = 40
