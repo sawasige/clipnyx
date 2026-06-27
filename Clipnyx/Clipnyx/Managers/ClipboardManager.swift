@@ -20,6 +20,11 @@ final class ClipboardManager {
         didSet { UserDefaults.standard.set(excludedCategories.map(\.rawValue), forKey: "excludedCategories") }
     }
 
+    /// 履歴に記録しないコピー元アプリの bundle ID 集合（パスワードマネージャ等）。
+    var excludedAppBundleIds: Set<String> {
+        didSet { UserDefaults.standard.set(Array(excludedAppBundleIds), forKey: "excludedAppBundleIds") }
+    }
+
     /// 画像・PDF を OCR してテキスト認識するか（既定 true）。
     var ocrEnabled: Bool {
         didSet { UserDefaults.standard.set(ocrEnabled, forKey: "ocrEnabled") }
@@ -43,6 +48,7 @@ final class ClipboardManager {
         } else {
             excludedCategories = []
         }
+        excludedAppBundleIds = Set(UserDefaults.standard.stringArray(forKey: "excludedAppBundleIds") ?? [])
         ocrEnabled = UserDefaults.standard.object(forKey: "ocrEnabled") as? Bool ?? true
         items = store.loadIndex()
         favoriteFolders = store.loadFavoriteFolders()
@@ -60,6 +66,7 @@ final class ClipboardManager {
         maxHistoryCount = 50
         maxTotalSizeMB = 1024
         excludedCategories = []
+        excludedAppBundleIds = []
         ocrEnabled = false
         items = previewItems
         favoriteFolders = previewFolders
@@ -78,6 +85,7 @@ final class ClipboardManager {
         maxHistoryCount = 50
         maxTotalSizeMB = 1024
         excludedCategories = []
+        excludedAppBundleIds = []
         ocrEnabled = false
         items = demoItems
         favoriteFolders = demoFolders
@@ -130,6 +138,10 @@ final class ClipboardManager {
             return
         }
 
+        // コピー元アプリ。除外アプリ（パスワードマネージャ等）のコピーは記録しない
+        let sourceBundleId = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
+        if let bundleId = sourceBundleId, excludedAppBundleIds.contains(bundleId) { return }
+
         guard let (capturedItem, representations) = ClipboardItem.capture(from: pasteboard) else { return }
         var newItem = capturedItem
 
@@ -137,8 +149,7 @@ final class ClipboardManager {
         guard !excludedCategories.contains(newItem.category) else { return }
 
         // コピー元アプリを記録（自分自身のコピーは記録しない）
-        if let bundleId = NSWorkspace.shared.frontmostApplication?.bundleIdentifier,
-           bundleId != Bundle.main.bundleIdentifier {
+        if let bundleId = sourceBundleId, bundleId != Bundle.main.bundleIdentifier {
             newItem.sourceBundleId = bundleId
         }
 

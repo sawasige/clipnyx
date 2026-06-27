@@ -1,6 +1,7 @@
 import SwiftUI
 import AppKit
 import ServiceManagement
+import UniformTypeIdentifiers
 
 // MARK: - General Tab
 
@@ -307,6 +308,89 @@ struct FilterTab: View {
                     }
                 }
             }
+
+            Section("App Filter") {
+                Text("Copies from these apps will not be recorded.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                if clipboardManager.excludedAppBundleIds.isEmpty {
+                    Text("No apps excluded")
+                        .font(.callout)
+                        .foregroundStyle(.tertiary)
+                } else {
+                    ForEach(sortedExcludedApps, id: \.self) { bundleId in
+                        HStack {
+                            if let icon = SourceAppResolver.icon(for: bundleId) {
+                                Image(nsImage: icon)
+                                    .resizable()
+                                    .frame(width: 18, height: 18)
+                            }
+                            Text(SourceAppResolver.name(for: bundleId))
+                            Spacer()
+                            Button {
+                                clipboardManager.excludedAppBundleIds.remove(bundleId)
+                            } label: {
+                                Image(systemName: "minus.circle.fill")
+                                    .foregroundStyle(.red)
+                            }
+                            .buttonStyle(.plain)
+                            .help("Remove")
+                        }
+                    }
+                }
+
+                Menu {
+                    ForEach(addableApps, id: \.bundleId) { app in
+                        Button(app.name) {
+                            clipboardManager.excludedAppBundleIds.insert(app.bundleId)
+                        }
+                    }
+                    if !addableApps.isEmpty { Divider() }
+                    Button("Choose Application…") { chooseAppFromPanel() }
+                } label: {
+                    Label("Add App…", systemImage: "plus")
+                }
+            }
         }
+    }
+
+    /// /Applications などから任意のアプリを選んで除外に追加する。
+    /// メニューのアクション内で同期 runModal するとメニュー解除と競合してパネルが
+    /// 出ないため、Task で次のランループに回してから提示する。
+    private func chooseAppFromPanel() {
+        Task { @MainActor in
+            NSApp.activate(ignoringOtherApps: true)
+            let panel = NSOpenPanel()
+            panel.canChooseFiles = true
+            panel.canChooseDirectories = false
+            panel.allowsMultipleSelection = false
+            panel.allowedContentTypes = [.application]
+            panel.directoryURL = URL(fileURLWithPath: "/Applications")
+            panel.prompt = String(localized: "Add")
+            guard panel.runModal() == .OK, let url = panel.url,
+                  let bundleId = Bundle(url: url)?.bundleIdentifier else { return }
+            clipboardManager.excludedAppBundleIds.insert(bundleId)
+        }
+    }
+
+    private var sortedExcludedApps: [String] {
+        clipboardManager.excludedAppBundleIds.sorted {
+            SourceAppResolver.name(for: $0).localizedCaseInsensitiveCompare(SourceAppResolver.name(for: $1)) == .orderedAscending
+        }
+    }
+
+    /// 除外に追加できるアプリ候補（起動中の通常アプリ＋履歴に登場したアプリ）。
+    private var addableApps: [(bundleId: String, name: String)] {
+        var ids = Set<String>()
+        for app in NSWorkspace.shared.runningApplications where app.activationPolicy == .regular {
+            if let bid = app.bundleIdentifier { ids.insert(bid) }
+        }
+        ids.formUnion(clipboardManager.items.compactMap(\.sourceBundleId))
+        if let own = Bundle.main.bundleIdentifier { ids.remove(own) }
+        ids.subtract(clipboardManager.excludedAppBundleIds)
+        return ids
+            .map { (bundleId: $0, name: SourceAppResolver.name(for: $0)) }
+            .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
 }
