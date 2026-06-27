@@ -14,6 +14,9 @@ struct PopupContentView: View {
     @State private var favoriteFilter: FavoriteFilter = .allHistory
     @State private var listContentHeight: CGFloat = 0
     @State private var detailItem: ClipboardItem?
+    /// スクロール中フラグ。スクロール中はカーソル下を流れる行の onHover で
+    /// selectedIndex が頻繁に変わり、その都度パネル全体が再評価されて重くなるため抑制する。
+    @State private var isScrolling = false
     @FocusState private var isSearchFocused: Bool
 
     private var showSavedOnly: Bool { favoriteFilter != .allHistory }
@@ -206,6 +209,11 @@ struct PopupContentView: View {
         .task {
             await Task.yield()
             isSearchFocused = true
+            // コピー元アプリのアイコンを事前解決してキャッシュを温め、
+            // スクロール中に body 内で同期解決が走るのを防ぐ。
+            for bundleId in Set(clipboardManager.items.compactMap(\.sourceBundleId)) {
+                _ = SourceAppResolver.icon(for: bundleId)
+            }
         }
         .onChange(of: searchText) { _, _ in
             selectedIndex = 0
@@ -249,6 +257,10 @@ struct PopupContentView: View {
                     .padding(.vertical, 4)
                 }
                 .frame(height: min(listContentHeight, 450))
+                .onScrollPhaseChange { _, newPhase in
+                    let scrolling = newPhase != .idle
+                    if scrolling != isScrolling { isScrolling = scrolling }
+                }
                 .onPreferenceChange(ListContentHeightKey.self) { newHeight in
                     listContentHeight = newHeight
                 }
@@ -287,7 +299,7 @@ struct PopupContentView: View {
         )
         .id(item.id)
         .onHover { hovering in
-            if hovering, !keyboardNavigation {
+            if hovering, !keyboardNavigation, !isScrolling {
                 selectedIndex = index
             }
         }
