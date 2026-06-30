@@ -1,1 +1,4 @@
-- Smoothed out a brief flicker when the paste panel first opens
+- Records which app each item was copied from and shows its icon in the history
+- Filter the history by the app an item was copied from
+- Exclude specific apps from being recorded in the history
+- Smoother scrolling in the paste panel

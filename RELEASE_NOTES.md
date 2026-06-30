@@ -1,4 +1,10 @@
-- ペーストパネルを開いた直後のちらつきを抑え、表示をなめらかにしました
+- コピー元アプリを記録し、履歴の各アイテムにアイコンで表示するようにしました
+- コピー元アプリで履歴を絞り込めるようにしました
+- アプリ単位で履歴に記録しないように設定できるようにしました
+- ペーストパネルのスクロールの体感をなめらかにしました
 
 <!-- en -->
-- Smoothed out a brief flicker when the paste panel first opens
+- Clipnyx now records which app each item was copied from and shows its icon in the history
+- You can filter the history by the app an item was copied from
+- You can now exclude specific apps from being recorded in the history
+- Made scrolling in the paste panel feel smoother
