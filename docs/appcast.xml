@@ -193,6 +193,15 @@
     <description xml:lang="ja"><![CDATA[<ul><li>ペーストパネルを開いた直後のちらつきを抑え、表示をなめらかにしました</li></ul>]]></description>
     <enclosure url="https://github.com/sawasige/clipnyx/releases/download/v1.6.1/Clipnyx.dmg" length="4909357" type="application/octet-stream" sparkle:edSignature="sx3PM01TvsGdceWDYYmtTSqsoxOxYP7xDGdRAmPUOJsPheoilTs43bRWT8SpBRuaQgPEoUIYLZ+LHeIM1MXiDA==" />
   </item>
+        <item>
+    <title>1.7.0</title>
+    <pubDate>Tue, 30 Jun 2026 08:08:16 +0000</pubDate>
+    <sparkle:version>29</sparkle:version>
+    <sparkle:shortVersionString>1.7.0</sparkle:shortVersionString>
+    <description><![CDATA[<ul><li>Clipnyx now records which app each item was copied from and shows its icon in the history</li><li>You can filter the history by the app an item was copied from</li><li>You can now exclude specific apps from being recorded in the history</li><li>Made scrolling in the paste panel feel smoother</li></ul>]]></description>
+    <description xml:lang="ja"><![CDATA[<ul><li>コピー元アプリを記録し、履歴の各アイテムにアイコンで表示するようにしました</li><li>コピー元アプリで履歴を絞り込めるようにしました</li><li>アプリ単位で履歴に記録しないように設定できるようにしました</li><li>ペーストパネルのスクロールの体感をなめらかにしました</li></ul>]]></description>
+    <enclosure url="https://github.com/sawasige/clipnyx/releases/download/v1.7.0/Clipnyx.dmg" length="4975618" type="application/octet-stream" sparkle:edSignature="KDGf20UcpGSLZ2bJxTCKTE5n7pCvpuGQ52E0iyiOINxjeqMf7Jg/BQFy9cxHrBmTqd0KYYYQ64GOlAr9j9LLCQ==" />
+  </item>
     <!-- Items are prepended by CI on each release -->
   </channel>
 </rss>
